@@ -8,7 +8,7 @@
 ## Introdução
 A disciplina de Controle Inteligente é uma oportunidade única para os alunos se aprofundarem na interseção entre Inteligência Artificial e diversas áreas da Engenharia Elétrica.
 
-Nesse semestre aplicaremos os conhecimentos em em um caso de uso de Robótica. Portanto, o [**ROS 2 (Robot Operating System)**](https://www.ros.org/) será uma ferramenta central ao lado de [**Python**](https://www.python.org/) e [**PyTorch**](https://pytorch.org/), a fim de que a disciplina tenha uma forte dimensão profissionalizante. O ROS 2 é o padrão industrial para robótica e fornece a infraestrutura ("middleware") necessária para conectar os algoritmos de Inteligência Artificial (PyTorch) aos sensores e atuadores do robô (simulado ou real).
+Nesse semestre aplicaremos os conhecimentos em um caso de uso de Robótica. Portanto, o [**ROS 2 (Robot Operating System)**](https://www.ros.org/) será uma ferramenta central ao lado de [**Python**](https://www.python.org/) e [**PyTorch**](https://pytorch.org/), a fim de que a disciplina tenha uma forte dimensão profissionalizante. O ROS 2 é o padrão industrial para robótica e fornece a infraestrutura ("middleware") necessária para conectar os algoritmos de Inteligência Artificial (PyTorch) aos sensores e atuadores do robô (simulado ou real).
 
 ## 1. EMENTA (Atualizada para Integração de Sistemas)
 Fundamentos de Inteligência Computacional. Arquitetura de Software para Robótica (ROS 2). Redes Neurais Artificiais e Deep Learning aplicados à Percepção. Sistemas Fuzzy e Neuro-Fuzzy como Controladores. Algoritmos Genéticos. Aprendizado por Reforço Profundo (Deep RL) integrado a sistemas robóticos. Simulação e implementação de Agentes Autônomos.
