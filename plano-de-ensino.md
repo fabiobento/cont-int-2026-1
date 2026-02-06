@@ -82,7 +82,3 @@ A turma será dividida em equipes para resolver o problema de navegação autôn
 3.  **GÉRON, Aurélien.** *Hands-On Machine Learning with Scikit-Learn and PyTorch*. O'Reilly, 2025. (Referência para CNNs e treinamento).
 4.  **RENARD, Edouard.** *ROS 2 from Scratch*. Packt, 2024. (Para os conceitos fundamentais de nós e tópicos).
 
-### Por que esta abordagem é melhor para o seu projeto?
-1.  **Realismo:** Diferente de usar apenas o `gymnasium` puro, o uso do ROS 2 obriga o aluno a lidar com latência, comunicação assíncrona e tipos de dados reais (`sensor_msgs`), exatamente como no projeto de pesquisa do GAIA.
-2.  **Modularidade:** O "Estudante 1" pode focar no nó de Visão (publicando tópicos de *features*) e o "Estudante 2" no nó de RL (assinando *features* e publicando comandos), permitindo desenvolvimento paralelo e integração fácil.
-3.  **Simulação Avançada:** O uso do Gazebo Sim via ponte `ros_gz` permite testar a física do robô, algo que simuladores simples de RL não oferecem com precisão.
