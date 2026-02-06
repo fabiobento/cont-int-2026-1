@@ -1,5 +1,5 @@
 
-# PLANO DE ENSINO: CONTROLE INTELIGENTE (2026/1) - Ênfase em ROS 2
+# PLANO DE ENSINO: CONTROLE INTELIGENTE (2026/1)
 
 - **Disciplina:** Controle Inteligente (20261.ENEL.8)
 - **Ferramentas Principais:** Python 3, PyTorch, ROS 2 (Distro Jazzy/Humble), Gazebo Sim.
