@@ -6,11 +6,11 @@
 
 
 ## Introdução
-A disciplina de Controle Inteligente é uma oportunidade única para os alunos se aprofundarem na interseção entre Inteligência Artificial e  Inteligência Artificial e diversas áreas da Engenharia Elétrica.
+A disciplina de Controle Inteligente é uma oportunidade para os alunos se aprofundarem na interseção entre Inteligência Artificial e diversas áreas da Engenharia Elétrica.
 
-Nesse semestre aplicaremos os conhecimentos em em um caso de uso de Robótica. Portanto, o [**ROS 2 (Robot Operating System)**](https://www.ros.org/) será uma ferramenta central ao lado de [**Python**](https://www.python.org/) e [**PyTorch**](https://pytorch.org/), a fim de que a disciplina tenha uma forte dimensão profissionalizante. O ROS 2 é o padrão industrial para robótica e fornece a infraestrutura ("middleware") necessária para conectar os algoritmos de Inteligência Artificial (PyTorch) aos sensores e atuadores do robô (simulado ou real).
+Nesse semestre aplicaremos os conceitos de Inteligência Artificial em um caso de uso de Robótica. Portanto, o [**ROS 2 (Robot Operating System)**](https://www.ros.org/) será uma ferramenta central ao lado de [**Python**](https://www.python.org/) e [**PyTorch**](https://pytorch.org/), a fim de que a disciplina tenha uma forte dimensão profissionalizante. O ROS 2 é o padrão industrial para robótica e fornece a infraestrutura ("middleware") necessária para conectar os algoritmos de Inteligência Artificial (PyTorch) aos sensores e atuadores do robô (simulado ou real).
 
-## 1. EMENTA (Atualizada para Integração de Sistemas)
+## 1. EMENTA
 Fundamentos de Inteligência Computacional. Arquitetura de Software para Robótica (ROS 2). Redes Neurais Artificiais e Deep Learning aplicados à Percepção. Sistemas Fuzzy e Neuro-Fuzzy como Controladores. Algoritmos Genéticos. Aprendizado por Reforço Profundo (Deep RL) integrado a sistemas robóticos. Simulação e implementação de Agentes Autônomos.
 
 ## 2. OBJETIVOS
@@ -76,7 +76,7 @@ A turma será dividida em equipes para resolver o problema de navegação autôn
 *   **PyTorch:** Para construção das redes neurais e algoritmos de RL.
 *   **Rviz2:** Para visualização dos sensores e do estado do agente.
 
-**Bibliografia Específica (Baseada nas Fontes):**
+**Bibliografia Específica:**
 1.  **RENARD, Edouard.** *Mastering ROS 2 for Robotics Programming*. 4ª Ed. Packt, 2025. (Crucial para a integração ROS 2 + AI, Capítulos 14 e 15).
 2.  **LAPAN, Maxim.** *Deep Reinforcement Learning Hands-On*. 3ª Ed. Packt, 2024. (Base para PPO/DQN e PyTorch).
 3.  **GÉRON, Aurélien.** *Hands-On Machine Learning with Scikit-Learn and PyTorch*. O'Reilly, 2025. (Referência para CNNs e treinamento).
