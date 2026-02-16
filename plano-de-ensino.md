@@ -14,8 +14,8 @@ Nesse semestre aplicaremos os conceitos de Inteligência Artificial em um caso d
 Fundamentos de Inteligência Computacional. Arquitetura de Software para Robótica (ROS 2). Redes Neurais Artificiais e Deep Learning aplicados à Percepção. Sistemas Fuzzy e Neuro-Fuzzy como Controladores. Algoritmos Genéticos. Aprendizado por Reforço Profundo (Deep RL) integrado a sistemas robóticos. Simulação e implementação de Agentes Autônomos.
 
 ## 2. OBJETIVOS
-**Geral:** Capacitar o aluno a desenvolver sistemas de controle inteligente onde a "inteligência" (Redes Neurais/Fuzzy/RL) opera como nós de software integrados via middleware ROS 2.
-**Específico:** Preparar os alunos para desenvolver um **Agente Autônomo para Navegação**, utilizando ROS 2 para conectar a percepção visual (PyTorch) ao controle de navegação (RL) em ambientes simulados (Gazebo).
+- **Geral:** Capacitar o aluno a desenvolver sistemas de controle inteligente onde a "inteligência" (Redes Neurais/Fuzzy/RL) opera como nós de software integrados via middleware ROS 2.
+- **Específico:** Preparar os alunos para desenvolver um **Agente Autônomo para Navegação**, utilizando ROS 2 para conectar a percepção visual (PyTorch) ao controle de navegação (RL) em ambientes simulados (Gazebo).
 
 ---
 
