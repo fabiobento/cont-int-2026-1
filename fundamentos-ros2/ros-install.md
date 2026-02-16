@@ -1,4 +1,4 @@
-# Roteiro: Primeiros Passos com Programação em ROS 2
+# Roteiro 1: Primeiros Passos com ROS 2
 
 Na aula incial:
 
@@ -53,7 +53,42 @@ Existem várias maneiras de configurar o Ubuntu 24.04 em um computador. Aqui est
     O [Docker](https://www.docker.com/) é uma plataforma de virtualização em nível de sistema operacional. A principal diferença entre softwares de virtualização, como o VirtualBox, e o Docker é que as VMs (Máquinas Virtuais) virtualizam um SO completo. Em contraste, os containers Docker virtualizam a camada de aplicação sobre o SO hospedeiro (host). Ele utiliza o conceito de conteinerização, que pode isolar a aplicação e suas dependências em unidades portáteis e leves chamadas containers. Os containers compartilham o kernel do SO hospedeiro. Precisamos de um SO host, como Ubuntu, Windows ou macOS, para instalar o Docker.
 
         > O Docker é comparativamente leve e ideal para a implantação (*deployment*) de aplicações ROS 2 em robôs. Muitas imagens Docker estão hospedadas publicamente no [Docker Hub](https://hub.docker.com/). Imagens Docker são arquivos que contêm todas as bibliotecas e dependências, e os containers são as instâncias em execução de uma imagem. Usando a CLI (interface de linha de comando) do Docker, podemos baixar, gerenciar e executar diferentes imagens Docker.
-        
+
     Na próxima seção discutiremos a configuração do Docker, pois esta é uma tecnologia útil para implantar aplicações robóticas baseadas em ROS 2.
 
 - **Configurando o Ubuntu no seu robô:** A maioria dos robôs possui placas baseadas em x86_64 ou ARM64, como Raspberry Pi, Jetson Orin ou um PC industrial com processador Intel ou AMD. Podemos instalar o Ubuntu nessas máquinas. Se tivermos uma máquina x86_64, o procedimento de instalação é direto; você pode seguir as instruções mencionadas anteriormente. No entanto, se tivermos placas embarcadas, como as das séries Raspberry Pi ou Jetson, as instruções são diferentes. O Ubuntu é customizado para essas placas, e podemos consultar algumas referências para instalar o Ubuntu nelas. As instruções de configuração para o Ubuntu 24.04 no Raspberry Pi 5 podem ser encontradas [nesse link](https://raspberrytips.com/install-ubuntu-desktop-raspberry-pi/), e você pode encontrar uma referência para a instalação do Ubuntu em placas Jetson [aqui](https://ubuntu.com/download/nvidia-jetson).
+
+
+### **Instalando o ROS 2 Jazzy no Ubuntu 24.04 LTS**
+
+Esta seção fornece instruções para a instalação do ROS 2 Jazzy no Ubuntu 24.04 LTS. Estas instruções funcionarão em máquinas `x86_64` e `ARM64`.
+
+Para facilitar a instalação, usaremos um script de shell para automatizar este procedimento de instalação e desinstalação. Você pode encontrar o script `ros2_install_jazzy.sh` na pasta `fundamentos-ros2` para instalar o ROS 2 Jazzy, e o `ros2_uninstall_jazzy.sh` para desinstalar o mesmo.
+
+Você pode executar os seguintes comandos dentro da pasta `fundamentos-ros2` para instalar o ROS 2 Jazzy com um script de shell automatizado:
+
+```bash
+chmod +x ros2_install_jazzy.sh
+./ros2_install_jazzy.sh
+```
+
+Para desinstalar o ROS 2 Jazzy no futuro, use este comando:
+
+```bash
+chmod +x ros2_uninstall_jazzy.sh
+./ros2_uninstall_jazzy.sh
+```
+
+O script `ros2_install_jazzy.sh` automatiza a instalação completa do ROS 2 Jazzy no Ubuntu 24.04 LTS. Ele foi projetado para ser robusto, verificando dependências e configurando o ambiente de desenvolvimento tanto para Python quanto para C++.
+
+Aqui está o resumo das etapas que ele executa:
+
+1. Validação do Sistema: Verifica se o sistema operacional é exatamente o Ubuntu 24.04. Caso contrário, o script é encerrado para evitar instalações quebradas.
+2. Configuração de `Locale` (Idioma): Configura o suporte a UTF-8 e gera as definições de idioma para pt-BR, garantindo que caracteres especiais e acentuação funcionem corretamente no terminal e nos scripts.
+3. Preparação de Repositórios e Chaves: Adiciona o repositório `universe` do Ubuntu, baixa as chaves GPG oficiais da Open Robotics e configura as fontes do APT para permitir o download dos pacotes do ROS 2.
+4. Escolha da Instalação: Oferece ao usuário duas opções:
+    - `Desktop Full`: (Padrão) Instala tudo, incluindo simuladores e ferramentas gráficas (Rviz, Gazebo).
+    - `ROS-Base`: Instala apenas o essencial (comunicação, bibliotecas básicas), ideal para robôs embarcados como suas Raspberry Pi.
+5. Instalação de Ferramentas de Desenvolvimento: Além do ROS, ele instala o build-essential (g++, make), cmake e ros-dev-tools, preparando o ambiente para compilar pacotes.
+6. Configuração do Ambiente (.bashrc): Adiciona automaticamente o comando source ao arquivo de inicialização do seu terminal, para que o ROS 2 esteja pronto para uso toda vez que você abrir o terminal. Ele também força o Python a utilizar UTF-8 globalmente.
+7. Teste de Sanidade: Ao final, o script realiza três testes rápidos: verifica a variável de ambiente do ROS, testa a codificação do Python e tenta compilar um pequeno código C++ em tempo real para garantir que o compilador está funcional.
