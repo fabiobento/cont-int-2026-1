@@ -24,7 +24,7 @@ Na aula de hoje você terá uma visão prática de como configurar rapidamente o
 
 Para acompanhar este roteiro, é recomendável ter um computador ou placa embarcada (por exemplo, Raspberry Pi, placa Jetson, etc.) com o Ubuntu 24.04 LTS instalado ou qualquer outra versão do Ubuntu.
 
-Os materiais de referência para este roteiro podem ser encontrados na pasta `fundamendos-ros2` do seguinte repositório no GitHub: https://github.com/fabiobento/cont-int-2026-1/tree/main/fundamendos-ros2.
+Os materiais de referência para este roteiro podem ser encontrados na pasta `fundamentos-ros2` do seguinte repositório no GitHub: https://github.com/fabiobento/cont-int-2026-1/tree/main/fundamentos-ros2.
 
 ## Instalação do ROS 2
 
