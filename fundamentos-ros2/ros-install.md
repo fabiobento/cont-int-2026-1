@@ -63,7 +63,7 @@ Existem várias maneiras de configurar o Ubuntu 24.04 em um computador. Aqui est
 
 Esta seção fornece instruções para a instalação do ROS 2 Jazzy no Ubuntu 24.04 LTS. Estas instruções funcionarão em máquinas `x86_64` e `ARM64`.
 
-Para facilitar a instalação, usaremos um script de shell para automatizar este procedimento de instalação e desinstalação. Você pode encontrar o script `ros2_install_jazzy.sh` na pasta `fundamentos-ros2` para instalar o ROS 2 Jazzy, e o `ros2_uninstall_jazzy.sh` para desinstalar o mesmo.
+Para facilitar a instalação, usaremos um script de shell para automatizar este procedimento de instalação e desinstalação. Você pode encontrar o script `ros2_install_jazzy.sh` na pasta `fundamentos-ros2/scripts/` para instalar o ROS 2 Jazzy, e o `ros2_uninstall_jazzy.sh` para desinstalar o mesmo.
 
 Você pode executar os seguintes comandos dentro da pasta `fundamentos-ros2` para instalar o ROS 2 Jazzy com um script de shell automatizado:
 
@@ -89,6 +89,39 @@ Aqui está o resumo das etapas que ele executa:
 4. Escolha da Instalação: Oferece ao usuário duas opções:
     - `Desktop Full`: (Padrão) Instala tudo, incluindo simuladores e ferramentas gráficas (Rviz, Gazebo).
     - `ROS-Base`: Instala apenas o essencial (comunicação, bibliotecas básicas), ideal para robôs embarcados como suas Raspberry Pi.
-5. Instalação de Ferramentas de Desenvolvimento: Além do ROS, ele instala o build-essential (g++, make), cmake e ros-dev-tools, preparando o ambiente para compilar pacotes.
-6. Configuração do Ambiente (.bashrc): Adiciona automaticamente o comando source ao arquivo de inicialização do seu terminal, para que o ROS 2 esteja pronto para uso toda vez que você abrir o terminal. Ele também força o Python a utilizar UTF-8 globalmente.
+5. Instalação de Ferramentas de Desenvolvimento: Além do ROS, ele instala o build-essential (`g++`, `make`), `cmake` e `ros-dev-tools`, preparando o ambiente para compilar pacotes.
+6. Configuração do Ambiente (`~/.bashrc`): Adiciona automaticamente o comando `source` ao arquivo de inicialização do seu terminal, para que o ROS 2 esteja pronto para uso toda vez que você abrir o terminal. Ele também força o Python a utilizar UTF-8 globalmente.
 7. Teste de Sanidade: Ao final, o script realiza três testes rápidos: verifica a variável de ambiente do ROS, testa a codificação do Python e tenta compilar um pequeno código C++ em tempo real para garantir que o compilador está funcional.
+
+Agora que concluímos todas as etapas da instalação do ROS 2 Jazzy no Ubuntu 24.04, podemos realizar um teste para garantir que o ambiente ROS 2 esteja configurado corretamente:
+
+1. Abra o terminal no Ubuntu e adicione mais uma aba (ou abra um novo terminal).
+2. Na primeira aba, execute este comando:
+
+```bash
+ros2 run demo_nodes_cpp talker
+```
+
+3. Na segunda aba, execute este comando:
+
+```bash
+ros2 run demo_nodes_py listener
+```
+
+4. Se tudo estiver correto, você verá a seguinte saída:
+
+```bash
+[INFO] [1678886400.123456789] [talker]: Publishing: 'Hello World: 1'
+[INFO] [1678886400.234567890] [talker]: Publishing: 'Hello World: 2'
+[INFO] [1678886400.345678901] [talker]: Publishing: 'Hello World: 3'
+```
+
+5. Na segunda aba, você verá a seguinte saída:
+
+```bash
+[INFO] [1678886400.123456789] [listener]: I heard: 'Hello World: 1'
+[INFO] [1678886400.234567890] [listener]: I heard: 'Hello World: 2'
+[INFO] [1678886400.345678901] [listener]: I heard: 'Hello World: 3'
+```
+
+O exemplo acima é simplesmente uma demonstração de publicador/assinante (*publisher*/*subscriber*) usando o ROS 2. Se estiver funcionando corretamente, significa que a instalação e a configuração estão operacionais. Se não estiver funcionando ou se você estiver recebendo erros, certifique-se de que o carregamento das variáveis de ambiente (`source`) do ROS 2 está correto. Você pode pressionar `Ctrl + C` para encerrar cada um dos nós em execução.
