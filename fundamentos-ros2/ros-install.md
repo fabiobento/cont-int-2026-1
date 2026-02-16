@@ -296,8 +296,44 @@ Pressione `Ctrl + C` para encerrar cada nó em execução e pressione `Ctrl + D`
 >echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 >```
 >
->Isso fará com que qualquer novo terminal aberto via `docker exec -it master_ros2 bash` já reconheça os comandos do ROS automaticamente.
+>Isso fará com que qualquer novo terminal aberto via `docker exec -it cont-int-2026-1 bash` já reconheça os comandos do ROS automaticamente.
 
+
+Aqui está a tradução para o português:
+
+##### **Passo 4: Iniciando, parando e removendo o container**
+
+Aqui está o comando para parar o container que está em execução:
+```bash
+docker stop cont-int-2026-1
+```
+
+Se você quiser verificar o status de todos os containers no seu computador, use:
+```bash
+docker ps -a
+```
+
+Isso mostrará todos os containers existentes e seus respectivos status, indicando se estão parados ou em execução. Após parar o container, se você desejar iniciá-lo novamente, pode usar o comando `docker start` com o nome do container:
+```bash
+docker start cont-int-2026-1
+```
+
+Depois de iniciar o container, você pode anexar um shell usando o comando `docker exec` para acessar o terminal do container:
+```bash
+docker exec -it cont-int-2026-1 bash
+```
+
+Portanto, uma vez que você cria um container, não precisa criá-lo novamente, a menos que haja alterações na imagem Docker. Você pode simplesmente iniciar e parar o container sempre que quiser.
+
+Se desejar remover o container atual, utilize o comando `docker rm`. Certifique-se de parar o container antes de deletá-lo:
+```bash
+docker stop cont-int-2026-1
+docker rm cont-int-2026-1
+```
+
+Após deletar o container, você precisará usar o comando `docker run` novamente para criar um novo.
+
+Exploramos os comandos básicos do Docker. [Aqui você encontra](https://docs.docker.com/get-started/docker_cheatsheet.pdf) uma referência para um "guia de consulta rápida" (*cheat sheet*) de comandos Docker que você pode usar para aprender mais comandos. Agora, vamos discutir outro conceito importante no Docker, chamado **Dockerfile**.
 
 
 
