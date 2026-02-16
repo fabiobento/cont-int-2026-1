@@ -178,5 +178,5 @@ Este script ajuda a instalar todas as dependências do Docker. Se você tiver um
 
 Você obterá a seguinte saída. Estes são todos os detalhes do sistema do Docker:
 
-![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-info.png)
+    ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-info.png)
 
