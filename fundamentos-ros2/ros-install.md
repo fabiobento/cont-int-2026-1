@@ -100,15 +100,15 @@ Agora que concluímos todas as etapas da instalação do ROS 2 Jazzy no Ubuntu 2
 1. Abra o terminal no Ubuntu e adicione mais uma aba (ou abra um novo terminal).
 2. Na primeira aba, execute este comando:
 
-```bash
-ros2 run demo_nodes_cpp talker
-```
+    ```bash
+    ros2 run demo_nodes_cpp talker
+    ```
 
 3. Na segunda aba, execute este comando:
 
-```bash
-ros2 run demo_nodes_py listener
-```
+    ```bash
+    ros2 run demo_nodes_py listener
+    ```
 
 4. Se tudo estiver correto, você verá a seguinte saída:
 
@@ -140,3 +140,33 @@ Podemos instalar o ROS 2 Jazzy no Windows de várias maneiras. Aqui estão os pr
     > A instalação nativa no Windows costuma ser evitada na comunidade acadêmica e de pesquisa justamente pela complexidade de gerenciar dependências e a falta de suporte para muitos pacotes que são desenvolvidos especificamente para Linux. O **WSL 2** tem se tornado o padrão *de facto* para quem não pode abrir mão do Windows.
 
 ### **Instalando o ROS 2 Jazzy no Docker**
+
+O [Docker](https://www.docker.com/) é uma tecnologia de código aberto que ajuda desenvolvedores de software a desenvolver e implantar rapidamente aplicações em Windows, Linux e macOS. O Docker também é amplamente utilizado no desenvolvimento e implantação de softwares de robótica. A principal vantagem de usar o Docker é que podemos desenvolver e implantar rapidamente sua aplicação baseada em ROS em qualquer distribuição de ROS e de Linux. Mesmo que o seu SO hospedeiro seja o Ubuntu 20.04, você pode desenvolver aplicações ROS 2 no ROS 2 Jazzy (que utiliza o Ubuntu 24.04) usando o Docker. Isso ajudará a construir e testar sua aplicação ROS 2 em diferentes distribuições de ROS 2. O único requisito é instalar o software Docker nesses sistemas operacionais. O Docker é uma tecnologia importante que utilizamos neste curso. Discutiremos o Docker em mais detalhes nesta seção.
+
+O Docker é uma ferramenta de software para criar, implantar e executar aplicações usando uma tecnologia chamada containers. Cada container no Docker possui uma instância leve do ambiente de software para executar nossa aplicação. Esse ambiente contém código, bibliotecas e dependências, o que ajuda os containers a funcionarem em diferentes ambientes. Diferente da VM que vimos anteriormente, cada container não possui um SO separado. Os containers trabalham ao lado do kernel Linux do hospedeiro e criam uma abstração para executar diferentes ambientes. Portanto, ao contrário de uma VM, não precisamos instalar um SO completo para executar uma aplicação.
+
+Antes de mergulharmos no Docker, vamos ver como instalá-lo no Ubuntu 24.04 LTS como máquina hospedeira. [A instalação oficial do Docker está em seu site](https://docs.docker.com/engine/install/ubuntu/). Neste curso, adicionei um script automático para realizar o mesmo procedimento. Ele instalará o Docker no Ubuntu 24.04, bem como o [**NVIDIA Container Toolkit**](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html). O NVIDIA Container Toolkit permite aos usuários construir e executar containers acelerados por GPU que funcionarão em conjunto com o Docker.
+
+#### **Instalando o Docker e o NVIDIA Container Toolkit**
+
+Siga estes passos para instalar o Docker e o NVIDIA Container Toolkit:
+
+1. Abra o repositório do GitHub do curso e navegue até `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_setup_scripts`. Você encontrará o arquivo `setup_docker_ubuntu.sh` lá. Você pode executar este script abrindo um terminal dentro desta pasta:
+
+    ```bash
+    chmod +x setup_docker_ubuntu.sh
+    ./setup_docker_ubuntu.sh
+    ```
+
+Este script ajuda a instalar todas as dependências do Docker. Se você tiver uma placa de vídeo NVIDIA e o driver instalado corretamente, ele instalará o NVIDIA Container Toolkit, que fornece aceleração gráfica ao container.
+
+2. Se tudo for instalado corretamente, você poderá verificar se o Docker está rodando em segundo plano usando o seguinte comando:
+
+    ```bash
+    systemctl status docker
+    ```
+
+Você obterá a seguinte saída se tudo estiver configurado adequadamente:
+    
+    
+
