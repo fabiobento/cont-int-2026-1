@@ -1,4 +1,3 @@
-```shell
 #!/bin/bash -eu
 
 # The BSD License
@@ -21,4 +20,3 @@ sudo apt -y autoremove
 echo ""
 echo ">>> {Concluído: Desinstalação do ROS Jazzy}"
 echo "#################################################################"
-```
