@@ -168,7 +168,15 @@ Este script ajuda a instalar todas as dependências do Docker. Se você tiver um
 
     Você obterá a seguinte saída se tudo estiver configurado adequadamente:
 
-
     ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-status-check.png)
 
+
+3. Se o status do Docker estiver como ativo (`active`), você poderá testar o comando `docker` no terminal para garantir que tudo esteja em ordem:
+    ```bash
+    docker info
+    ```
+
+Você obterá a seguinte saída. Estes são todos os detalhes do sistema do Docker:
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-info.png)
 
