@@ -172,11 +172,132 @@ Este script ajuda a instalar todas as dependências do Docker. Se você tiver um
 
 
 3. Se o status do Docker estiver como ativo (`active`), você poderá testar o comando `docker` no terminal para garantir que tudo esteja em ordem:
+    
     ```bash
     docker info
     ```
 
-Você obterá a seguinte saída. Estes são todos os detalhes do sistema do Docker:
+    Você obterá a seguinte saída. Estes são todos os detalhes do sistema do Docker:
 
     ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-info.png)
+
+#### **Executando o Docker com ROS 2 Jazzy**
+
+Devemos realizar alguns passos antes de começar a trabalhar com o ROS 2 Jazzy no Ubuntu 24.04 LTS. As etapas são detalhadas nas subseções a seguir.
+
+##### **Passo 1: Baixando (*pulling*) a imagem base e construindo uma imagem Docker personalizada**
+
+O primeiro passo para começar a usar o Docker é baixar uma imagem base do Docker Hub ou de outra fonte. Vamos primeiro entender o que são o Docker e as imagens base.
+
+As **imagens Docker** são arquivos que contêm todo o código da aplicação, dependências e ambiente de execução. Podemos dizer que as imagens Docker são modelos (*templates*) para criar um **container Docker**. Uma **imagem base** é a imagem inicial que utilizamos para construir nossa própria imagem Docker. Por exemplo, podemos usar a **imagem Docker do ROS 2 Jazzy** como imagem base e, a partir dela, criar a sua imagem com todas as dependências necessárias.
+
+O [Docker Hub](https://hub.docker.com/) oferece aos desenvolvedores acesso gratuito a imagens Docker públicas e permite que eles enviem suas próprias imagens. Essas imagens permitem que os desenvolvedores as utilizem como base para criar seus containers.
+
+Após instalar o Docker em sua máquina, você pode baixar (*pull*) diretamente a imagem Docker do ROS 2 Jazzy do Docker Hub. A [Open Robotics publica todas as imagens Docker do ROS 1 e 2 em sua conta](https://hub.docker.com/r/osrf/ros/tags). Você pode baixar qualquer imagem da conta deles.
+
+O comando a seguir ajuda a baixar a imagem base do Jazzy do Docker Hub. Isso o levará diretamente para o ambiente do ROS 2 Jazzy sem a necessidade de instalar mais nada:
+
+```bash
+docker pull osrf/ros:jazzy-desktop-full
+```
+
+Após inserir este comando, você verá que a imagem está sendo baixada, o que levará algum tempo dependendo da velocidade da sua internet. Assim que o download terminar, você terá a imagem base do ROS 2 Jazzy. O próximo passo é criar um container usando essa imagem. Como já discutimos, as imagens Docker são como modelos (*templates*) para o container; portanto, assim que um container for iniciado, teremos o ambiente do ROS 2 Jazzy dentro dele. Trabalharemos na maior parte do tempo dentro do container usando um shell, pois a maioria das imagens base possui um ambiente leve, que não inclui um ambiente de desktop (interface gráfica) como o que vemos no Ubuntu 24.04 LTS.
+
+Depois de obter a imagem Docker do Jazzy, podemos começar a criar um container a partir dela. A seção seguinte discute os passos necessários.
+
+##### **Passo 2: Criando um container a partir da imagem do ROS 2 Jazzy**
+
+Para criar um container, você pode usar o seguinte comando:
+```bash
+docker run -it --name cont-int-2026-1 osrf/ros:jazzy-desktop-full bash
+```
+
+Após executar este comando no seu terminal, você poderá ver um novo terminal com um usuário diferente, que pode ser o usuário root, como no exemplo abaixo:
+
+```bash
+root@eafa922c9072:/#
+```
+
+Esta linha é o shell do container ROS 2 Jazzy com o nome **master_ros2**. Se você observar o comando acima, verá que usamos o comando `docker run` para criar um container. Devemos adicionar o nome da imagem; também podemos especificar o nome do container usando o argumento `--name`.
+
+O argumento `-it` no Docker ajuda a interagir com o container, permitindo o envio de comandos de texto através do shell **bash**. O comando `bash` ao final informa ao container Docker para executar o interpretador de comandos bash assim que ele iniciar. Portanto, este comando cria um container Docker com um shell bash interativo e o nome de **master_ros2**. O nome do container é opcional aqui; se você não incluir um nome, ele atribuirá um aleatoriamente. É melhor definir um nome para que possamos iniciar, parar e deletar este container facilmente.
+
+Após criar o container a partir da imagem, você terá um ambiente ROS 2 Jazzy onde poderá fazer qualquer coisa. Seu progresso será perdido se você deletar o container. As alterações feitas dentro do container ficam em cache, portanto, você pode iniciar e parar o container sem perder dados. Somente a reconstrução (*rebuilding*) dele fará com que você perca quaisquer dados que não estejam montados no sistema hospedeiro (host).
+
+Você pode realizar o seguinte teste para garantir que o ROS 2 Jazzy está funcionando corretamente.
+
+Execute o nó publicador de exemplo no ROS 2, que publica uma string "Hello World". Isso deve ser executado no terminal do Docker:
+
+```bash
+ros2 run demo_nodes_cpp talker
+```
+
+Você obterá a seguinte saída:
+
+```bash
+[INFO] [1708036800.123456789] [talker]: Publishing: "Hello World: 1"
+[INFO] [1708036801.123456789] [talker]: Publishing: "Hello World: 2"
+[INFO] [1708036802.123456789] [talker]: Publishing: "Hello World: 3"
+```
+ Agora podemos executar um comando para se inscrever no tópico "topic" e receber as mensagens publicadas pelo nó "talker". Para rodar esse próximo comando siga apra a próxima seção
+
+Aqui está a tradução para o português:
+
+##### **Passo 3: Executando um novo comando no container ROS 2 Jazzy**
+
+Após criar um container e acessar o shell, executamos o programa publicador (*publisher*) no ROS 2 e podemos ver que ele está funcionando.
+
+Agora, como acessar outro terminal deste container e executar o código assinante (*subscriber*)? É aí que entram os comandos `docker exec`. Os comandos `docker exec` nos ajudam a rodar outro programa ou comando no mesmo container. Portanto, abra um novo terminal no seu SO hospedeiro e execute o seguinte comando para obter acesso ao terminal do container:
+
+```bash
+docker exec -it cont-int-2026-1 bash
+```
+Após carregar este comando (*sourcing*), você poderá executar o nó ouvinte (*listener*):
+
+```bash
+source /opt/ros/jazzy/setup.bash
+ros2 run demo_nodes_cpp listener
+```
+Você obterá a seguinte saída:
+
+```bash
+[INFO] [1708036800.123456789] [listener]: I heard: "Hello World: 1"
+[INFO] [1708036801.123456789] [listener]: I heard: "Hello World: 2"
+[INFO] [1708036802.123456789] [listener]: I heard: "Hello World: 3"
+```
+Pressione `Ctrl + C` para encerrar cada nó em execução e pressione `Ctrl + D` para sair do shell. Após sair do shell, o contêiner ainda pode estar rodando em segundo plano. Você pode parar o contêiner usando o comando da próxima seção.
+
+> **Observação Técnica Importante**:
+>
+> Quando você abre um novo terminal do Docker com o comando `docker exec`, ele inicia uma nova sessão de shell "limpa". No ROS 2, isso é um desafio comum por causa do isolamento do ambiente.
+>
+>Aqui está o porquê de precisarmos repetir esse processo:
+>
+> **O Papel do `setup.bash`**
+>
+> O ROS 2 não instala seus binários nos caminhos padrão do sistema (como o `/usr/bin`). Em vez disso, ele os mantém organizados em `/opt/ros/jazzy/`. Para que o terminal saiba onde encontrar os comandos `ros2 run`, `ros2 topic`, etc., o script `setup.bash` precisa:
+>
+> 1. Configurar a variável `$PATH`.
+> 2. Definir a variável `$ROS_DISTRO`.
+> 3. Configurar caminhos de bibliotecas (`LD_LIBRARY_PATH`) para que o Python e o C++ funcionem.
+>
+> **Por que no Docker é diferente?**
+>
+>Em uma instalação nativa no Ubuntu, nós geralmente adicionamos a linha `source /opt/ros/jazzy/setup.bash` ao arquivo `~/.bashrc`. No entanto, em containers Docker:
+>
+> * **Sessões não-interativas:** Algumas formas de entrar no container não carregam o `.bashrc` automaticamente.
+> * **Imagens Oficiais:** Muitas imagens base não vêm com essa linha configurada no `.bashrc` por padrão para permitir que o usuário escolha qual workspace quer carregar.
+>
+> **Como automatizar isso?**
+>
+>Para não ter que digitar o comando toda vez, você pode rodar este comando **uma única vez** dentro do seu container:
+>
+>```bash
+>echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+>```
+>
+>Isso fará com que qualquer novo terminal aberto via `docker exec -it master_ros2 bash` já reconheça os comandos do ROS automaticamente.
+
+
+
 
