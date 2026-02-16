@@ -166,7 +166,9 @@ Este script ajuda a instalar todas as dependências do Docker. Se você tiver um
     systemctl status docker
     ```
 
-Você obterá a seguinte saída se tudo estiver configurado adequadamente:
-    
-    
+    Você obterá a seguinte saída se tudo estiver configurado adequadamente:
+
+
+    ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-status-check.png)
+
 
