@@ -451,4 +451,13 @@ docker run -it --name test_ros_dev_basic test_ros2_basic:v0.1
 
 Até agora, vimos containers Docker que interagem com comandos de shell. E quanto ao uso de aplicações com interface gráfica (**GUI**) dentro do container Docker? Sim, isso também é possível. Na próxima seção, veremos como executar ferramentas do ROS 2 com a interface gráfica habilitada.
 
+#### **Habilitando Interface Gráfica (GUI) em um container ROS 2 Jazzy**
+
+Nesta seção, veremos como habilitar o suporte a interface gráfica no Docker. Após habilitar o suporte a GUI, poderemos trabalhar tanto com as ferramentas gráficas quanto com as de linha de comando do ROS 2 Jazzy. Então, vamos começar.
+
+Vá até a pasta `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_gui`; dentro dela, você encontrará um Dockerfile semelhante ao `Dockerfile.basic`. O nome do Dockerfile é [`Dockerfile.master_ros2`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/fundamentos-ros2/scripts/ros2_jazzy_docker/docker_gui/Dockerfile.master_ros2). Estes dois arquivos são bem parecidos, mas a diferença está no comando `docker run`. Você pode ver no mesmo diretórios vários scripts shell junto com o `Dockerfile.master_ros2` para construir imagens (`build_image.sh`), criar (`create_container.sh`), iniciar (`start_container.sh`), parar (`stop_container.sh`) e remover (`remove_container.sh`) os containers Docker. Isso tornará o processo mais fácil do que memorizar todos os comandos do Docker. Além disso, todos os scripts aceitam argumentos de linha de comando nos quais podemos especificar o Dockerfile, o nome do container e assim por diante, para construir a imagem Docker e executar o container.
+
+> **Observação Técnica**
+Habilitar a GUI é o que permitirá que você abra janelas do `OpenCV` (`cv2.imshow`), o `Rviz2` ou o `rqt` diretamente do container para a tela do seu Ubuntu 24.04.
+
 
