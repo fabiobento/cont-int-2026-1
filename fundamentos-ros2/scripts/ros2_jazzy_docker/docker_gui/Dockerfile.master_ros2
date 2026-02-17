@@ -1,31 +1,30 @@
-# Use the official ROS Jazzy desktop full base image
+# Usa a imagem base oficial do ROS Jazzy desktop full
 FROM osrf/ros:jazzy-desktop-full
 
-
-#Name of docker user as argument 
+# Nome do usuário docker como argumento
 ARG docker_user_name
-# Name of the ros workspace to mount
+# Nome do workspace ROS a ser montado
 ARG ros_ws
 
-# The group identifier and User identifier for user creation
+# Identificadores de grupo (GID) e usuário (UID) para criação do usuário
 ARG GID=1000
 ARG UID=1000
 
-# Set up environment variables
+# Configura variáveis de ambiente
 ENV DEBIAN_FRONTEND=noninteractive
 ENV HOME="/home/$docker_user_name"
 ENV ROS_DISTRO=jazzy
 ENV ROS_WS=${HOME}/$ros_ws
 
-# Delete user if it exists in container (Ubuntu Noble: ubuntu)
+# Remove o usuário se ele já existir no container (ex: usuário 'ubuntu' no Ubuntu Noble)
 RUN if id -u $UID ; then userdel `id -un $UID` ; fi
 
-# Add user and install sudo
+# Cria o usuário, configura o shell bash e instala o sudo sem senha
 RUN groupadd --gid $GID $docker_user_name && useradd --uid $UID --gid $docker_user_name --shell /bin/bash --create-home $docker_user_name \
     && apt-get update && apt-get install -y sudo \
     && echo "$docker_user_name ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Install necessary dependencies
+# Instala dependências essenciais do sistema e do ROS
 RUN apt-get update && apt-get install -y \
     git \
     python3-pip \
@@ -33,17 +32,17 @@ RUN apt-get update && apt-get install -y \
     python3-vcstool \
     && rm -rf /var/lib/apt/lists/*
 
-# Set ownership to user
+# Define a propriedade do diretório home para o usuário criado
 RUN chown -R $docker_user_name:$docker_user_name ${HOME}
 
-# Switch to user
+# Alterna para o usuário não-root
 USER $docker_user_name
 
-# Copy ros ws entry point
+# Copia o script de entrypoint do workspace ROS
 COPY ros_ws_entrypoint.sh /ros_ws_entrypoint.sh
 
-
+# Define o diretório de trabalho para o workspace ROS
 WORKDIR $ROS_WS
 
-# Entrypoint
+# Define o script de entrada do container
 ENTRYPOINT ["/ros_entrypoint.sh"]
