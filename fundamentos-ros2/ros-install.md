@@ -1,4 +1,4 @@
-# Roteiro 1: Primeiros Passos com ROS 2
+# Aula 1: Primeiros Passos com ROS 2
 
 Na aula incial:
 
@@ -65,7 +65,7 @@ Existem várias maneiras de configurar o Ubuntu 24.04 em um computador. Aqui est
 
 Esta seção fornece instruções para a instalação do ROS 2 Jazzy no Ubuntu 24.04 LTS. Estas instruções funcionarão em máquinas `x86_64` e `ARM64`.
 
-Para facilitar a instalação, usaremos um script de shell para automatizar este procedimento de instalação e desinstalação. Você pode encontrar o script `ros2_install_jazzy.sh` na pasta `fundamentos-ros2/scripts/` para instalar o ROS 2 Jazzy, e o `ros2_uninstall_jazzy.sh` para desinstalar o mesmo.
+Para facilitar a instalação, usaremos um script de shell para automatizar este procedimento de instalação e desinstalação. Você pode encontrar o script [`ros2_install_jazzy.sh`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/main/fundamentos-ros2/scripts/ros2_install_jazzy.sh) na pasta `fundamentos-ros2/scripts/` para instalar o ROS 2 Jazzy, e o [`ros2_uninstall_jazzy.sh`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/fundamentos-ros2/scripts/ros2_uninstall_jazzy.sh) para desinstalar o mesmo.
 
 Você pode executar os seguintes comandos dentro da pasta `fundamentos-ros2` para instalar o ROS 2 Jazzy com um script de shell automatizado:
 
@@ -151,7 +151,7 @@ Antes de mergulharmos no Docker, vamos ver como instalá-lo no Ubuntu 24.04 LTS 
 
 Siga estes passos para instalar o Docker e o NVIDIA Container Toolkit:
 
-1. Abra o repositório do GitHub do curso e navegue até `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_setup_scripts`. Você encontrará o arquivo `setup_docker_ubuntu.sh` lá. Você pode executar este script abrindo um terminal dentro desta pasta:
+1. Abra o repositório do GitHub do curso e navegue até `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_setup_scripts`. Você encontrará o arquivo [`setup_docker_ubuntu.sh`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/fundamentos-ros2/scripts/ros2_jazzy_docker/docker_setup_scripts/setup_docker_ubuntu.sh) lá. Você pode executar este script abrindo um terminal dentro desta pasta:
 
     ```bash
     chmod +x setup_docker_ubuntu.sh
@@ -335,5 +335,47 @@ Após deletar o container, você precisará usar o comando `docker run` novament
 
 Exploramos os comandos básicos do Docker. [Aqui você encontra](https://docs.docker.com/get-started/docker_cheatsheet.pdf) uma referência para um "guia de consulta rápida" (*cheat sheet*) de comandos Docker que você pode usar para aprender mais comandos. Agora, vamos discutir outro conceito importante no Docker, chamado **Dockerfile**.
 
+#### **Dockerfile para o ROS 2 Jazzy**
+
+Um **Dockerfile** é um arquivo de texto que contém instruções usadas para construir uma imagem Docker personalizada. Ele define como essa imagem deve ser construída. Então, por que precisamos construir uma imagem Docker personalizada? Imagine que você desenvolveu um software para robôs usando o ROS 2; a execução desse software exige que algumas dependências estejam instaladas. A imagem base do ROS 2 Jazzy que usamos anteriormente pode não ter todas essas dependências. Nesse cenário, podemos escrever um Dockerfile colocando o ROS 2 Jazzy como imagem base e adicionando as dependências e o ambiente para criar uma nova imagem personalizada. O Dockerfile nos ajuda a criar imagens customizadas com os pacotes necessários para rodar a aplicação. Ele é semelhante a uma receita, como um conjunto de instruções para produzir uma imagem. Podemos escrever o Dockerfile usando instruções específicas e construir esse arquivo usando o comando `docker build`.
+
+Aqui está a aparência de um Dockerfile básico para o ROS 2 Jazzy:
+
+```dockerfile
+# Imagem Base
+FROM osrf/ros:jazzy-desktop-full
+
+# Atualiza os pacotes do Ubuntu e instala o pip
+RUN apt update && apt upgrade -y
+RUN apt install -y python3-pip
+
+# Comando executado ao iniciar o container
+CMD ["/bin/bash"]
+```
+
+Você pode navegar até a pasta `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_basics` e encontrará este arquivo como [`Dockerfile`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/fundamentos-ros2/scripts/ros2_jazzy_docker/docker_basics/Dockerfile). O nome **Dockerfile** é o nome padrão de todos os Dockerfiles, mas você pode nomeá-lo como preferir, como `Dockerfile.basic`, `Dockerfile.cont-int-2006-1`, e assim por diante, caso queira manter vários Dockerfiles para diferentes aplicações. Durante a construção(_**build**_) da imagem Docker, você pode especificar o nome deste Dockerfile e ele construirá a imagem correspondente.
+
+Vamos primeiro construir a imagem Docker personalizada e, depois, explorar como o Dockerfile funciona.
+
+Aqui está o comando usado para construir um Dockerfile e criar uma imagem personalizada. Abra um terminal na mesma pasta onde o Dockerfile está localizado e execute este comando:
+
+```bash
+docker build -f Dockerfile -t test_ros2:v0.1 .
+```
+
+Onde:
+
+* `docker build` é o comando usado para construir uma imagem Docker.
+* `-f Dockerfile` especifica o nome do Dockerfile a ser usado.
+* `-t test_ros2:v0.1` especifica o nome e a tag da imagem a ser criada.
+* `.` especifica o caminho para o Dockerfile.
+
+Este comando lê o **Dockerfile**, que é especificado com o argumento `-f`, e utiliza o `-t` para indicar o nome da imagem e sua tag (etiqueta). A tag é opcional, mas é recomendável colocar uma tag em cada imagem para identificar a versão caso haja alterações no Dockerfile. Você encontrará um ponto (`.`) ao final, que se refere ao diretório atual. O Dockerfile buscará os arquivos para copiar para o container a partir deste diretório.
 
 
+> **Observação Técnica Importante:**
+> Se você quiser copiar um script Python da sua máquina para dentro da imagem do robô usando o comando `COPY`, esse script precisa estar dentro da pasta onde você executou o comando (ou em uma subpasta dela). O Docker não consegue "enxergar" arquivos que estejam em pastas superiores ao ponto (`.`) por questões de segurança.
+
+Após uma construção (*build*) bem-sucedida, você poderá encontrar mensagens como esta no terminal:
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-build.png)

@@ -1,10 +1,10 @@
-#Base Image
+# Imagem Base
 FROM osrf/ros:jazzy-desktop-full
 
-#Update and upgrade Ubuntu package and install pip
+# Atualiza os pacotes do Ubuntu e instala o pip
 RUN apt update && apt upgrade -y
 RUN apt install -y python3-pip
 
-#Execute command, bash when it create the container
+# Comando executado ao iniciar o container
 CMD ["/bin/bash"]
 
