@@ -407,3 +407,55 @@ O Dockerfile começa a partir de uma imagem base do ROS 2 Jazzy. A instrução `
 >
 >* **`RUN` vs `CMD`:** O `RUN` acontece durante a **construção** (no seu computador, uma única vez), enquanto o `CMD` acontece toda vez que você **inicia** o container (no robô ou na Raspberry Pi).
 >* **Boas Práticas:** Em nosso caso, poderíamos usar o `RUN` para já deixar o `PyTorch` instalado na imagem, poupando tempo.
+
+
+O comando `CMD` pode ser sobrescrito fornecendo-se o comando ao final do comando `docker run`. Existe um comando semelhante chamado `ENTRYPOINT` no Dockerfile, que desempenha a mesma função, mas o comando não pode ser sobrescrito no `docker run`.
+
+Vamos analisar alguns Dockerfiles mais complexos para o desenvolvimento baseado em ROS 2. Você pode encontrar Dockerfiles básicos que serão bons para iniciar o desenvolvimento com ROS 2. Se você navegar até `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_basics`, encontrará o [`Dockerfile.basic`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/fundamentos-ros2/scripts/ros2_jazzy_docker/docker_basics/Dockerfile.basic). O usuário padrão na imagem base do ROS 2 Jazzy é o usuário **root**. Este Dockerfile pode criar um novo usuário, o que restringe as permissões e é mais seguro do que o usuário root. O usuário root tem permissão total para fazer qualquer coisa no Docker. É melhor manter um usuário normal durante o desenvolvimento e usar o comando `sudo` para obter acesso root.
+
+```dockerfile
+# Imagem Base
+FROM osrf/ros:jazzy-desktop-full
+
+# Nome do usuário a ser criado e IDs de usuário/grupo
+ARG USERNAME=robot
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+# Remove o usuário padrão se ele já existir com o mesmo UID (comum no Ubuntu Noble)
+RUN if id -u $USER_UID ; then userdel `id -un $USER_UID` ; fi
+
+# Cria o grupo e o usuário, e adiciona suporte ao sudo sem senha
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && apt update \
+    && apt install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+
+# Atualiza os pacotes do sistema e instala o gerenciador de pacotes pip
+RUN apt update && apt upgrade -y && apt install -y python3-pip
+
+# Define o shell padrão como bash
+ENV SHELL=/bin/bash
+
+# Define o usuário padrão para a execução do container
+USER $USERNAME
+
+# Comando padrão para iniciar o shell interativo
+CMD ["/bin/bash"]
+```
+Para construir este arquivo e utilizá-lo, você pode usar os mesmos comandos Docker que utilizou para o primeiro exemplo de Dockerfile.
+
+```bash
+docker build -f Dockerfile.basic -t test_ros2_basic:v0.1 .
+docker run -it --name test_ros_dev_basic test_ros2_basic:v0.1
+```
+
+> **Observação Técnica:**
+> * **Segurança:** Rodar como root pode permitir que um script mal escrito ou um erro em um nó do ROS apague arquivos cruciais do sistema de arquivos montado.
+> * **Compatibilidade:** Muitas ferramentas de GUI (como o **Rviz2**) e alguns drivers de hardware comportam-se de forma diferente ou mais instável quando executados diretamente como root.
+
+Até agora, vimos containers Docker que interagem com comandos de shell. E quanto ao uso de aplicações com interface gráfica (**GUI**) dentro do container Docker? Sim, isso também é possível. Na próxima seção, veremos como executar ferramentas do ROS 2 com a interface gráfica habilitada.
+
+
