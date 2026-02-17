@@ -497,4 +497,4 @@ robot@robot-pc:~/master_ros2_ws$ rviz2
 
 Isso iniciará o RViz2, que é uma das ferramentas de interface gráfica (GUI) populares do ROS 2. Você verá o RViz2 na tela desta forma:
 
-![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-build.png)
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-rviz2.png)
