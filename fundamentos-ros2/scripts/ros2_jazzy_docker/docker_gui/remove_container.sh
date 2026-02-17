@@ -1,8 +1,8 @@
 #!/bin/sh
 
-CONTAINER_NAME="$1" #name of container which you created earlier, by running "create_container.sh" file.
+# Nome do container que você criou anteriormente, executando o arquivo "create_container.sh".
+CONTAINER_NAME="$1"
 
-# Running the existing container
-
+# Parando e removendo o container existente
 docker stop $CONTAINER_NAME
 docker rm $CONTAINER_NAME

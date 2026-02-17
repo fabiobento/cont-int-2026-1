@@ -1,26 +1,30 @@
 #!/bin/sh
 
+# Script para criar e executar um container Docker com suporte a interface gráfica (GUI) e ROS2.
+# Uso: ./create_container.sh <imagem_docker> <nome_ws_ros2> <nome_container>
 
-DOCKER_IMAGE="$1"  # Name of the Docker image.
-ROS2_WS_NAME="$2"    #ROS2 ws name
-CONTAINER_NAME="$3"  # Name of the container you want to create.
+DOCKER_IMAGE="$1"    # Nome da imagem Docker.
+ROS2_WS_NAME="$2"     # Nome do workspace ROS2.
+CONTAINER_NAME="$3"   # Nome do container a ser criado.
 
+# Caminho para o código fonte no host (máquina física).
+HOST_WS_PATH="/home/$USER/$ROS2_WS_NAME/src"
 
-HOST_WS_PATH="/home/$USER/$ROS2_WS_NAME/src"  # Path to your workspace on the host.
-
-# Get Docker image user
+# Obtém o usuário configurado na imagem Docker.
 DOCKER_USER=$(docker inspect "$DOCKER_IMAGE" --format '{{.Config.User}}')
 if [ -z "$DOCKER_USER" ]; then
-    DOCKER_USER="ubuntu"  # fallback to host user if not set
+    DOCKER_USER="ubuntu"  # Valor padrão caso não esteja definido na imagem.
 fi
 
+# Permite conexões locais ao servidor X para interface gráfica.
 xhost +local:docker
 
+# Configurações para encaminhamento do X11.
 XSOCK=/tmp/.X11-unix
 XAUTH=/tmp/.docker.xauth
 XAUTH_DOCKER=/tmp/.docker.xauth
 
-# Create Xauth if not present
+# Cria o arquivo Xauth se não existir para autenticação do display.
 if [ ! -f "$XAUTH" ]; then
     xauth_list=$(xauth nlist :0 | sed -e 's/^..../ffff/')
     if [ ! -z "$xauth_list" ]; then
@@ -31,9 +35,9 @@ if [ ! -f "$XAUTH" ]; then
     chmod a+r "$XAUTH"
 fi
 
-# Check for NVIDIA GPU
+# Verifica a presença de GPU NVIDIA.
 if nvidia-smi | grep -q NVIDIA; then
-    echo "NVIDIA GPU detected, initializing container with GPU support"
+    echo "GPU NVIDIA detectada, inicializando container com suporte a GPU"
     docker run -it --network host \
         --privileged \
         --name "$CONTAINER_NAME" \
@@ -50,7 +54,7 @@ if nvidia-smi | grep -q NVIDIA; then
         "$DOCKER_IMAGE" \
         bash
 else
-    echo "NVIDIA GPU NOT detected, initializing container without GPU support"
+    echo "GPU NVIDIA NÃO detectada, inicializando container sem suporte a GPU"
     docker run -it --network host \
         --privileged \
         --name "$CONTAINER_NAME" \

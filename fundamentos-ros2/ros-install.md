@@ -219,9 +219,9 @@ Após executar este comando no seu terminal, você poderá ver um novo terminal 
 root@eafa922c9072:/#
 ```
 
-Esta linha é o shell do container ROS 2 Jazzy com o nome **master_ros2**. Se você observar o comando acima, verá que usamos o comando `docker run` para criar um container. Devemos adicionar o nome da imagem; também podemos especificar o nome do container usando o argumento `--name`.
+Esta linha é o shell do container ROS 2 Jazzy com o nome **cont-int-2026-1**. Se você observar o comando acima, verá que usamos o comando `docker run` para criar um container. Devemos adicionar o nome da imagem; também podemos especificar o nome do container usando o argumento `--name`.
 
-O argumento `-it` no Docker ajuda a interagir com o container, permitindo o envio de comandos de texto através do shell **bash**. O comando `bash` ao final informa ao container Docker para executar o interpretador de comandos bash assim que ele iniciar. Portanto, este comando cria um container Docker com um shell bash interativo e o nome de **master_ros2**. O nome do container é opcional aqui; se você não incluir um nome, ele atribuirá um aleatoriamente. É melhor definir um nome para que possamos iniciar, parar e deletar este container facilmente.
+O argumento `-it` no Docker ajuda a interagir com o container, permitindo o envio de comandos de texto através do shell **bash**. O comando `bash` ao final informa ao container Docker para executar o interpretador de comandos bash assim que ele iniciar. Portanto, este comando cria um container Docker com um shell bash interativo e o nome de **cont-int-2026-1**. O nome do container é opcional aqui; se você não incluir um nome, ele atribuirá um aleatoriamente. É melhor definir um nome para que possamos iniciar, parar e deletar este container facilmente.
 
 Após criar o container a partir da imagem, você terá um ambiente ROS 2 Jazzy onde poderá fazer qualquer coisa. Seu progresso será perdido se você deletar o container. As alterações feitas dentro do container ficam em cache, portanto, você pode iniciar e parar o container sem perder dados. Somente a reconstrução (*rebuilding*) dele fará com que você perca quaisquer dados que não estejam montados no sistema hospedeiro (host).
 
@@ -460,4 +460,49 @@ Vá até a pasta `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_gui`; dentro
 > **Observação Técnica**
 Habilitar a GUI é o que permitirá que você abra janelas do `OpenCV` (`cv2.imshow`), o `Rviz2` ou o `rqt` diretamente do container para a tela do seu Ubuntu 24.04.
 
+#### **Construindo a imagem Docker**
 
+Temos um script chamado [`build_image.sh`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/fundamentos-ros2/scripts/ros2_jazzy_docker/docker_gui/build_image.sh), que aceita diversos argumentos, como o nome da imagem Docker, nome de usuário e assim por diante, e utiliza o comando `docker build` para construir o Dockerfile.
+
+Discutiremos primeiro o uso do script dentro da pasta. Antes de executar o script, crie uma pasta em sua pasta pessoal (`home`) chamada `master_ros2_ws/src` para armazenar seus pacotes ROS 2. Você pode usar o seguinte comando para fazer isso:
+
+```bash
+mkdir -p ~/master_ros2_ws/src
+
+```
+
+Após criar esta pasta, você pode iniciar a construção da imagem Docker usando o comando a seguir. Certifique-se de estar executando-o dentro da pasta `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_gui` do repositório:
+
+```bash
+./build_image.sh ros2_gui:v0.1 master_ros2_ws robot
+
+```
+
+Neste script, o primeiro argumento é o nome da imagem Docker personalizada com a versão, o segundo é o nome do workspace do ROS 2 (que será discutido na próxima seção) e o terceiro é o nome de usuário que desejamos criar dentro do Docker.
+
+Após construir a imagem, você pode criar um container usando o script [`create_container.sh`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/fundamentos-ros2/scripts/ros2_jazzy_docker/docker_gui/create_container.sh):
+
+```bash
+./create_container.sh ros2_gui:v0.1 master_ros2_ws ros2_dev
+
+```
+
+Ao executar este script, devemos fornecer o nome da imagem que criamos, o nome do workspace do ROS 2 na máquina hospedeira e o nome do container. O script verificará se você possui uma placa de vídeo NVIDIA e seu driver instalados no seu SO Ubuntu. Se instalados, ele utilizará a aceleração gráfica da placa NVIDIA. Estamos apenas usando o comando `docker run` dentro deste script, mas com múltiplos argumentos para aceleração gráfica, montagem de volumes e o workspace do ROS 2 em nosso SO hospedeiro. Criar um container desta forma fornece o ambiente para executar um aplicativo de interface gráfica (GUI) a partir do terminal, e a interface irá aparecer.
+
+Você obterá um shell após criar o container. Você pode executar o seguinte comando para verificar se a interface gráfica está habilitada ou não no container:
+
+```bash
+robot@robot-pc:~/master_ros2_ws$ rviz2
+
+```
+
+---
+
+### Destaque para o seu trabalho no IFES:
+
+Este fluxo é exatamente o que um **Professor** precisa para gerenciar turmas.
+
+* **Persistência com `mkdir`:** Ao criar a pasta no seu `~/` (home) e passá-la como argumento, o script faz um **Bind Mount**. Isso significa que se o aluno deletar o container por erro, o código fonte dentro de `master_ros2_ws/src` continuará salvo na sua máquina física.
+* **NVIDIA:** Como você trabalha com **Redes Neurais Profundas**, a detecção automática que o script faz da GPU é vital para que o `rviz2` não fique travando ao renderizar nuvens de pontos ou feeds de vídeo processados.
+
+**Gostaria que eu explicasse como configurar o VS Code para abrir diretamente essa pasta `master_ros2_ws` e facilitar a programação dos seus nós do ROS 2?**
