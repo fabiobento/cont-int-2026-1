@@ -242,8 +242,6 @@ Você obterá a seguinte saída:
 ```
  Agora podemos executar um comando para se inscrever no tópico "topic" e receber as mensagens publicadas pelo nó "talker". Para rodar esse próximo comando siga apra a próxima seção
 
-Aqui está a tradução para o português:
-
 ##### **Passo 3: Executando um novo comando no container ROS 2 Jazzy**
 
 Após criar um container e acessar o shell, executamos o programa publicador (*publisher*) no ROS 2 e podemos ver que ele está funcionando.
@@ -298,9 +296,6 @@ Pressione `Ctrl + C` para encerrar cada nó em execução e pressione `Ctrl + D`
 >```
 >
 >Isso fará com que qualquer novo terminal aberto via `docker exec -it cont-int-2026-1 bash` já reconheça os comandos do ROS automaticamente.
-
-
-Aqui está a tradução para o português:
 
 ##### **Passo 4: Iniciando, parando e removendo o container**
 
@@ -382,8 +377,6 @@ Após uma construção (*build*) bem-sucedida, você poderá encontrar mensagens
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-build.png)
 
-
-Aqui está a tradução para o português:
 
 Após construir a imagem, podemos criar o container usando o comando `docker run`, como fizemos anteriormente:
 
