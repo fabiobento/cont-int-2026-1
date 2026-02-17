@@ -136,7 +136,8 @@ Podemos instalar o ROS 2 Jazzy no Windows de várias maneiras. Aqui estão os pr
 * **Instalando o ROS 2 Jazzy no VirtualBox/VMware:** Já discutimos a instalação do Ubuntu 24.04 LTS em softwares de virtualização como o VirtualBox. Para instalar o ROS 2 Jazzy nele, podemos seguir as mesmas instruções discutidas para o Ubuntu 24.04 LTS. Este método é muito fácil de configurar e também seguro para experimentar o ROS 2. Mesmo que o SO convidado (*guest*) trave, isso não afetará o SO hospedeiro (*host*) principal, que aqui é o Windows.
 * **Instalando o ROS 2 Jazzy no WSL 2:** O WSL é um recurso do Windows 10/11 que permite a execução de um ambiente Linux em uma máquina Windows sem a necessidade de uma máquina virtual ou configuração de dual-boot. [Aqui está o tutorial oficial sobre como habilitar o WSL no Windows](https://ubuntu.com/desktop/wsl). A primeira versão foi o WSL 1, e a mais recente é o WSL 2. O WSL 2 possui mais recursos que o WSL 1. Usando o WSL 2, podemos instalar novas versões do Ubuntu, como o Ubuntu 24.04 e 22.04. As mesmas instruções de instalação do ROS 2 Jazzy no Ubuntu 24.04 LTS podem ser seguidas para instalar o ROS 2 Jazzy no WSL 2. Ele não é baseado apenas em linha de comando, mas também pode visualizar ferramentas de interface gráfica (GUI). Também há um compartilhamento de arquivos facilitado entre o Windows e o WSL 2.
 * **Instalando o ROS 2 Jazzy no Windows 10 (sem virtualização):** Podemos instalar o ROS 2 Jazzy nativamente no Windows 10, mas não no Windows 11. Este método não utiliza o WSL; tudo roda nativamente, sem camadas adicionais. As instruções de configuração são tediosas e demoradas, mas se realmente precisarmos integrar o ROS 2 com qualquer aplicação nativa de Windows, este é o caminho a seguir. [Aqui está a referência para instalar nativamente o ROS 2 Jazzy no Windows 10](https://docs.ros.org/en/jazzy/Installation/Windows-Install-Binary.html).
-    > **Observação Técnica Importante:**
+    > **Observação Técnica:**
+    >
     > A instalação nativa no Windows costuma ser evitada na comunidade acadêmica e de pesquisa justamente pela complexidade de gerenciar dependências e a falta de suporte para muitos pacotes que são desenvolvidos especificamente para Linux. O **WSL 2** tem se tornado o padrão *de facto* para quem não pode abrir mão do Windows.
 
 ### **Instalando o ROS 2 Jazzy no Docker**
@@ -267,7 +268,7 @@ Você obterá a seguinte saída:
 ```
 Pressione `Ctrl + C` para encerrar cada nó em execução e pressione `Ctrl + D` para sair do shell. Após sair do shell, o contêiner ainda pode estar rodando em segundo plano. Você pode parar o contêiner usando o comando da próxima seção.
 
-> **Observação Técnica Importante**:
+> **Observação Técnica**:
 >
 > Quando você abre um novo terminal do Docker com o comando `docker exec`, ele inicia uma nova sessão de shell "limpa". No ROS 2, isso é um desafio comum por causa do isolamento do ambiente.
 >
@@ -373,9 +374,36 @@ Onde:
 Este comando lê o **Dockerfile**, que é especificado com o argumento `-f`, e utiliza o `-t` para indicar o nome da imagem e sua tag (etiqueta). A tag é opcional, mas é recomendável colocar uma tag em cada imagem para identificar a versão caso haja alterações no Dockerfile. Você encontrará um ponto (`.`) ao final, que se refere ao diretório atual. O Dockerfile buscará os arquivos para copiar para o container a partir deste diretório.
 
 
-> **Observação Técnica Importante:**
+> **Observação Técnica:**
+>
 > Se você quiser copiar um script Python da sua máquina para dentro da imagem do robô usando o comando `COPY`, esse script precisa estar dentro da pasta onde você executou o comando (ou em uma subpasta dela). O Docker não consegue "enxergar" arquivos que estejam em pastas superiores ao ponto (`.`) por questões de segurança.
 
 Após uma construção (*build*) bem-sucedida, você poderá encontrar mensagens como esta no terminal:
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-build.png)
+
+
+Aqui está a tradução para o português:
+
+Após construir a imagem, podemos criar o container usando o comando `docker run`, como fizemos anteriormente:
+
+```bash
+docker run -it --name test_ros_dev test_ros2:v0.1
+```
+Onde:
+
+* `docker run` é o comando usado para criar um container.
+* `-it` especifica que o container deve ser executado em modo interativo e com um terminal.
+* `--name test_ros_dev` especifica o nome do container.
+* `test_ros2:v0.1` especifica a imagem a ser usada.
+
+Após criar o container, você pode usar o comando `docker exec` para acessar mais terminais (*shells*).
+
+Agora você já tem uma ideia de como construir uma imagem do ROS 2 Jazzy escrevendo o seu próprio Dockerfile, então vamos analisar detalhadamente o Dockerfile mencionado anteriormente.
+
+O Dockerfile começa a partir de uma imagem base do ROS 2 Jazzy. A instrução `FROM` no Dockerfile é usada para indicar qual imagem base estamos utilizando. Depois disso, atualizamos e fazemos o upgrade dos pacotes da imagem base. Essa operação utiliza a instrução `RUN` no Dockerfile. Usando a instrução `RUN`, podemos instalar pacotes na imagem base. A própria operação de *update* & *upgrade* transforma a imagem base em uma imagem personalizada, pois a nova imagem passa a ter os pacotes mais recentes; agora, estamos usando a instrução `RUN` para instalar um novo pacote do Ubuntu chamado `python3-pip` dentro da imagem personalizada. Por fim, a instrução `CMD` especifica o comando que deve ser executado quando iniciamos o container.
+
+> **Observação Técnica:**
+>
+>* **`RUN` vs `CMD`:** O `RUN` acontece durante a **construção** (no seu computador, uma única vez), enquanto o `CMD` acontece toda vez que você **inicia** o container (no robô ou na Raspberry Pi).
+>* **Boas Práticas:** Em nosso caso, poderíamos usar o `RUN` para já deixar o `PyTorch` instalado na imagem, poupando tempo.
