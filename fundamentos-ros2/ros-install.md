@@ -493,16 +493,8 @@ Você obterá um shell após criar o container. Você pode executar o seguinte c
 
 ```bash
 robot@robot-pc:~/master_ros2_ws$ rviz2
-
 ```
 
----
+Isso iniciará o RViz2, que é uma das ferramentas de interface gráfica (GUI) populares do ROS 2. Você verá o RViz2 na tela desta forma:
 
-### Destaque para o seu trabalho no IFES:
-
-Este fluxo é exatamente o que um **Professor** precisa para gerenciar turmas.
-
-* **Persistência com `mkdir`:** Ao criar a pasta no seu `~/` (home) e passá-la como argumento, o script faz um **Bind Mount**. Isso significa que se o aluno deletar o container por erro, o código fonte dentro de `master_ros2_ws/src` continuará salvo na sua máquina física.
-* **NVIDIA:** Como você trabalha com **Redes Neurais Profundas**, a detecção automática que o script faz da GPU é vital para que o `rviz2` não fique travando ao renderizar nuvens de pontos ou feeds de vídeo processados.
-
-**Gostaria que eu explicasse como configurar o VS Code para abrir diretamente essa pasta `master_ros2_ws` e facilitar a programação dos seus nós do ROS 2?**
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-build.png)
