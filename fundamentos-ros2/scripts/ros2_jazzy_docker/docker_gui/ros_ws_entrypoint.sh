@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-# Configura o ambiente do workspace ROS
-source "$ROS_WS/install/setup.bash"
+# Carrega o ambiente global do ROS 2 Jazzy
+source "/opt/ros/jazzy/setup.bash"
 
-# Executa o comando fornecido como argumento (mantendo o PID 1 no container)
+# Carrega o workspace local se ele existir
+if [ -f "$ROS_WS/install/setup.bash" ]; then
+  source "$ROS_WS/install/setup.bash"
+fi
+
 exec "$@"

@@ -498,3 +498,20 @@ robot@robot-pc:~/master_ros2_ws$ rviz2
 Isso iniciará o RViz2, que é uma das ferramentas de interface gráfica (GUI) populares do ROS 2. Você verá o RViz2 na tela desta forma:
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-rviz2.png)
+
+
+Terminamos de criar um container Docker com interface gráfica (GUI) habilitada. O restante do script ajuda a iniciar, parar e remover containers. Então, vamos ver como ele é utilizado.
+
+Inicie um novo terminal do container que está em execução. O argumento que você deve fornecer é o nome do container, que é **ros2_dev**:
+
+```bash
+./start_container.sh ros2_dev
+
+```
+
+Após iniciar o novo terminal a partir do container, você notará que ele está no caminho do workspace (espaço de trabalho) do ROS 2 que criamos na máquina hospedeira:
+
+```bash
+robot@robot-pc:~/master_ros2_ws$
+
+```

@@ -32,17 +32,25 @@ RUN apt-get update && apt-get install -y \
     python3-vcstool \
     && rm -rf /var/lib/apt/lists/*
 
+# Copia o script de entrypoint customizado para a raiz
+COPY ros_ws_entrypoint.sh /ros_ws_entrypoint.sh
+
+# Garante permissão de execução e configura o .bashrc para novos terminais (docker exec)
+RUN chmod +x /ros_ws_entrypoint.sh \
+    && echo "source /opt/ros/jazzy/setup.bash" >> ${HOME}/.bashrc \
+    && echo "if [ -f \${ROS_WS}/install/setup.bash ]; then source \${ROS_WS}/install/setup.bash; fi" >> ${HOME}/.bashrc
+
 # Define a propriedade do diretório home para o usuário criado
 RUN chown -R $docker_user_name:$docker_user_name ${HOME}
 
 # Alterna para o usuário não-root
 USER $docker_user_name
 
-# Copia o script de entrypoint do workspace ROS
-COPY ros_ws_entrypoint.sh /ros_ws_entrypoint.sh
-
 # Define o diretório de trabalho para o workspace ROS
 WORKDIR $ROS_WS
 
 # Define o script de entrada do container
-ENTRYPOINT ["/ros_entrypoint.sh"]
+ENTRYPOINT ["/ros_ws_entrypoint.sh"]
+
+# Comando padrão
+CMD ["bash"]
