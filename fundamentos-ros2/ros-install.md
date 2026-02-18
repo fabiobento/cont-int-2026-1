@@ -515,3 +515,91 @@ Após iniciar o novo terminal a partir do container, você notará que ele está
 robot@robot-pc:~/master_ros2_ws$
 
 ```
+
+Esta pasta **master_ros2_ws** não está dentro do container Docker, mas sim montada a partir da máquina local. Se você se lembra, criamos um workspace do ROS 2 na máquina local, certo? Essa pasta é o que podemos acessar dentro do Docker. Podemos fazer isso montando o volume da pasta do SO hospedeiro durante a criação do container Docker, utilizando o comando `docker run`.
+
+Esta é uma excelente maneira de trabalhar com diferentes distribuições do ROS 2 no mesmo workspace usando a abstração do Docker. O código-fonte permanece no SO hospedeiro, mas podemos montar o workspace do ROS 2 dentro do container e compilar nosso código com diferentes distribuições, como ROS 2 Jazzy, Iron e Humble.
+
+Podemos até usar uma IDE, como o **VS Code**, para realizar desenvolvimento remoto usando um container Docker. Em resumo, o Docker oferece aos desenvolvedores de robótica a oportunidade de criar rapidamente aplicações em ROS 2 e testá-las em qualquer uma das distribuições.
+
+Para parar o container **ros2_dev** em execução, podemos usar o script `stop_container.sh` dentro da pasta `docker_gui`. Execute este script e forneça o nome do container como argumento para parar qualquer container em execução:
+
+```bash
+./stop_container.sh ros2_dev
+
+```
+
+Podemos executar o `remove_container.sh` com o nome do container como argumento para removê-lo:
+
+```bash
+./remove_container.sh ros2_dev
+
+```
+
+Passamos por alguns tópicos importantes do Docker que utilizaremos no restante do curso. Você também pode consultar os guias [An Updated Guide to Docker and ROS 2](https://roboticseabass.com/2023/07/09/updated-guide-docker-and-ros2/) e [Docker for Robotics with the Robot Operating System (ROS/ROS 2)](https://github.com/2b-t/docker-for-robotics) para obter mais informações sobre a configuração do ROS 2 com Docker.
+
+Até agora, vimos como trabalhar com uma aplicação de container único. A seguir, veremos como trabalhar com aplicações de múltiplos containers, o que significa que os nós do ROS 2 funcionarão em containers separados, e esses dois nós, rodando nesses containers diferentes, irão se comunicar.
+
+#### **Docker Compose com ROS 2 Jazzy**
+
+O [Docker Compose](https://docs.docker.com/reference/cli/docker/compose/) é outro recurso útil no Docker para aplicações de robótica. Trabalhamos com containers Docker individuais usando ferramentas de linha de comando do Docker. E quanto ao trabalho com múltiplos containers? Por exemplo, em uma aplicação de robótica, temos uma aplicação de *front-end* funcionando em um framework JavaScript, uma aplicação de navegação ROS 2 e uma aplicação de *deep learning* para interagir com essa aplicação de navegação. Nesta situação, será melhor manter os três tipos de aplicações em diferentes imagens Docker e iniciar a comunicação entre elas separadamente a partir de diferentes containers. Nesse tipo de cenário, o `docker-compose` é uma opção melhor, pois ajuda a criar e gerenciar múltiplos containers com um único comando. Também podemos configurar as definições de rede do Docker para que todos esses containers possam se comunicar usando o ROS 2 DDS. A parte do `docker-compose` da ferramenta de linha de comando funciona mais como um plugin. Isso já foi instalado em nosso script de configuração do Docker.
+
+Podemos escrever um arquivo de configuração do docker-compose que contenha a configuração desses múltiplos containers, incluindo a imagem Docker, o nome do container e outras configurações mencionadas no comando `docker run`. Uma vez que esses arquivos de configuração estejam escritos, podemos iniciar esses containers com um único comando.
+
+Você pode encontrar um conjunto de configurações do Docker Compose na pasta `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_compose` do [repositório do curso](https://github.com/fabiobento/cont-int-2026-1/tree/main/fundamentos-ros2/scripts/ros2_jazzy_docker/docker_compose) . O nome padrão de cada arquivo de configuração do docker-compose é `docker-compose.yml`. Você pode encontrar um [arquivo básico de docker compose](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/fundamentos-ros2/scripts/ros2_jazzy_docker/docker_compose/docker-compose-basic.yml) nesta pasta, e esta é a sua aparência:
+
+```yaml
+services:
+  talker:
+    image: osrf/ros:jazzy-desktop-full
+    command: ros2 run demo_nodes_cpp talker
+
+  listener:
+    image: osrf/ros:jazzy-desktop-full
+    command: ros2 run demo_nodes_cpp listener
+    depends_on:
+      - talker
+```
+
+Se você verificar este arquivo de configuração, encontrará a versão do Docker Compose no início do arquivo. Depois disso, poderá ver a seção `services`, que define os containers que serão iniciados como parte deste arquivo de compose. Neste exemplo, `talker` e `listener` são os dois containers iniciados na seção de serviços. Se você observar este container, ele utiliza `ros-jazzy-desktop-full` como imagem e executa os nós de publicador (*publisher*) e assinante (*listener*) no ROS 2 para testes. A tag `depends_on` indica que o serviço `listener` depende do `talker`. O `docker-compose` iniciará o serviço `talker` primeiro, antes de iniciar o `listener`.
+
+>  **Observação Técnica:**
+> Por que usar o `depends_on` no seu projeto?
+> * **Ordem de Inicialização**: Em seus sistemas, você pode garantir que, por exemplo, o nó de driver da câmera (ex: RealSense ou PTZ) suba completamente antes que o seu nó de **Detecção de Anomalias** tente se conectar ao tópico de imagem.
+> * **Rede Isolada**: O Docker Compose cria automaticamente uma rede para esses serviços. Mesmo em containers separados, o `listener` conseguirá "ouvir" o `talker` via DDS como se estivessem no mesmo host.
+
+Para iniciar o arquivo [docker-compose](fundamentos-ros2/scripts/ros2_jazzy_docker/docker_compose/docker-compose.yml), você pode usar o seguinte comando. Certifique-se de estar dentro da pasta de código do docker-compose (`fundamentos-ros2/scripts/ros2_jazzy_docker/docker_compose`):
+
+```bash
+docker compose up
+
+```
+
+Isso iniciará e executará todos os serviços definidos no arquivo `.yml`. Ao permitir que você defina serviços, redes e volumes em um único arquivo de configuração YAML, ele simplifica o processo de gerenciamento de aplicações Docker de múltiplos containers.
+
+Você verá a saída deste comando da seguinte forma:
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-compose.png)
+
+Se você quiser parar o serviço, você pode usar:
+
+```bash
+docker compose down
+```
+
+Certifique-se de que seu terminal esteja na pasta `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_compose`.
+
+Você também pode encontrar um arquivo docker-compose detalhado na mesma pasta chamado [`docker-compose1.yml`](fundamentos-ros2/scripts/ros2_jazzy_docker/docker_compose/docker-compose1.yml). Este arquivo mostra mais argumentos que podem ser usados no arquivo de configuração. Para rodar o arquivo `docker-compose1.yml` sem precisar renomeá-lo, você usa a flag `-f` (de *file*).
+
+Para subir os serviços:
+
+```bash
+docker compose -f docker-compose1.yml up
+```
+
+Para derrubar os recursos:
+
+```bash
+docker compose -f docker-compose1.yml down
+```
+
