@@ -603,3 +603,37 @@ Para derrubar os recursos:
 docker compose -f docker-compose1.yml down
 ```
 
+#### **Instalando o ROS 2 Jazzy em robôs**
+
+Vimos como configurar o ROS 2 Jazzy em máquinas de desenvolvimento e agora veremos como configurá-lo em robôs.
+
+Em robôs, utilizamos majoritariamente um computador de placa única (SBC) ou uma placa desenvolvida sob medida com um módulo de computação. Se você examinar as SBCs e os módulos de computação populares disponíveis, encontrará tanto as arquiteturas x86_64 quanto ARM64. Você pode instalar o Ubuntu nessas plataformas e trabalhar com o Docker. Duas placas populares usadas em robôs são a Raspberry Pi e as placas da série NVIDIA Jetson.
+
+Você pode encontrar as placas e [módulos Raspberry Pi](https://www.raspberrypi.com/products/) mais recentes em . As placas e módulos da série Jetson mais recentes podem ser encontrados [no site da _NVIDIA developer_](https://developer.nvidia.com/buy-jetson).
+
+Você pode instalar o Ubuntu 24.04 LTS 64-bit na Raspberry Pi mais recente, e este é o SO de "nível 1" (Tier 1) para o ROS 2 Jazzy, o que significa que você pode instalar o ROS 2 a partir dos binários diretamente usando o script que vimos anteriormente para instalação do ROS 2 disponível em `/fundamentos-ros2/scripts/ros2_install_jazzy.sh` e no [repositório do curso no GitHub](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/fundamentos-ros2/scripts/ros2_install_jazzy.sh). O SO ARM de 32 bits é "nível 3" (Tier 3) para o ROS 2 Jazzy; nesse caso, devemos instalar o ROS 2 compilando o código-fonte. O SO padrão que vem com a Raspberry Pi é chamado Raspberry Pi OS, que é um SO baseado em Debian e possui apenas suporte de nível 3. No entanto, você pode configurar o Docker no Raspberry Pi OS usando o script de configuração do Docker e trabalhar no ROS 2 Jazzy em um Ubuntu 24.04 (SO nível 1) a partir do Docker.
+
+Há uma referência para instalar o Ubuntu 24.04 LTS em uma placa Raspberry Pi [nesse site](https://ubuntu.com/download/raspberry-pi).
+
+Você também pode usar o Docker para configurar o ROS 2 Jazzy na Raspberry Pi usando os seguintes comandos, como já vimos anteriormente:
+
+```bash
+docker pull ros:jazzy-ros-core 
+docker run -it --rm ros:jazzy-ros-core
+
+```
+
+As placas da série Jetson possuem Ubuntu por padrão, o qual é personalizado com drivers da NVIDIA e o [Jetpack SDK](https://developer.nvidia.com/embedded/jetpack). A NVIDIA mantém seus próprios pacotes Debian para o ROS 2. Você pode instalar o ROS 2 Jazzy deles no SO hospedeiro ou usar o Docker para utilizar o ROS 2 Jazzy. A NVIDIA também fornece os [`jetson-containers`](https://github.com/dusty-nv/jetson-containers) para construir imagens Docker com outras bibliotecas. Existem bibliotecas de IA, ROS, visão, entre outras, e você pode escolher qualquer combinação junto com um script fornecido pela NVIDIA.
+
+Isso é extremamente útil para aplicações de robótica.
+
+Aqui está um exemplo de uso do `jetson-containers` com múltiplas bibliotecas de robótica e IA:
+
+```bash
+jetson-containers build --name=my_container pytorch transformers ros:jazzy-desktop
+```
+
+> **Observação Técnica:**
+> Trabalhar com Docker no computador do robô será a melhor abordagem, pois ajuda na implantação facilitada do software do robô sem se preocupar com dependências. Também ajuda a atualizar o software do robô facilmente, bastando baixar (*pull*) uma nova imagem.
+
+Vimos diferentes métodos de instalação do ROS 2 Jazzy em máquinas de desenvolvimento e computadores de robôs. A próxima aula é sobre o aprendizado de diferentes conceitos e ferramentas no ROS 2.
