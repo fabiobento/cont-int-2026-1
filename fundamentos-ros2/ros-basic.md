@@ -637,3 +637,36 @@ jetson-containers build --name=my_container pytorch transformers ros:jazzy-deskt
 > Trabalhar com Docker no computador do robô será a melhor abordagem, pois ajuda na implantação facilitada do software do robô sem se preocupar com dependências. Também ajuda a atualizar o software do robô facilmente, bastando baixar (*pull*) uma nova imagem.
 
 Vimos diferentes métodos de instalação do ROS 2 Jazzy em máquinas de desenvolvimento e computadores de robôs. A próxima aula é sobre o aprendizado de diferentes conceitos e ferramentas no ROS 2.
+
+## Conceitos e Ferramentas Básicas do ROS 2
+
+Nesta seção, exploraremos conceitos importantes do ROS 2 utilizando uma abordagem prática. Precisamos compreender todos esses conceitos antes de começarmos a programar usando o ROS 2 Jazzy. Veremos diferentes ferramentas do ROS 2 juntamente com o entendimento de seus conceitos, explicando cada um deles por meio de um exemplo.
+
+Antes de saltarmos para os conceitos, devemos entender por que usamos o ROS 2 para a programação de robôs. O ROS 2 é um framework de software que fornece um conjunto de bibliotecas, ferramentas e recursos para a construção de suas aplicações robóticas. Então, qual é a característica fundamental que o ROS 2 traz para a programação de robôs? É a **comunicação entre processos** (IPC), ou seja, a comunicação entre os diferentes processos no sistema operacional. Como você sabe, um robô pode ter múltiplos sensores, atuadores e computadores. Os dados dos sensores do robô precisam ser adquiridos e depois processados para gerar sinais de controle para os atuadores. Geralmente, essas operações podem não estar incluídas em um único processo rodando no computador. O principal motivo é que, se qualquer operação falhar, ela pode derrubar o processo inteiro. Escrevemos múltiplos processos para realizar essa operação. É aí que o ROS 2 traz o poder da comunicação entre processos; ele pode fornecer diferentes APIs em C++/Python e ajudar esses programas a trocar dados de diferentes maneiras. Os dados podem ser enviados continuamente para outro programa, como uma interação de requisição e resposta. Esta é uma funcionalidade central que o ROS 2 oferece aos desenvolvedores de robótica. Todas as outras funcionalidades são construídas sobre este recurso principal. 
+
+Primeiro, veremos como executar um programa no ROS 2. Não escreveremos um programa novo para executá-lo; em vez disso, tentaremos rodar um programa já existente, que está disponível no ROS 2 assim que você o instala.
+
+### Como executar nós/aplicativos do ROS 2 no seu robô
+
+Como já sabemos, usando o ROS 2, podemos criar nossos próprios nós/aplicativos de robótica para realizar tarefas específicas no robô. Veremos exatamente como executar esses nós a seguir:
+
+1. O ROS 2 fornece uma ferramenta de linha de comando chamada `ros2`. Esta ferramenta nos ajuda a realizar múltiplas operações no framework ROS 2. Vamos começar com sua máquina que possui o ROS 2 instalado; pode ser o seu SO hospedeiro ou um container Docker.
+
+    Primeiro, abra um terminal e, para demonstração, utilizaremos o container Docker que foi criado anteriormente com suporte a interface gráfica (GUI).
+
+    Execute este script a partir da pasta `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_gui`:
+
+    ```bash
+    ./start_container.sh ros2_dev
+    ```
+
+2. Execute o comando `ros2` no seu terminal:
+
+    ```bash
+    $ ros2
+    ```
+
+Se o seu ambiente ROS 2 estiver configurado corretamente, você verá esta saída no terminal:
+
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-compose.png)
