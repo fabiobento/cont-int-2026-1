@@ -669,4 +669,76 @@ Como já sabemos, usando o ROS 2, podemos criar nossos próprios nós/aplicativo
 Se o seu ambiente ROS 2 estiver configurado corretamente, você verá esta saída no terminal:
 
 
-![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/docker-compose.png)
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/ros2-app.png)
+
+
+O comando `ros2` é o comando principal no ROS 2, o qual vem acompanhado de subcomandos, conforme mostrado na Figura 2.7. Você encontrará subcomandos como `run`, que auxilia na execução de um nó específico do ROS 2. A partir da lista acima, é possível identificar o uso de cada subcomando. Você pode consultar a utilidade de cada um simplesmente inserindo-o no terminal. Por exemplo, se digitar `ros2 run`, verá os sub-argumentos que devem ser passados por este terminal. O comando `ros2` é o comando principal da CLI (Interface de Linha de Comando) do ROS 2.
+
+3. Para executar um programa/executável específico do ROS 2, use o seguinte comando:
+
+```bash
+ros2 run nome_do_pacote_ros nome_do_executavel
+```
+
+Ex:
+
+```bash
+ros2 run demo_nodes_cpp talker
+```
+
+Neste exemplo, `demo_nodes_cpp` é um pacote ROS 2 e `talker` é o nome do executável do programa em C++ dentro deste pacote. O `demo_nodes_cpp` é instalado juntamente com o ROS 2 Jazzy.
+
+Você deve estar se perguntando o que é um pacote ROS 2. Então, vamos ver o que é um pacote ROS 2 e prosseguir com o comando `ros2 run`.
+
+### O que é um pacote ROS 2?
+
+Um pacote ROS 2 é uma organização de software dentro do framework ROS 2. Ele contém o código e os arquivos necessários para implementar funcionalidades ou recursos específicos em uma aplicação robótica. Tipicamente, um pacote ROS 2 compreende nós (programas que executam computações), bibliotecas, arquivos de configuração, arquivos de inicialização (*launch files*) e outros recursos, como definições de mensagens e serviços.
+
+Tudo no ROS 2 é modelado dentro de um pacote. Um pacote é simplesmente uma pasta que podemos criar usando o comando `ros2 pkg`, e que conterá arquivos como `package.xml`, `CMakeLists.txt`, e assim por diante, para manter a identidade do pacote. Informações como o nome do pacote, dependências e outras serão incluídas nesses arquivos.
+Ao instalarmos o ROS 2, obteremos seus pacotes principais por padrão. Também teremos acesso a toneladas de pacotes ROS 2 da comunidade. Esses pacotes são facilmente redistribuídos via Git ou podem ser adicionados aos repositórios oficiais do ROS 2, permitindo a instalação de seus binários.
+
+Um recurso útil do ROS 2 é a facilidade de reutilizar pacotes construídos por outros desenvolvedores em seu robô. Cada pacote é criado para aplicações específicas. Por exemplo, o pacote `demo_nodes_cpp` no ROS 2 contém exemplos de C++ para o ROS 2.
+
+Veremos mais detalhes sobre a estrutura de um pacote ROS 2 nas próximas seções.
+
+Retornando ao comando `ros2 run`, você pode notar que o primeiro argumento mencionado é o nome do pacote e, em seguida, o nome do executável. Se você estiver escrevendo um programa em C++ usando ROS 2, ele deve ser compilado e obteremos um executável. Neste exemplo, esse executável é o que mencionamos no comando. Estes exemplos de demonstração já foram instalados com o ROS 2. Se você criar um pacote ROS 2 com programas em C++, podemos compilar esses programas e gerar o executável. No próximo capítulo, aprenderemos como criar um pacote e inserir código C++ dentro dele.
+
+Ao executar este comando de exemplo, você verá o executável começar a rodar:
+
+```bash
+[INFO] [1726326377.958376860] [talker]: Publishing: 'Hello World: 1'
+[INFO] [1726326378.958355664] [talker]: Publishing: 'Hello World: 2'
+[INFO] [1726326379.958358086] [talker]: Publishing: 'Hello World: 3'
+```
+
+Assim que o executável começa a rodar, um nó ROS 2 será criado.
+
+### O que é um nó (node) ROS?
+
+Quando você inicia um executável ROS 2, ele rodará e se tornará um processo. Este processo é chamado de nó ROS 2. Portanto, quando escrevemos um programa em C++/Python usando APIs do ROS 2 e compilamos/construímos e executamos o executável, obtemos um nó ROS 2. Um nó ROS 2 é um processo único que realiza algum tipo de computação, como coletar dados de sensores, processar esses dados ou outras operações no PC do robô ou do operador. Nós no ROS 2 podem publicar e assinar diversos tipos de dados com a ajuda do middleware DDS subjacente. Uma aplicação robótica terá um conjunto de nós ROS 2 para diferentes propósitos. Cada nó pode ser iniciado usando o `ros2 run`; outras técnicas, como o arquivo `ros2 launch`, permitem iniciar múltiplos nós com um único comando.
+
+Para inspecionar os detalhes completos de um nó ROS 2, podemos usar o comando `ros2 node`. Este comando nos fornece informações sobre o nó específico que mencionamos e uma lista de nós em execução no SO.
+
+Se você executar o comando `ros2 node list` em um novo terminal, ele listará os nós em execução. Neste exemplo, a saída do comando é `/talker`.
+
+`/talker` não é o nome do nosso executável; em vez disso, o nome do nó é o que atribuímos dentro do próprio código. Isso não está visível para nós agora. No próximo capítulo, demonstraremos o mesmo. Você pode dar qualquer nome ao seu nó, e dois nós não podem ter o mesmo nome. Seus nomes devem ser únicos!
+
+O comando a seguir listará os detalhes desses nós, o que inclui Assinantes (*Subscribers*), Publicadores (*Publishers*), Serviços e Ações:
+
+```bash
+ros2 node info /talker
+```
+
+Aqui está como veremos a saída do mesmo:
+
+```bash
+Subscribers:
+Publishers:
+/chatter: std_msgs/msg/String
+Service Servers:
+Service Clients:
+Action Servers:
+Action Clients:
+```
+
+Nesta saída, não há Assinantes, Servidores de Serviço, Clientes ou Servidores de Ação, mas você pode encontrar um nome de Publicador, `/chatter`. Ainda não sabemos muito sobre Publicadores, Assinantes, Serviços e Ações do ROS 2. Esses termos referem-se a padrões de comunicação entre os diferentes nós. Será melhor compreender esses termos antes de retornar a este ponto.
