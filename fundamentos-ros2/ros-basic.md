@@ -742,3 +742,51 @@ Action Clients:
 ```
 
 Nesta saída, não há Assinantes, Servidores de Serviço, Clientes ou Servidores de Ação, mas você pode encontrar um nome de Publicador, `/chatter`. Ainda não sabemos muito sobre Publicadores, Assinantes, Serviços e Ações do ROS 2. Esses termos referem-se a padrões de comunicação entre os diferentes nós. Será melhor compreender esses termos antes de retornar a este ponto.
+
+### O que é um tópico ROS?
+
+Vimos os termos Publicador (*Publisher*) e Assinante (*Subscriber*) na saída do comando anterior. Um publicador em um nó pode enviar um tipo de dado, e o assinante também pode receber um tipo de dado. Os nós publicam e assinam diversos tipos de dados por meio dos tópicos ROS. Os tópicos ROS são um meio de comunicação entre diferentes nós. Ele é chamado de barramento de dados nomeado, no qual os nós podem trocar vários tipos de dados. Podemos criar qualquer número de tópicos em nosso nó ROS e enviar diversos tipos de dados, como inteiros, floats, matrizes, imagens e assim por diante. Também podemos assinar vários tipos de dados dentro de um nó ROS. Os tópicos ROS são um tipo de comunicação que usamos nos nós ROS. A comunicação com tópicos ROS é assíncrona, o que significa que o publicador pode enviar dados contínuos sem esperar pelo nó receptor. O publicador nem sequer sabe muito sobre quem está recebendo os dados. Podemos dizer que é um mecanismo de comunicação de N-para-M.
+
+No exemplo acima, o tópico para publicação de dados é `/chatter` (`std_msgs/msg/String`). Junto com o nome do tópico, você pode ver o tipo de dado que ele está publicando: uma string (*cadeia de caracteres*). Na próxima seção, aprenderemos mais sobre os diferentes tipos de dados do ROS.
+
+Podemos agora iniciar um nó assinante chamado `listener`, que está inscrito no mesmo tópico `/chatter`. Aqui está o comando para rodar o nó `listener`:
+
+```bash
+ros2 run demo_nodes_cpp listener
+
+```
+
+Certifique-se de ter aberto um novo terminal para executar este comando. Além disso, não confunda o nome do executável com o nome do nó aqui. O nome do nó é definido dentro do código e o executável é apenas um arquivo binário. Neste exemplo, o nome do nó e o executável são iguais, mas não serão os mesmos em todos os casos.
+
+Você obterá a seguinte saída com o nó `listener`:
+
+```bash
+[INFO] [1726333039.114079927] [listener]: I heard: [Hello World: 1]
+[INFO] [1726333040.113948341] [listener]: I heard: [Hello World: 2]
+[INFO] [1726333041.113945517] [listener]: I heard: [Hello World: 3]
+```
+
+Após rodar os nós `talker` e `listener`, você pode executar o seguinte comando:
+
+```bash
+ros2 node list
+```
+
+E a saída será:
+
+```bash
+/listener
+/talker
+```
+
+Esta saída mostra que, atualmente, dois nós estão rodando em nosso sistema. Se tentarmos o comando `ros2 node info /listener`, ele mostrará o tópico ao qual o nó `/listener` está inscrito:
+
+```bash
+Subscribers:
+/chatter: std_msgs/msg/String
+Publishers:
+```
+
+Se quisermos ver como os nós estão se comunicando, podemos usar uma ferramenta de interface gráfica (GUI) do ROS 2 chamada `rqt`. Abra um novo terminal e digite `rqt`, e você verá uma janela vazia. Vá em **Plugins | Introspection | Node Graph**. Você verá uma saída como esta:
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/ros2-rqt.png)
