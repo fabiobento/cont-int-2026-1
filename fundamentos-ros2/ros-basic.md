@@ -790,3 +790,134 @@ Publishers:
 Se quisermos ver como os nós estão se comunicando, podemos usar uma ferramenta de interface gráfica (GUI) do ROS 2 chamada `rqt`. Abra um novo terminal e digite `rqt`, e você verá uma janela vazia. Vá em **Plugins | Introspection | Node Graph**. Você verá uma saída como esta:
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/ros2-rqt.png)
+
+A seta indica que o **talker** está publicando um tópico chamado `/chatter`, e o **listener** está se inscrevendo (subscribing) neste tópico. Essa visualização é chamada de grafo de nós ou **grafo de computação do ROS**. Após visualizar o grafo, você pode fechar a janela ou pressionar `Ctrl + C` para encerrá-lo via terminal.
+
+O conceito de grafos de computação do ROS é importante para a compreensão do sistema, então vamos nos aprofundar neste tópico.
+
+### O que é um grafo de computação do ROS?
+
+O grafo de computação do ROS refere-se a uma rede ponto a ponto (peer-to-peer) de processos do ROS que processam dados em conjunto. Ele mostra como os vários componentes do sistema, como nós (nodes), tópicos, serviços e ações, se inter-relacionam e trocam dados. O grafo de computação é também a camada menos visível da arquitetura em um sistema ROS. Ele revela como a informação flui e como as diversas partes do software executado no robô interagem.
+
+Visualizar o grafo de computação nos ajudará a entender como os nós se comunicam e a identificar quaisquer problemas na comunicação.
+
+Voltando aos tópicos do ROS 2, assumindo que o **talker** e o **listener** estão rodando em dois terminais, utilize um terceiro terminal e execute o seguinte comando, que serve principalmente para verificar os tópicos do ROS 2:
+
+```bash
+ros2 topic list
+```
+
+Este comando listará os tópicos que estão sendo publicados ou assinados no momento.
+
+O resultado será parecido com este:
+
+```bash
+/chatter
+```
+
+Existe apenas um tópico ativo agora, que é o `/chatter`.
+
+Outro comando útil é:
+
+```bash
+ros2 topic echo /chatter
+```
+
+Este comando irá se inscrever no tópico `/chatter` e exibir os dados na tela. O comando `echo` imprime as mensagens do tópico especificado.
+Você verá uma saída semelhante a esta:
+
+```text
+data: 'Hello World: 1'
+---
+data: 'Hello World: 2'
+---
+```
+
+Podemos testar alguns subcomandos comumente usados com o comando `ros2 topic`.
+
+O comando a seguir exibirá informações sobre um tópico específico. Ele mostrará quantos publicadores (**publishers**) e assinantes (**subscribers**) existem para este tópico, bem como o tipo de dado utilizado:
+
+```bash
+ros2 topic info /chatter
+```
+
+A saída será parecida com esta:
+
+```text
+Type: std_msgs/msg/String
+Publisher count: 1
+Subscription count: 2
+```
+
+Podemos até mesmo criar um tópico e publicar dados através deste comando. Aqui está um exemplo de uso:
+
+```bash
+ros2 topic pub /chatter std_msgs/msg/String "data: 'Hello, ROS 2'" -r 1
+```
+
+Este comando especifica o nome do tópico, o tipo de mensagem e "Hello, ROS 2!", que é a string (texto) a ser publicada. O parâmetro `-r 1` indica a frequência (1 Hz).
+
+Se você estiver executando o nó **talker**, ele já estará publicando no tópico `/chatter` com dados do tipo string. Se você publicar outro dado do tipo string no mesmo tópico, ambas as strings poderão ser vistas no tópico `/chatter`, e você verá ambas as publicações se estiver inscrito (subscribed) nele. Ao verificar as mensagens no terminal do nó **listener**, você encontrará algo assim:
+
+```bash
+[INFO] [1726339920.694865075] [listener]: I heard: [Hello, ROS 2]
+[INFO] [1726339920.853698114] [listener]: I heard: [Hello World: 1]
+[INFO] [1726339921.694919145] [listener]: I heard: [Hello, ROS 2]
+[INFO] [1726339921.853678698] [listener]: I heard: [Hello World: 2]
+```
+
+Podemos publicar diferentes tipos de mensagens no mesmíssimo tópico. O assinante mostrará apenas o tipo de mensagem para o qual está programado para receber.
+
+Por exemplo, os comandos a seguir permitem que você publique uma mensagem do tipo string e outra do tipo inteiro (integer) no tópico `/chatter`:
+
+```bash
+ros2 topic pub /chatter std_msgs/msg/String "data: 'Hello, ROS 2'" -r 1
+ros2 topic pub /chatter std_msgs/msg/Int32 "data: 2" -r 1
+```
+
+Após executar ambos os comandos em dois terminais diferentes, execute o nó listener usando o seguinte comando:
+
+```bash
+ros2 run demo_nodes_cpp listener
+```
+
+Você notará que apenas os dados do tipo *string* são assinados. Se você criar um nó assinante para `Int32`, ele assinará apenas os dados inteiros publicados. O comando `ros2 topic echo` não funcionará devido aos múltiplos tipos de mensagem. Misturar diferentes tipos de mensagens no mesmo tópico não é recomendado e pode causar erros de tempo de execução (*runtime*).
+Você pode ler mais sobre o uso do `ros2 topic` em *[ros2 topic Command Line Tool – Debug ROS2 Topics From the Terminal](https://roboticsbackend.com/ros2-topic-cmd-line-tool-debug-ros2-topics-from-the-terminal/)*.
+
+A seguir, discutiremos as mensagens ROS, que são utilizadas nos tópicos ROS.
+
+### O que é uma mensagem ROS?
+
+No ROS 2, as mensagens são as estruturas de dados usadas para a comunicação entre os nós. As mensagens são enviadas via tópicos (para comunicação do tipo publicação/assinatura), por meio de serviços (para requisição/resposta) ou em ações (para tarefas de longa duração). Elas também são chamadas de interfaces ROS. Uma mensagem no ROS 2 define o tipo e a estrutura dos dados transmitidos. Essas mensagens são definidas em arquivos `.msg`, onde cada mensagem combina diferentes campos que representam tipos de dados específicos (inteiros, strings, arrays, etc.). O ROS 2 fornece um conjunto de pacotes dedicados a tipos de mensagens predefinidos, como `std_msgs`, `sensor_msgs` e `geometry_msgs`. O pacote `std_msgs` contém tipos de dados como strings, inteiros, etc. O `sensor_msgs` possui tipos de dados para imagens e nuvens de pontos (*point clouds*), enquanto o `geometry_msgs` contém mensagens para armazenar poses, velocidade, etc.
+
+As mensagens do ROS 2 podem ter múltiplos campos dentro delas. Pode não ser apenas uma única string, mas sim uma combinação de múltiplos tipos de dados. O comando `ros2 interface` é usado para obter a lista de campos dentro de uma mensagem ROS 2.
+Aqui está um exemplo de como listar os campos dentro de `std_msgs/msg/String`:
+
+```bash
+ros2 interface show std_msgs/msg/String
+
+```
+
+Aqui está a saída:
+
+```bash
+string data
+
+```
+
+Portanto, para preencher a mensagem `std_msgs/msg/String` com um texto, você deve preencher o campo `data` dentro da mensagem.
+
+Você pode descobrir mais sobre mensagens do ROS 2 em [Messages and Services (ros2 interface)](https://ros2-tutorial.readthedocs.io/en/humble/messages.html).
+
+Agora podemos explorar o conceito de serviços e ações do ROS com alguns exemplos.
+
+
+### O que é um serviço ROS e como o Turtlesim funciona?
+
+No ROS 2, um serviço é um modelo de comunicação baseado em um sistema de chamada e resposta. Ele envolve uma comunicação bidirecional: um cliente envia uma requisição para um servidor, e o servidor processa essa requisição e envia de volta uma resposta. Este conceito é diferente dos tópicos ROS, que são unidirecionais e seguem um modelo de publicação-assinatura. Embora o padrão subjacente dos serviços seja síncrono, as chamadas de serviço no ROS 2 podem ser implementadas de forma assíncrona no nível do nó, permitindo que o cliente continue o processamento enquanto aguarda por uma resposta.
+
+Vamos observar um exemplo de caso de uso de serviço. Se quisermos ligar ou desligar algo no robô, você pode escrever um serviço para isso e, quando o cliente chamar esse serviço, ele executará a operação de ligar/desligar. Existem muitos casos de uso para serviços ROS em robôs. A figura a seguir ilustra um servidor e um cliente de serviço ROS 2. Neste diagrama, dois clientes de serviço interagem com um servidor de serviço ROS.
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/ros2-service-server.png)
+
+Trabalhar com exemplos pode nos ajudar a aprender mais sobre o serviço ROS 2. Para colocar a mão na massa com os serviços do ROS 2, podemos usar o **Turtlesim**, um simulador 2D pré-instalado nos pacotes do ROS 2. O Turtlesim é um nó ROS 2 que possui tópicos, serviços, parâmetros e ações. Podemos usar este nó para aprender sobre todos os conceitos do ROS 2.
