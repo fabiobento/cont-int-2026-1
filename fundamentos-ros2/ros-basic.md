@@ -921,3 +921,105 @@ Vamos observar um exemplo de caso de uso de serviço. Se quisermos ligar ou desl
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/ros2-service-server.png)
 
 Trabalhar com exemplos pode nos ajudar a aprender mais sobre o serviço ROS 2. Para colocar a mão na massa com os serviços do ROS 2, podemos usar o **Turtlesim**, um simulador 2D pré-instalado nos pacotes do ROS 2. O Turtlesim é um nó ROS 2 que possui tópicos, serviços, parâmetros e ações. Podemos usar este nó para aprender sobre todos os conceitos do ROS 2.
+
+Você pode usar o seguinte nó para iniciar o **turtlesim**:
+
+```bash
+ros2 run turtlesim turtlesim_node
+```
+
+Você verá a seguinte janela se o comando funcionar corretamente:
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/ros2-turtlesim.png)
+
+O **Turtlesim** no ROS 2 é um simulador gráfico 2D incluído na instalação desktop do ROS 2. Ele é usado principalmente para aprendizado e experimentação com os conceitos do ROS 2. Essas ferramentas ajudam a entender como funcionam os conceitos de comunicação do sistema.
+
+O Turtlesim é um nó ROS 2 com uma interface gráfica (GUI). Neste simulador, você pode ver uma tartaruga ao centro. A tartaruga é um robô; podemos enviar comandos de velocidade para movê-la. Podemos interagir com este simulador usando tópicos, serviços, parâmetros e ações do ROS 2. A tartaruga é equipada com uma caneta, que pode ser ativada ou desativada usando um serviço ROS. A tartaruga desenha na superfície enquanto se move no plano 2D, e a cor da caneta também é configurável. Ela possui um sensor de cor que publicará a cor detectada no plano, e esses valores serão publicados em um tópico. O desenho feito pela tartaruga pode ser limpo usando serviços do ROS 2, e podemos até mesmo resetar todo o simulador Turtlesim chamando um serviço.
+
+
+Vamos aprender como um serviço ROS 2 funciona. Assim como as ferramentas de linha de comando para tópicos, existem ferramentas de linha de comando para analisar os serviços do ROS 2.
+
+Podemos começar listando os nós primeiro, usando o seguinte comando:
+
+```bash
+ros2 node list
+```
+
+E você obterá o nó como:
+
+```bash
+/turtlesim
+```
+
+Se você executar:
+
+```bash
+ros2 node info /turtlesim
+```
+
+você obterá os detalhes completos do nó `/turtlesim`. A saída é apresentada abaixo:
+
+```bash
+/turtlesim
+Subscribers:
+/turtle1/cmd_vel: geometry_msgs/msg/Twist
+Publishers:
+/turtle1/color_sensor: turtlesim/msg/Color
+/turtle1/pose: turtlesim/msg/Pose
+Service Servers:
+/clear: std_srvs/srv/Empty
+/kill: turtlesim/srv/Kill
+/reset: std_srvs/srv/Empty
+/spawn: turtlesim/srv/Spawn
+/turtle1/set_pen: turtlesim/srv/SetPen
+/turtle1/teleport_absolute: turtlesim/srv/TeleportAbsolute
+/turtle1/teleport_relative: turtlesim/srv/TeleportRelative
+Service Clients:
+Action Servers:
+/turtle1/rotate_absolute: turtlesim/action/RotateAbsolute
+Action Clients:
+```
+
+Se você verificar a saída na seção **Service Servers**, encontrará um conjunto de serviços como `/clear`, `/kill`, `/reset`, `/spawn`, etc. Isso indica que o Turtlesim já possui esses serviços, e você pode chamá-los a partir de um cliente de serviço. Você também pode encontrar o tipo de dado do serviço junto com o seu nome. O tipo de dado do serviço terá duas entradas: uma para a **requisição** (*request*) e outra para a **resposta** (*response*). Pode haver múltiplos campos tanto na requisição quanto na resposta. Se você quiser ver o que há dentro do tipo de serviço, pode usar o seguinte comando:
+
+
+Por exemplo, se você quiser entender quais campos estão dentro do serviço `/spawn`, você pode usar o seguinte comando:
+```bash
+ros2 interface show turtlesim/srv/Spawn
+```
+
+Você obterá a seguinte saída:
+
+```bash
+float32 x
+float32 y
+float32 theta
+string name # Opcional.
+---
+string name
+```
+
+O serviço `/spawn` cria uma nova tartaruga no turtlesim. Se você chamar o serviço spawn com a posição da nova tartaruga e um nome, ele criará uma nova tartaruga e retornará o nome como resposta, caso a chamada do serviço seja bem-sucedida. A primeira parte da definição do serviço é a **requisição** (*request*) e a segunda é a **resposta** (*response*). Essas duas partes são divididas pelas linhas `---`.
+
+Agora, vamos chamar este serviço diretamente pela linha de comando.
+
+Aqui está a sintaxe para chamar um serviço. O comando `ros2 service call`, acompanhado do nome do serviço, tipo e os dados necessários nos campos, é a maneira de chamar um serviço pelo terminal. Este comando funciona como um cliente de serviço ROS 2:
+
+```bash
+ros2 service call <nome_do_serviço> <tipo_do_serviço> <argumentos>
+```
+
+Aqui está o exemplo de comando para criar uma nova tartaruga no turtlesim. Se você chamar o serviço `/spawn` do turtlesim com os valores de x, y e theta da nova tartaruga, ele criará uma nova tartaruga na pose correspondente. A origem é o canto superior esquerdo do turtlesim, sendo o eixo horizontal o X e o eixo vertical o Y:
+
+```bash
+ros2 service call /spawn turtlesim/srv/Spawn "{x: 2, y: 2, theta: 0.2, name: 'turtle5'}"
+```
+
+Após executar o comando, você verá a seguinte mensagem se a chamada do serviço estiver correta:
+
+```bash
+waiting for service to become available...
+requester: making request: turtlesim.srv.Spawn_Request(x=2.0, y=2.0, theta=0.2, name='turtle5')
+
+response:
+turtlesim.srv.Spawn_Response(name='turtle5')
+```
