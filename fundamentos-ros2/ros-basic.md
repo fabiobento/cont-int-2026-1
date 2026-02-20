@@ -1023,3 +1023,55 @@ requester: making request: turtlesim.srv.Spawn_Request(x=2.0, y=2.0, theta=0.2, 
 response:
 turtlesim.srv.Spawn_Response(name='turtle5')
 ```
+
+Após esta mensagem no terminal, você verá uma nova tartaruga logo abaixo da tartaruga central, como mostrado:
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/fundamentos-ros2/imagens/ros2-turtlesim-spw.png)
+
+Você pode listar os serviços que os nós fornecem usando o seguinte comando:
+
+```bash
+ros2 service list -t
+
+```
+
+O `-t` serve para mostrar o tipo do serviço junto com o seu nome.
+
+Você provavelmente obterá a seguinte saída:
+
+```bash
+/clear [std_srvs/srv/Empty]
+/kill [turtlesim/srv/Kill]
+/reset [std_srvs/srv/Empty]
+/spawn [turtlesim/srv/Spawn]
+
+```
+
+Aqui estão alguns outros exemplos de chamadas de serviço que você pode testar com o turtlesim.
+
+O comando a seguir resetará todo o turtlesim. Ao resetar, todas as tartarugas geradas serão removidas, todos os desenhos serão apagados e a posição da tartaruga original voltará para o centro:
+
+```bash
+ros2 service call /reset std_srvs/srv/Empty {}
+
+```
+
+O comando a seguir limpará apenas o desenho feito pela tartaruga:
+
+```bash
+ros2 service call /clear std_srvs/srv/Empty {}
+
+```
+
+Se quisermos teleoperar a tartaruga usando o teclado, existe um nó para isso. O comando a seguir iniciará o nó, e você poderá mover o robô usando as setas do teclado:
+
+```bash
+ros2 run turtlesim turtle_teleop_key
+
+```
+
+Este nó simplesmente publica a velocidade linear e angular no tópico `/turtle1/cmd_vel`, e o tipo da mensagem é `geometry_msgs/msg/Twist`. O turtlesim assina este tópico e move o robô com base nos comandos de velocidade. Portanto, neste caso, o `/teleop_turtle` é o nó publicador e o `turtlesim` é o nó assinante.
+
+Aqui está uma fonte onde você pode ler mais sobre os [serviços no ROS 2](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Services/Understanding-ROS2-Services.html).
+
+Nesta aula, exploramos como trabalhar com serviços do ROS 2 usando o Turtlesim e as ferramentas de linha de comando, demonstrando a comunicação síncrona entre nós e várias operações de serviço, como gerar, resetar e controlar a tartaruga.
