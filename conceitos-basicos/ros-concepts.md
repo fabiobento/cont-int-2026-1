@@ -48,5 +48,5 @@ Uma Action é composta por três componentes definidos em um arquivo `.action`:
 
 > **Exemplos Práticos:** Navegação autônoma (SLAM), movimentação de juntas em braços robóticos ou sequências complexas de decolagem em drones.
 
-    ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/conceitos-basicos/imagens/ros-actions.png)
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/conceitos-basicos/imagens/ros-actions.png)
 
