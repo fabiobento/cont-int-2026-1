@@ -184,3 +184,148 @@ ros2 run turtlesim turtlesim_node --ros-args -p background_r:=255 -p background_
 
 Você pode aprender mais sobre os parâmetros do ROS consultando a [documentação oficial aqui](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Parameters/Understanding-ROS2-Parameters.html).
 
+
+Agora, vamos analisar o arquivo de **launch** do ROS na seção seguinte.
+
+## O que é um arquivo de launch do ROS 2?
+
+Os arquivos de **launch** do ROS 2 são ferramentas poderosas para iniciar múltiplos nós, configurar parâmetros, realizar o remapeamento de nomes de tópicos e controlar a execução de nós em um sistema robótico complexo.
+
+Eles são extremamente úteis se a sua aplicação possuir vários nós. Não é prático executar cada nó individualmente usando o comando `ros2 run`; em vez disso, os arquivos de launch oferecem uma maneira de rodar os nós com todas as suas configurações pré-definidas através de um único comando.
+
+O comando `ros2 launch` é utilizado para disparar um arquivo de launch. Esses arquivos ficam guardados dentro dos pacotes do ROS 2. No ROS 2, o arquivo de launch pode ser escrito em **Python**, **XML** ou **YAML**. O formato em Python oferece maior flexibilidade em comparação às outras opções, especialmente em aplicações robóticas complexas. Ao escrever um arquivo de launch em Python, a extensão será `.py` e, geralmente, segue-se a convenção de nomenclatura `*.launch.py`.
+
+A sintaxe do comando `ros2 launch` é apresentada abaixo:
+
+```bash
+ros2 launch nome_do_pacote nome_do_arquivo_de_launch.py
+```
+
+Aqui está um exemplo de execução de um arquivo de launch que já vem incluso no pacote `demo_nodes_cpp`:
+
+```bash
+ros2 launch demo_nodes_cpp talker_listener_launch.py
+```
+
+Este arquivo iniciará simultaneamente o **talker** (emissor) e o **listener** (receptor), e você verá uma mensagem como esta no terminal:
+
+```bash
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [talker-1]: process started with pid [1505]
+[INFO] [listener-2]: process started with pid [1506]
+[talker-1] [INFO] [1726427687.713985453] [talker]: Publishing: 'Hello World: 1'
+[listener-2] [INFO] [1726427687.714343316] [listener]: I heard: [Hello World: 1]
+[talker-1] [INFO] [1726427688.712840861] [talker]: Publishing: 'Hello World: 2'
+[listener-2] [INFO] [1726427688.713186962] [listener]: I heard: [Hello World: 2]
+```
+
+Aqui está a aparência desse arquivo de launch:
+
+```python
+"""Inicia um talker e um listener."""
+from launch import LaunchDescription
+import launch_ros.actions
+
+def generate_launch_description():
+    return LaunchDescription([
+        launch_ros.actions.Node(
+            package='demo_nodes_cpp',
+            executable='talker',
+            output='screen'),
+        launch_ros.actions.Node(
+            package='demo_nodes_cpp',
+            executable='listener',
+            output='screen'),
+    ])
+
+```
+
+Neste arquivo, você encontrará um conjunto de módulos Python utilizados internamente. Note a função única chamada `generate_launch_description()`. Esta função é o **padrão** nos arquivos de launch do ROS 2: sempre que executamos um comando de launch, o sistema chama essa função, que deve obrigatoriamente retornar um objeto do tipo `LaunchDescription`.
+
+A classe `LaunchDescription` funciona como um "contêiner" para o arquivo de launch, guardando informações sobre quais nós, parâmetros e configurações devem ser iniciados. Também vemos a classe `Node()`, que auxilia na execução de um nó com sua configuração específica. Os objetos `Node` são inseridos dentro do `LaunchDescription` e retornados pela função para que o ROS possa executá-los.
+
+Discutiremos mais detalhes sobre arquivos de launch no próximo capítulo. Você também pode ler mais no link: ***[Criando um arquivo de launch](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Launch/Creating-Launch-Files.html)***.
+
+
+Após discutirmos os conceitos mais importantes, vamos colocar a mão na massa com os pacotes de demonstração do ROS 2.
+
+## Construindo um pacote ROS 2
+
+Pacotes (**Packages**) são as unidades básicas de software no ROS 2. Eles são organizados dentro de um **ROS 2 Workspace** (espaço de trabalho), onde podemos buildar (compilar) os pacotes e executar os nós.
+
+Criar um workspace no ROS 2 é muito simples, e você pode ter quantos desejar em seu sistema operacional. O objetivo principal do workspace é organizar um conjunto de pacotes relacionados. Por exemplo: se você estiver trabalhando em um projeto de navegação, pode manter todos os pacotes pertinentes dentro de um mesmo workspace. Essa é uma excelente prática para manter a organização dos arquivos do seu robô.
+
+Existem dois tipos de espaços de trabalho (**workspaces**) no ROS 2. O primeiro é o **base workspace**, que se refere à própria instalação do ROS 2. Nós adicionamos o comando `source /opt/ros/<distro>/setup.bash` no arquivo `~/.bashrc` para carregar esse workspace base. Se ele não for carregado, os pacotes e ferramentas principais do ROS não ficarão visíveis no terminal.
+
+O segundo tipo é o **overlay workspace**. Estes são os espaços de trabalho criados pelo usuário. Uma vez criados, você pode buildar (compilar) o workspace e sobrepô-lo ao workspace base, carregando o arquivo `setup.bash` localizado na pasta `install`. No ROS 2, podemos criar múltiplos workspaces e sobrepô-los uns aos outros.
+
+
+### Criando um workspace no ROS 2
+
+Um workspace do ROS 2 nada mais é do que uma pasta que contém uma subpasta chamada `src`. Abaixo, o comando para criar um workspace chamado `master_ros2_ws` na sua pasta home (o comando também cria a pasta `src` automaticamente):
+
+```bash
+mkdir -p ~/master_ros2_ws/src
+```
+
+Após criar as pastas, entre na pasta `src`. É aqui que criaremos novos pacotes ou copiaremos pacotes já existentes:
+
+```bash
+cd ~/master_ros2_ws/src
+```
+
+Quando terminar de mexer nos pacotes, volte para a pasta raiz do workspace:
+
+```bash
+cd ~/master_ros2_ws
+```
+
+Agora podemos buildar o workspace. Vale notar que você pode buildar o workspace mesmo que ele ainda não tenha nenhum pacote dentro.
+
+
+### "Buildando" o Workspace
+Antes de compilar, a melhor prática é usar o seguinte comando para instalar as dependências dos pacotes:
+
+```bash
+rosdep install -i --from-path src --rosdistro jazzy -y
+```
+
+O comando `rosdep` localiza as dependências dos pacotes dentro da pasta `src` e verifica se elas já estão instaladas no seu sistema operacional. Caso não estejam, ele as instala automaticamente. Este é um comando extremamente prático para gerenciar problemas de dependência no ROS 2.
+
+Após instalar as dependências, você pode finalmente buildar o seu workspace.
+
+Você pode utilizar o seguinte comando para compilar os pacotes dentro do seu workspace:
+
+```bash
+colcon build
+```
+
+O comando `colcon` é a ferramenta de compilação (**build tool**) comumente utilizada no ROS 2 para construir os pacotes dentro de um workspace. É necessário estar na pasta raiz do workspace do ROS 2 antes de iniciar a compilação.
+
+Podemos compilar todos os pacotes de uma vez ou selecionar pacotes específicos:
+
+* **`colcon build`**: Compila todos os pacotes presentes no workspace.
+* **`colcon build --packages-select <nome_do_pacote>`**: Compila seletivamente apenas o pacote especificado.
+
+Outra variação importante é o comando `colcon build --symlink-install`. O parâmetro `symlink-install` cria **links simbólicos** (symlinks) no diretório `install/` em vez de copiar os arquivos fisicamente. Esta é uma excelente opção ao trabalhar com **nós em Python**: se você modificar o código do nó Python, não precisará recompilar o pacote, pois o arquivo executável na pasta `install` já aponta diretamente para o seu arquivo de código original.
+
+Assim que você executar o comando, verá mensagens confirmando que os pacotes foram construídos. Esse processo envolve a compilação de código-fonte, como em C++. Após o sucesso, você encontrará três pastas principais ao lado da pasta `src`:
+
+| Pasta | Descrição |
+| --- | --- |
+| **build** | Onde os arquivos intermediários da compilação são armazenados. |
+| **install** | Onde ficam os executáveis, scripts e arquivos de configuração prontos para uso. |
+| **log** | Contém mensagens de log e histórico detalhado do processo de build. |
+
+Você pode ler mais sobre o comando `colcon` no link oficial: [Using colcon to build packages](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Colcon-Tutorial.html).
+
+
+Após compilar o workspace com sucesso, podemos adicioná-lo como um **overlay** (sobreposição) ao sistema utilizando o seguinte comando:
+
+```bash
+source ~/master_ros2_ws/install/setup.bash
+```
+
+Após carregar esse overlay, você poderá executar os nós e arquivos de launch contidos nesses pacotes. Aprenderemos mais detalhes sobre os workspaces do ROS no próximo capítulo. Você também pode consultar: ***[Creating a workspace](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Creating-A-Workspace/Creating-A-Workspace.html)***.
+
+Discutimos a maioria dos conceitos cruciais do ROS 2. Agora, vamos ver como implementar esses conceitos na prática em nosso código.
