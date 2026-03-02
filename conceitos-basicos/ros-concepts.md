@@ -329,3 +329,66 @@ source ~/master_ros2_ws/install/setup.bash
 Após carregar esse overlay, você poderá executar os nós e arquivos de launch contidos nesses pacotes. Aprenderemos mais detalhes sobre os workspaces do ROS no próximo capítulo. Você também pode consultar: ***[Creating a workspace](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Creating-A-Workspace/Creating-A-Workspace.html)***.
 
 Discutimos a maioria dos conceitos cruciais do ROS 2. Agora, vamos ver como implementar esses conceitos na prática em nosso código.
+
+### Introdução às bibliotecas de cliente do ROS 2
+
+Os conceitos de ROS 2 que vimos neste capítulo podem ser implementados em nossos nós. Podemos criar qualquer número de tópicos, serviços, ações e parâmetros em nossos nós ROS. Então, como podemos implementar esses conceitos em nosso programa? A resposta são as bibliotecas de cliente do ROS 2 (ROS 2 *client libraries*). O ROS 2 vem com um conjunto de bibliotecas chamadas bibliotecas de cliente. Essas bibliotecas fornecem APIs que permitem aos usuários implementar todos os conceitos no ROS 2. Existem duas bibliotecas de cliente populares que o ROS 2 suporta oficialmente: **rclcpp** e **rclpy**. A biblioteca rclcpp é a biblioteca de cliente para C++, e a rclpy é a biblioteca de cliente para Python. Como desenvolvedores, precisamos apenas aprender as APIs fornecidas por essas bibliotecas para implementar nós ROS 2.
+
+Podemos escolher a biblioteca de cliente para nossa aplicação. Se você estiver trabalhando com um código mais rápido e eficiente, pode optar pela biblioteca de cliente C++; se precisar de um tempo de desenvolvimento mais rápido, pode optar pelo Python. Um ponto importante a notar é que os nós do ROS 2 escritos em diferentes bibliotecas de cliente podem se comunicar e compartilhar mensagens entre si.
+
+Todas as bibliotecas de cliente no ROS 2 são construídas sobre uma camada comum chamada **ROS Client Library (rcl)**. Esta camada implementa a lógica e o comportamento dos conceitos do ROS que não são específicos de nenhuma linguagem. Isso facilita o desenvolvimento de bibliotecas de cliente para qualquer linguagem.
+
+Existem várias bibliotecas de cliente no ROS 2 além das duas bibliotecas oficiais mencionadas anteriormente. Uma lista é fornecida abaixo. Estas bibliotecas são mantidas pela comunidade:
+
+* **Rust:** `rclrs` é a biblioteca de cliente para escrever nós ROS 2 em Rust.
+* **Node.js:** `rclnodejs` é um cliente Node.js para ROS 2.
+* **JVM e Android:** `rcljava` é o cliente Java para ROS 2, e `ros2_java_android` são as vinculações (*bindings*) Android para ROS 2.
+* **rclc:** Esta é uma biblioteca de cliente para programação em C.
+* **C#/.NET:** `rcldotnet` é uma biblioteca de cliente C#/.NET para ROS 2.
+
+Também é possível escrever uma biblioteca de cliente para uma linguagem de programação específica. Aqui está a API da `rcl` para implementar [bibliotecas de cliente específicas de linguagem](https://docs.ros.org/en/jazzy/p/rcl/).
+
+Você pode consultar o link a seguir se quiser ler mais sobre as [bibliotecas de cliente do ROS 2](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Client-Libraries.html).
+
+Cobrimos o básico das bibliotecas de cliente do ROS 2. Agora, vamos explorar mais conceitos relacionados ao nó ROS 2 antes de implementar nós utilizando Python e C++.
+
+### Mergulhando nos nós do ROS 2
+
+Na aula 2, discutimos o que é um nó do ROS 2. Quando executamos um programa ou executável do ROS 2, ele pode iniciar um único ou múltiplos nós. No ROS 2, um nó é um componente fundamental de um sistema robótico que realiza uma tarefa específica, como processamento de dados de sensores, atuação ou comunicação. Embora um nó seja frequentemente associado a um processo, o ROS 2 permite que múltiplos nós existam dentro de um único processo, oferecendo maior flexibilidade e eficiência.
+
+De acordo com a documentação do ROS 2:
+> *“Um nó é um participante no gráfico (*graph*) do ROS 2, que utiliza uma biblioteca de cliente para se comunicar com outros nós. Os nós podem se comunicar com outros nós dentro do mesmo processo, em um processo diferente ou em uma máquina diferente. Os nós são tipicamente a unidade de computação em um gráfico ROS; cada nó deve realizar uma única tarefa lógica.”*
+
+Dependendo da aplicação robótica no ROS 2, múltiplos nós podem trabalhar e se comunicar entre si para realizar uma aplicação. Os nós no ROS 2 utilizam tópicos, serviços e ações para se comunicarem. Podemos executar nós na mesma máquina ou em múltiplas máquinas, e eles podem se comunicar através de uma rede. Isso permite que os desenvolvedores criem aplicações robóticas complexas que sejam escaláveis e modulares.
+
+#### Diferentes tipos de nós do ROS 2
+
+O ROS 2 vem com diferentes tipos de nós. Abaixo está uma comparação dos diferentes tipos, suas vantagens e desvantagens.
+
+##### Nós padrão (não-componíveis)
+
+**Definição:** Um nó não-componível (*non-composable*) no ROS 2 funciona como um processo independente com seu próprio espaço de memória. Um **Executor** gerencia como o nó processa os *callbacks*, utilizando modelos de thread única ou múltiplas threads (*single-threaded* ou *multithreaded*). Os executores são responsáveis por coordenar a execução dos *callbacks* (como funções de inscrição/assinatura) nos nós do ROS 2.
+
+Existem executores de thread única e executores multithread. Um executor de thread única executa os *callbacks* de um nó em uma única thread, enquanto um executor multithread os executa em paralelo usando múltiplas threads, o que permite maior concorrência.
+
+O executor no ROS 2 atua como um escalonador (*scheduler*), decidindo quando o *callback* deve ser executado. Quando múltiplos nós são carregados em um contêiner, o executor ajuda a gerenciar os *callbacks* de todos os nós dentro daquele contêiner. Dependendo da escolha do tipo de executor, os *callbacks* dos nós são executados sequencialmente ou em paralelo.
+
+Você pode executar múltiplos nós em um único processo criando-os manualmente e compartilhando um **Executor**. Isso oferece isolamento e simplicidade, mas com uma maior sobrecarga de recursos. Eles podem ser iniciados individualmente a partir da linha de comando ou de arquivos de inicialização (*launch files*). Nós não-componíveis são processos isolados; portanto, em termos de uso de CPU, mais memória será consumida e haverá uma latência potencial na comunicação entre os nós. Existem vantagens neste método; por exemplo, se um nó travar (*crash*), isso não afetará os outros nós. Isso torna o sistema mais robusto em algumas situações.
+
+**Uso**: Pode ser utilizado onde os nós precisam ser menos dependentes uns dos outros, o que significa que a falha de um nó não fará o outro nó falhar diretamente.
+
+**Exemplo**: Um exemplo de nó não-componível é um nó de driver de sensor independente, como LIDAR, câmera, etc., que lê os dados do sensor e os publica. Os outros nós podem assinar esses tópicos para processamento. O nó do driver pode ser executado de forma independente, sem depender de outros nós.
+
+
+##### Nós Componíveis / Nós de Componente (Composable Nodes)
+
+**Definição**: Nos nós componíveis, podemos carregar múltiplos nós em um "contêiner" e executar todos no mesmo processo junto com outros nós. Um contêiner no ROS 2 é, essencialmente, um processo que pode hospedar vários nós componíveis; ele funciona como um gerenciador de nós. O contêiner utiliza o ROS 2 (geralmente de forma *multithreaded*) para gerenciar todos os componentes carregados. Os nós componíveis permitem que múltiplos nós compartilhem recursos computacionais e memória, reduzindo assim a latência de comunicação através da comunicação de "cópia zero" (*zero-copy*) e melhorando a eficiência geral. Eles proporcionam um design mais modular e eficiente em termos de recursos. Esses nós podem ser carregados e descarregados dinamicamente em um contêiner durante o tempo de execução.
+
+**Uso**: Nós componíveis são uma excelente escolha se muitos nós precisam se comunicar com frequência, como em um sistema de navegação robótica. Isso ajudará a minimizar a sobrecarga (*overhead*) de comunicação.
+
+**Exemplo**: Aqui está um exemplo de nós componíveis: o Nó 1 lê um sensor LIDAR e publica os dados; o Nó 2 cria um mapa usando esses dados do LIDAR; e o Nó 3 navega o robô usando o mapa criado. Podemos executar todos esses nós em um executor *multithreaded* para tornar a aplicação mais rápida. Já um executor de thread única (*single-threaded*) seria apropriado para aplicações onde há pouco processamento no *callback* de cada nó.
+
+##### Nós de Ciclo de Vida / Nós Gerenciados (Lifecycle Nodes)
+
+**Definição**: O nó de ciclo de vida (*lifecycle node*) é um recurso adicionado ao ROS 2 que fornece uma máquina de estados gerenciada dentro do nó. Isso ajuda o nó a transicionar entre estados específicos, tais como: não configurado (*unconfigured*), inativo (*inactive*), ativo (*active*) e finalizado (*finalized*). Este recurso oferece mais controle sobre o processo de inicialização, execução e limpeza (*cleanup*) do nó.
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/conceitos-basicos/imagens/ros-nodes-lifecycle.png)
