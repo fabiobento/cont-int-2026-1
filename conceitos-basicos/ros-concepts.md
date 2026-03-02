@@ -393,3 +393,64 @@ Você pode executar múltiplos nós em um único processo criando-os manualmente
 **Definição**: O nó de ciclo de vida (*lifecycle node*) é um recurso adicionado ao ROS 2 que fornece uma máquina de estados gerenciada dentro do nó. Isso ajuda o nó a transicionar entre estados específicos, tais como: não configurado (*unconfigured*), inativo (*inactive*), ativo (*active*) e finalizado (*finalized*). Este recurso oferece mais controle sobre o processo de inicialização, execução e limpeza (*cleanup*) do nó.
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/conceitos-basicos/imagens/ros-nodes-lifecycle.png)
+
+
+Como você pode ver na figura acima, o nó de ciclo de vida (*lifecycle node*) transita por quatro estados. Comparado aos nós padrão, que passam diretamente de inativo para ativo, o estado do nó de ciclo de vida pode ser controlado. Aqui está uma visão geral dos estados do nó de ciclo de vida:
+
+* **Não configurado (*Unconfigured*)**: Este é o estado inicial do nó de ciclo de vida quando ele é criado. O nó foi iniciado, mas ainda não executou sua funcionalidade. Neste estado, o nó não pode se comunicar com outros nós e não possui comunicação com assinantes (*subscribers*) ou serviços. O nó está ocioso.
+* **Inativo (*Inactive*)**: Após a transição do estado não configurado, o nó move-se para o estado Inativo. Neste estado, o nó já foi configurado, mas ainda não está realizando tarefas como publicar ou assinar tópicos.
+* **Ativo (*Active*)**: Se alterarmos o estado de Inativo para Ativo, o nó poderá operar totalmente, incluindo publicação, assinatura, serviços, ações, etc. Neste estado, o nó funcionará como um nó padrão.
+* **Finalizado (*Finalized*)**: Este é o estado final do nó. Após atingir este estado, o nó não pode transitar para nenhum outro estado. Depois deste estado, o nó será encerrado (*shut down*).
+
+Você pode ler mais sobre nós de ciclo de vida no seguinte link: [https://design.ros2.org/articles/node_lifecycle.html](https://design.ros2.org/articles/node_lifecycle.html).
+
+**Uso**: Nós de ciclo de vida são ideais quando são necessários controle na inicialização, no desligamento e na configuração em tempo de execução. Isso é mais adequado para robôs industriais ou veículos autônomos.
+
+**Exemplo**: Um nó de controle de um braço robótico precisa ser inicializado, controlado ativamente e desligado de forma segura.
+
+Vimos vários tipos de nós no ROS 2. Aqui estão as principais conclusões desta seção:
+
+* **Nós não-componíveis (Non-composable nodes)**: São úteis para tarefas isoladas, mas consomem mais recursos e apresentam latência na comunicação.
+* **Nós componíveis / de componente (Composable/component nodes)**: Os nós componíveis permitem que múltiplos nós sejam executados dentro de um único processo, aumentando a eficiência e reduzindo a sobrecarga (*overhead*). Eles oferecem uma abordagem modular para implantar aplicações ROS 2, permitindo o carregamento dinâmico de nós em tempo de execução. Isso os torna especialmente adequados para ambientes com restrição de recursos, como **sistemas embarcados**.
+* **Nós de ciclo de vida (Lifecycle nodes)**: Os nós de ciclo de vida introduzem uma máquina de estados que define como um nó transita entre diferentes estágios de operação. Isso permite que os desenvolvedores controlem quando um nó inicializa, começa a trabalhar, para ou desliga — o que é extremamente útil em sistemas complexos.
+
+Na próxima seção, veremos como os nós do ROS 2 se comunicam entre si.
+
+#### Como os nós do ROS 2 se comunicam?
+
+Sabemos que o DDS é o núcleo do ROS 2, fornecendo recursos como descoberta (*discovery*), distribuição de dados e **Qualidade de Serviço (QoS)**. Veja como os nós se comunicam no ROS 2:
+
+* **Mecanismo de Descoberta (*Discovery*)**: O DDS oferece descoberta automática para os nós do ROS 2 usando seu protocolo de descoberta. Assim que iniciamos um nó ROS 2, ele transmite sua presença na rede. Se um nó começa a publicar um tópico e outro assina o mesmo tópico com o mesmo tipo de mensagem, o DDS conectará os nós automaticamente e eles começarão a se comunicar. Quando um nó é encerrado, ele também envia uma atualização ao DDS sobre isso.
+* **QoS (Quality of Service)**: As políticas de QoS no ROS 2 permitem que os desenvolvedores controlem parâmetros de comunicação como confiabilidade (*reliability*), latência, durabilidade, etc. Essas políticas ajudam o nó ROS 2 a lidar com diferentes condições de rede e garantem a transmissão confiável de dados.
+* **Mecanismo de Transporte**: O DDS utiliza UDP, TCP e memória compartilhada (*shared memory*) com base nas políticas de QoS definidas pelo desenvolvedor.
+
+Na comunicação entre nós do ROS 2, entender as várias políticas de QoS é importante para configurar cada nó para diferentes aplicações. A próxima seção discutirá as diversas políticas de QoS e sua importância.
+
+#### Mergulhando no QoS em nós do ROS 2
+
+Examinaremos as diferentes políticas de QoS que podemos usar para configurar um nó ROS 2. Discutiremos cada política, os valores que podemos configurar e exemplos de casos de uso. Abaixo, apresentamos uma tabela que mostra uma comparação de cada política.
+
+| Política de QoS | Descrição | Valores Possíveis | Exemplos de Casos de Uso |
+| :--- | :--- | :--- | :--- |
+| **Confiabilidade (Reliability)** | Esta política controla as garantias de entrega de mensagens entre os nós. | **Reliable:** Garante que cada mensagem seja entregue.<br>**Best-Effort:** Envia mensagens sem garantir a entrega. | **Reliable:** Use para mensagens importantes, como comandos de velocidade do robô.<br>**Best-Effort:** Use para dados de sensores de alta frequência, como drivers de câmera ou LIDAR. |
+| **Durabilidade (Durability)** | Esta política determina se mensagens passadas estão disponíveis para assinantes tardios. | **Volatile:** A mensagem será descartada após o envio.<br>**Transient Local:** Armazena e entrega mensagens passadas para novos assinantes. | **Volatile:** Útil para nós de drivers de sensores em tempo real, onde dados antigos são inválidos.<br>**Transient Local:** Útil para compartilhar parâmetros ou dados de mapa. |
+| **Histórico (History)** | Esta política decide quanta informação deve ser armazenada para assinantes tardios. | **Keep Last:** Armazena apenas as mensagens recentes.<br>**Keep All:** Armazena todas as mensagens até que sejam processadas ou a memória se esgote. | **Keep Last:** Para streaming em tempo real, onde os dados mais recentes são o que importa.<br>**Keep All:** Ideal para controle crítico e registro de dados (logging). |
+| **Profundidade (Depth)** | Define o número máximo de mensagens na fila antes de sobrescrever as mais antigas. | O valor é um número inteiro. | **Baixa profundidade (ex: 5–10):** Adequado para aplicações de baixa latência.<br>**Alta profundidade:** Adequado para comunicações em surto (*bursty*). |
+| **Prazo (Deadline)** | Garante que as mensagens sejam entregues ou recebidas em um determinado tempo. O nó recebe um *callback* se for violado. | Valores em milissegundos (ex: 100ms). | Dados de sensores que devem chegar dentro de um intervalo de tempo específico. |
+| **Vivacidade (Liveliness)** | Controla como os nós declaram se ainda estão ativos, mesmo sem se comunicar. | **Automatic:** O DDS (middleware) gerencia automaticamente a vivacidade.<br>**Manual:** O nó deve enviar um sinal de vivacidade explicitamente. | **Automatic:** A maioria dos nós usa este método.<br>**Manual:** Nós críticos, como controladores, usam o método manual. |
+| **Tempo de Vida (Lifespan)** | Define a duração pela qual uma mensagem é válida. Após esse tempo, ela é descartada e não entregue. | Duração (ex: 3s, 10s). | Uso para dados sensíveis onde informações obsoletas devem ser ignoradas. |
+| **Propriedade (Ownership)** | Determina se o publicador tem propriedade exclusiva de uma mensagem em um tópico. | **Shared:** Permite que múltiplos publicadores escrevam em um tópico.<br>**Exclusive:** Apenas um publicador pode enviar mensagens no tópico. | **Shared:** Adequado para sistemas distribuídos com vários publicadores no mesmo tópico.<br>**Exclusive:** Adequado para tópicos críticos com apenas um publicador. |
+
+Podemos consultar esta tabela para configurar os nós que iremos desenvolver nas próximas seções.
+
+Você pode ler mais sobre QoS no ROS 2 no [seguinte link](https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Quality-of-Service-Settings.html).
+
+Agora, começaremos a implementar nós do ROS 2. Veremos como implementar tópicos, parâmetros, serviços e ações no ROS 2.
+
+### Implementando tópicos do ROS 2 em Python
+
+Esta seção mostrará como implementar um publicador e um assinante usando Python com as APIs `rclpy`. Veremos como implementar um nó publicador usando interfaces de mensagens personalizadas do ROS 2 e mensagens padrão do ROS 2. O objetivo do publicador é publicar dados de string usando o tipo de mensagem padrão `string` e uma string com um inteiro usando uma interface de mensagem personalizada. O nó assinante irá assinar ambos os tópicos.
+
+A figura mostra como a comunicação ocorre entre os nós publicador e assinante. Os nomes dos tópicos que o publicador publica são `/custom_topic` e `/std_string_topic`. O `/custom_topic` publica mensagens personalizadas do ROS 2, enquanto o `std_string_topic` usa mensagens de string padrão do ROS 2.
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/conceitos-basicos/imagens/ros-pub-sub.png)
