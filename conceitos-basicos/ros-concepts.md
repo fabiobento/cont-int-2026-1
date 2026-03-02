@@ -391,4 +391,5 @@ Você pode executar múltiplos nós em um único processo criando-os manualmente
 ##### Nós de Ciclo de Vida / Nós Gerenciados (Lifecycle Nodes)
 
 **Definição**: O nó de ciclo de vida (*lifecycle node*) é um recurso adicionado ao ROS 2 que fornece uma máquina de estados gerenciada dentro do nó. Isso ajuda o nó a transicionar entre estados específicos, tais como: não configurado (*unconfigured*), inativo (*inactive*), ativo (*active*) e finalizado (*finalized*). Este recurso oferece mais controle sobre o processo de inicialização, execução e limpeza (*cleanup*) do nó.
+
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/conceitos-basicos/imagens/ros-nodes-lifecycle.png)
