@@ -367,6 +367,6 @@ Vamos voltar à arquitetura de pacotes que tínhamos na [Figura 2-1](#figure-2-1
 
 <a id="figure-2-2"></a>
 
-![](https://github.com/fabiobento/cont-int-2026-1/raw/main/dev-ros2/imagens/pacote-organizacao-ros2.jpg)
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/dev-ros2/imagens/pacote-org-ros2.jpg)
 **Figura 2-2 - Exemplo da organização de pacotes para um pacote em nós.** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
 
