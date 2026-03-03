@@ -31,15 +31,15 @@ Quanto ao nome do workspace, vamos mantê-lo simples por enquanto e usar algo qu
 Abra o terminal, e navegue para seu diretório pessoal (*home*), e crie o workspace. É aqui que você escreverá todo o código para a sua aplicação ROS 2:
 
 ```bash
-cd
-mkdir -p ~/master_ros2_ws/src
+$ cd
+$ mkdir -p ~/master_ros2_ws/src
 ```
 Isso é tudo o que há para fazer. Para configurar um novo *workspace*, basta criar um novo diretório (em algum lugar na sua pasta pessoal) e criar um diretório `src` dentro dele.
 > **Observação Importante:**
 >
 > Como trabalharemos dentro de um container, o workspace será criado dentro dele. Então, antes de seguir os próximos passos, vá para o diretório `dev-ros2/scripts/docker_dev` do [repositório da disciplina](https://github.com/fabiobento/cont-int-2026-1) que você baixou e execute o script para iniciar o container:
 > ```bash
-    > ./start_container.sh ros2_dev
+    > $ ./start_container.sh ros2_dev
 > ```
 
 ### Compilando o workspace
@@ -52,8 +52,8 @@ Mesmo que o workspace esteja vazio (ainda não criamos nenhum pacote), ainda ass
 Vamos compilar o workspace:
 
 ```bash
-cd ~/master_ros2_ws
-colcon build
+$ cd ~/master_ros2_ws
+$ colcon build
 ```
 
 > **Observação Importante:**
@@ -64,13 +64,13 @@ colcon build
 Como você pode ver, nenhum pacote foi compilado, mas vamos listar todos os diretórios dentro de `~/master_ros2_ws`:
 
 ```bash
-ls -F ~/master_ros2_ws
+$ ls -F ~/master_ros2_ws
 ```
 
 Você verá a listagem dos seguintes diretórios:
 
 ```bash
-build/  install/  log/  src/
+$ build/  install/  log/  src/
 ```
 
 Após executar o comando de compilação `colcon build`, o seu workspace será organizado em quatro diretórios principais, cada um com uma função específica no ciclo de desenvolvimento:
@@ -87,7 +87,7 @@ Podemos comparar com um projeto de placa de circuito impresso (PCB): a pasta **`
 Se você navegar para dentro do diretório `install` recém-criado, poderá ver um arquivo `setup.bash`:
 
 ```bash
-ls ~/master_ros2_ws/install
+$ ls ~/master_ros2_ws/install
 COLCON_IGNORE             _local_setup_util_sh.py  local_setup.ps1  local_setup.zsh  setup.ps1  setup.zsh
 _local_setup_util_ps1.py  local_setup.bash         local_setup.sh   setup.bash       setup.sh
 ```
@@ -100,7 +100,7 @@ Toda vez que você compilar seu *workspace*, você deve ativá-lo para que o amb
 
 Para ativar o *workspace*, execute o script `setup.bash`:
 ```bash
-source ~/master_ros2_ws/install/setup.bash
+$ source ~/master_ros2_ws/install/setup.bash
 ```
 
 Então, como fizemos anteriormente, vamos adicionar essa linha ao nosso `.bashrc`. Dessa forma, você não precisará ativar (*source*) o workspace toda vez que abrir um novo terminal.
@@ -113,8 +113,8 @@ Execute o comando abaixo para adicionar a ativação da instalação global do R
 
 ```bash
 # Adicionando as configurações ao final do .bashrc
-echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
-echo "source ~/master_ros2_ws/install/setup.bash" >> ~/.bashrc
+$ echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+$ echo "source ~/master_ros2_ws/install/setup.bash" >> ~/.bashrc
 ```
 >> **Por que a ordem importa?**
 >
@@ -129,14 +129,14 @@ echo "source ~/master_ros2_ws/install/setup.bash" >> ~/.bashrc
 Após executar os comandos acima, você deve recarregar o arquivo para que as mudanças entrem em vigor imediatamente:
 
 ```bash
-source ~/.bashrc
+$ source ~/.bashrc
 ```
 
 Para conferir se o texto foi inserido corretamente sem precisar de um editor, você pode usar o comando `tail`:
 
 ```bash
 # Mostra as últimas 5 linhas do arquivo
-tail -n 5 ~/.bashrc
+$ tail -n 5 ~/.bashrc
 ```
 
 > **Observação:**
@@ -162,4 +162,45 @@ Consideremos um braço robótico que queremos utilizar para pegar e colocar obje
 
 Poderíamos ter um pacote para gerir uma câmera, outro pacote para o controle do hardware (motores) e ainda outro pacote para calcular o planejamento de movimento (*motion planning*) do robô.
 
-![alt text](imagens/pacotes_ros2.png)
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/dev-ros2/imagens/pacote-ros2.jpg)
+**Exemplo da organização de pacotes para um robô de pick and place.** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
+
+
+Cada pacote é uma unidade independente, responsável por uma subparte da sua aplicação.
+
+Os pacotes são muito úteis para organizar os seus nós e também para gerir corretamente as dependências, como veremos mais adiante neste livro.
+
+Agora, vamos criar um pacote, e aqui você precisará fazer uma escolha. Se você quiser criar um nó com Python, criará um pacote Python; se quiser criar um nó com C++, criará um pacote C++. A arquitetura para cada tipo de pacote é bastante diferente.
+
+> **Observação**
+> * **Pacotes Python:** Utilizam o `setuptools` e são mais dinâmicos para prototipagem rápida.
+> * **Pacotes C++:** Utilizam o `CMake`, exigindo uma estrutura de compilação um pouco mais rígida, mas oferecendo maior desempenho para tarefas críticas de tempo real.
+
+### Criando um pacote Python
+
+Você criará todos os seus pacotes no diretório `src` do seu workspace ROS 2. Portanto, certifique-se de navegar para este diretório antes de fazer qualquer outra coisa:
+```bash
+$ cd ~/master_ros2_ws/src
+```
+
+>> **Observação Importante**
+>> Regra de "ouro":
+>> * **Criar** pacotes e **escrever** código: sempre dentro da pasta **`src/`**.
+>> * **Compilar** (`colcon build`): sempre na **raiz** do workspace.
+
+Aqui está como construir o comando para criar um pacote:
+
+* **`ros2 pkg create <nome_do_pacote>`**: Este é o mínimo que você precisa escrever.
+* Você pode especificar um tipo de compilação (*build type*) com **`--build-type <tipo_de_compilação>`**. Para um pacote Python, precisamos usar **`ament_python`**.
+* Você também pode especificar algumas dependências opcionais com **`--dependencies <lista_de_dependências_separadas_por_espaços>`**. É sempre possível adicionar dependências mais tarde no pacote.
+
+Vamos criar nosso primeiro pacote chamado **`my_py_pkg`**. Usaremos este nome como um exemplo para trabalhar com os principais conceitos do ROS 2. Depois, conforme progredirmos, usaremos nomes mais significativos. No diretório `src` do seu workspace, execute o seguinte:
+
+```bash
+$ ros2 pkg create my_py_pkg --build-type ament_python --dependencies rclpy
+```
+> **Observação:**
+> O parâmetro `--build-type ament_python` é o que diferencia um projeto Python de um C++ (que usaria `ament_cmake`). Se você esquecer essa flag, o ROS 2 tentará criar um pacote C++ por padrão, o que causará erros quando você tentar rodar scripts Python.
+
+
+
