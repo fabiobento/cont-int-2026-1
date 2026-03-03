@@ -1,9 +1,0 @@
-# Goal
-int32 goal_value
----
-# Result
-int32 result_value
----
-# Feedback
-float32 progress
-
