@@ -370,3 +370,206 @@ Vamos voltar à arquitetura de pacotes que tínhamos na [Figura 2-1](#figure-2-1
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/dev-ros2/imagens/pacote-org-ros2.jpg)
 **Figura 2-2 - Exemplo da organização de pacotes para um pacote em nós.** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
 
+Como você pode ver, no pacote da câmera, poderíamos ter um nó responsável por gerenciar o hardware da câmera. Este nó enviaria imagens para um nó de processamento de imagem, e este último extrairia as coordenadas dos objetos para o robô coletar.
+
+Enquanto isso, um nó de planejamento de movimento (no pacote de planejamento de movimento) calcularia os movimentos que o robô deve realizar, dado um comando específico. Um nó de correção de trajetória pode dar suporte a esse planejamento de movimento usando os dados recebidos do nó de processamento de imagem.
+
+Finalmente, para fazer o robô se mover, um nó de driver de hardware seria responsável pela comunicação com o hardware (motores, encoders) e receberia comandos do nó de planejamento de movimento. Um nó adicional de publicação de estado (*state publisher*) poderia estar aqui para publicar dados extras sobre o robô para que outros nós os utilizem.
+
+Esta organização de nós é puramente fictícia e serve apenas para dar uma ideia geral de como uma aplicação ROS 2 pode ser projetada e quais papéis um nó pode ter nessa aplicação.
+
+Agora, você vai (finalmente) escrever o seu primeiro nó ROS 2. O ROS 2 exige bastante instalação e configuração antes que você possa realmente escrever algum código, mas a boa notícia é que já concluímos tudo isso e agora podemos focar no código.
+
+Não faremos nada muito complicado por enquanto; não vamos mergulhar em recursos ou comunicações complexas. Escreveremos um nó básico que você poderá usar como modelo (*template*) para iniciar qualquer nó futuro. Também vamos compilar o nó e ver como executá-lo.
+
+## Criando um nó em Python
+
+Vamos criar nosso primeiro nó Python, ou em outras palavras, nosso primeiro programa ROS 2 em Python.
+
+Os processos de criação de nós em Python e C++ são muito diferentes. É por isso que escrevi uma seção separada para cada um deles. Começaremos com Python, com explicações completas passo a passo. Depois, veremos como fazer o mesmo com C++. Se você deseja seguir a seção de nós em C++, certifique-se de ler esta primeiro.
+
+Para criar um nó, você terá que fazer o seguinte:
+
+1. **Criar um arquivo** para o nó.
+2. **Escrever o nó**. Usaremos **Programação Orientada a Objetos (POO)**, conforme recomendado oficialmente para o ROS 2 (e quase todo código ROS 2 existente que você encontrar utiliza POO).
+3. **Compilar o pacote** no qual o nó existe.
+4. **Executar o nó** para testá-lo.
+
+Vamos começar com nosso primeiro nó Python.
+
+### Criando o arquivo para o nó
+
+Para escrever um nó, primeiro precisamos criar um arquivo. Onde devemos criar este arquivo?
+
+Se você se lembra, quando criamos o pacote **`my_py_pkg`**, outro diretório chamado `my_py_pkg` foi criado dentro do pacote. É aqui que escreveremos o nó. Para todo pacote Python, você deve ir para o diretório que possui o mesmo nome do pacote. Se o nome do seu pacote for `abc`, então você irá para `~/master_ros2_ws/src/abc/abc/`.
+
+Crie um novo arquivo neste diretório e torne-o executável:
+
+1. **Navegar até o local correto:**
+```bash
+$ cd ~/master_ros2_ws/src/my_py_pkg/my_py_pkg/
+```
+
+2. **Criar o arquivo do nó:**
+```bash
+$ touch my_first_node.py
+```
+
+3. **Dar permissão de execução (Essencial!):**
+```bash
+$ chmod +x my_first_node.py
+```
+
+> **Obervação**
+>
+> **Por que o `chmod +x` é importante?**
+> Sem isso, o Ubuntu tratará o arquivo apenas como um texto comum. Para o ROS 2 conseguir "rodar" esse nó como um programa independente, ele precisa dessa permissão de execução.
+
+Depois disso, abra este arquivo para escrever nele. Você pode usar qualquer editor de texto ou IDE que desejar, desde que não se perca em meio a todos os arquivos.
+
+Se você não tem ideia do que usar, sugiro usar o **VS Code** em extensão remota com o container, instalando a extensão de ROS.
+
+
+### Escrevendo um nó Python ROS 2 mínimo
+
+Aqui está o código inicial para qualquer nó Python que você criar. Você pode escrever este código no arquivo `my_first_node.py`:
+
+```python
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+class MyCustomNode(Node):
+    def __init__(self):
+        super().__init__('my_node_name')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = MyCustomNode()
+    rclpy.spin(node)
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+Como você pode ver, usamos POO aqui. A POO (Programação Orientada a Objetos) está em toda parte no ROS 2, e esta é a maneira padrão (e recomendada) de escrever um nó.
+
+Vamos retomar este código passo a passo, para entender o que ele está fazendo:
+
+```python
+#!/usr/bin/env python3
+```
+
+Esta linha é chamada de **shebang**. Ela diz ao sistema operacional que este arquivo deve ser executado usando o interpretador Python 3. É uma prática padrão em scripts Python no Linux.
+
+```python
+import rclpy
+from rclpy.node import Node
+```
+
+Aqui, importamos o `rclpy`, que é o pacote principal do ROS 2 para Python. Dele, importamos a classe `Node`, que é a classe base para todos os nós ROS 2.
+
+```python
+class MyCustomNode(Node):
+   def __init__(self):
+       super().__init__('my_node_name')
+```
+
+Aqui, definimos uma classe chamada `MyCustomNode` que herda de `Node`. O `__init__` é o construtor da classe. Nele, chamamos o construtor da classe pai (`super().__init__`) passando o nome do nó (`'my_node_name'`).
+
+Este nó não está fazendo nada por enquanto; adicionaremos algumas funcionalidades em um minuto. Vamos finalizar o código:
+
+```python
+def main(args=None):
+    rclpy.init(args=args)
+    node = MyCustomNode()
+    rclpy.spin(node)
+    rclpy.shutdown()
+```
+
+Após a classe, criamos uma função `main()` na qual executamos as seguintes ações:
+
+1. **Inicializamos as comunicações do ROS 2** com `rclpy.init()`. Esta deve ser a primeira linha na sua função `main()`.
+2. **Criamos um objeto** a partir da classe `MyCustomNode` que escrevemos antes. Isso inicializará o nó. Não há necessidade de destruir o nó manualmente depois, pois isso acontecerá automaticamente quando o programa for encerrado.
+3. **Fazemos o nó girar (`spin`)**. Se você omitir esta linha, o nó será criado, o programa terminará em seguida e o nó será destruído. Fazer o nó "girar" significa que bloqueamos a execução aqui, o programa permanece vivo e, portanto, o nó também. Enquanto isso, como veremos em breve, todos os *callbacks* registrados para o nó podem ser processados. Quando você pressionar **Ctrl + C**, o nó parará de girar e esta função retornará.
+4. Após o nó ser encerrado, **desligamos as comunicações do ROS 2** com `rclpy.shutdown()`. Esta será a última linha da sua função `main()`.
+
+É assim que todos os seus programas ROS 2 funcionarão. Como você pode ver, o nó é, na verdade, um objeto que criamos dentro do programa (o nó não é o programa em si, mas ainda assim é muito comum referir-se à palavra “nó” quando falamos do programa). Após ser criado, o nó pode permanecer vivo e desempenhar seu papel enquanto estiver girando. Voltaremos a esse conceito de *spinning* em breve.
+
+Finalmente, também adicionamos estas duas linhas:
+
+```python
+if __name__ == '__main__':
+    main()
+
+```
+
+Isso é algo puramente do Python e não tem nada a ver com o ROS 2. Apenas significa que, se você executar o script Python diretamente, a função `main()` será chamada, permitindo que você teste seu programa sem precisar instalá-lo com o `colcon`.
+
+Excelente, você escreveu seu primeiro nó Python minimalista. Antes de compilá-lo e executá-lo, adicione mais uma linha no construtor do Nó para que ele faça algo:
+
+```python
+class MyCustomNode(Node):
+    def __init__(self):
+        super().__init__('my_node_name')
+        self.get_logger().info("Hello World")
+
+```
+
+Esta linha imprimirá "Hello World" quando o nó iniciar. 
+
+Como a classe `MyCustomNode` herda da classe `Node`, temos acesso a todas as funcionalidades do ROS 2 para nós. Isso tornará as coisas bem convenientes para nós. Aqui, você tem um exemplo com a funcionalidade de *logging*: obtemos o método `get_logger()` da classe `Node`. Então, com o método `info()`, podemos imprimir um log com o nível de informação (*info level*).
+
+> **Observação**
+> * **O Nome do Nó vs. Nome do Arquivo:** O nome que vai dentro do `super().__init__('my_node_name')` é o que aparecerá quando eles digitarem `ros2 node list` no terminal. Ele não precisa ser igual ao nome do arquivo `.py`.
+> * **O papel do `rclpy.spin(node)`:** O robô precisa ficar "escutando". Sem o `spin`, o código é apenas um script que executa e morre. Com o `spin`, ele se torna um processo de controle contínuo.
+> * **Logs vs. Prints:** O `self.get_logger().info()` é superior ao `print()` porque, em um sistema real, esses logs podem ser gravados em arquivos para análise posterior de falhas.
+
+### **Compilando o nó**
+
+Agora você vai compilar o nó para que possa executá-lo.
+
+Você pode estar pensando: por que precisamos compilar um nó Python? Python é uma linguagem interpretada; não poderíamos simplesmente executar o próprio arquivo?
+
+Sim, isso é verdade: você poderia testar o código apenas executando-o no terminal (`python3 meu_primeiro_no.py`). No entanto, o que queremos fazer é realmente instalar o arquivo em nosso *workspace*, para que possamos iniciar o nó com o comando `ros2 run` e, mais tarde, a partir de um arquivo de inicialização (*launch file*).
+
+Geralmente usamos a palavra "compilar" (*build*), porque para instalar um nó Python, temos que executar o comando `colcon build`.
+
+Para compilar (instalar) o nó, precisamos fazer mais uma coisa no pacote. Abra o arquivo **`setup.py`** do pacote `my_py_pkg`. Localize os campos **`entry_points`** e **`'console_scripts'`** ao final do arquivo. Para cada nó que quisermos compilar, temos que adicionar uma linha dentro do array `'console_scripts'`:
+
+```python
+entry_points={
+    'console_scripts': [
+        "test_node = my_py_pkg.my_first_node:main"
+    ],
+},
+```
+
+> **Observação Importante:**
+>
+> Aqui é um momento em mais se cometem erros de sintaxe. > Lembre-se que a estrutura da linha que deve ser adicionada é a seguinte:
+>```python
+>'nome_do_executavel = nome_do_pacote.nome_do_arquivo:main'
+>```
+> Onde:
+>* **`nome_do_executavel`**: É o nome que eles vão digitar no `ros2 run`.
+>* **`nome_do_pacote.nome_do_arquivo`**: É o caminho onde o ROS vai buscar o script.
+>* **`:main`**: Indica que o ROS deve procurar pela função `def main()` que escrevemos no código.
+> 
+> Qualquer erro de digitação aqui fará com que o `ros2 run` não encontre o nó, mesmo que o arquivo `.py` esteja perfeito.
+
+Existem algumas coisas importantes para escrever esta linha corretamente:
+
+* Primeiro, escolha um **nome para o executável**. Este será o nome que você usará com o comando `ros2 run <nome_do_pacote> <nome_do_executavel>`.
+* Para o **nome do arquivo**, ignore a extensão `.py`.
+* O **nome da função** é `main`, conforme a função `def main()` que criamos no código.
+* Se você quiser adicionar outro executável para outro nó, não esqueça de adicionar uma **vírgula** entre cada executável e colocar um executável por linha.
+
+Por exemplo, caso você tivesse dois nós (um para o sensor e outro para o motor), o arquivo `setup.py` ficaria assim:
+
+```python
+'console_scripts': [
+    'sensor_node = my_py_pkg.sensor_script:main',
+    'motor_node = my_py_pkg.motor_script:main'
+],
+```
