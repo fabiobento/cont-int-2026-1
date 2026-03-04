@@ -512,11 +512,11 @@ Excelente, você escreveu seu primeiro nó Python minimalista. Antes de compilá
 class MyCustomNode(Node):
     def __init__(self):
         super().__init__('my_node_name')
-        self.get_logger().info("Hello World")
+        self.get_logger().info("Alô mundo! Este é o meu primeiro nó em ROS2 usando Python!")
 
 ```
 
-Esta linha imprimirá "Hello World" quando o nó iniciar. 
+Esta linha imprimirá "Alô mundo! Este é o meu primeiro nó em ROS2 usando Python!" quando o nó iniciar. 
 
 Como a classe `MyCustomNode` herda da classe `Node`, temos acesso a todas as funcionalidades do ROS 2 para nós. Isso tornará as coisas bem convenientes para nós. Aqui, você tem um exemplo com a funcionalidade de *logging*: obtemos o método `get_logger()` da classe `Node`. Então, com o método `info()`, podemos imprimir um log com o nível de informação (*info level*).
 
@@ -573,3 +573,91 @@ Por exemplo, caso você tivesse dois nós (um para o sensor e outro para o motor
     'motor_node = my_py_pkg.motor_script:main'
 ],
 ```
+
+> **Observação:**
+>
+> Neste primeiro exemplo, fiz questão de usar um nome diferente para cada um, para que você perceba que são três coisas distintas. Mas, às vezes, todos os três nomes podem ser iguais. Por exemplo, você poderia criar um arquivo `sensor_temperatura.py`, e então nomear tanto o seu nó quanto o seu executável como `sensor_temperatura`.
+
+Agora que você forneceu as instruções para criar um novo executável, vá para o diretório raiz do seu *workspace* e compile o pacote:
+
+```bash
+$ cd ~/master_ros2_ws
+$ colcon build
+```
+
+A saída esperada é semelhante a:
+```bash
+Starting >>> my_cpp_pkg
+Starting >>> my_py_pkg
+Finished <<< my_cpp_pkg [0.16s]
+Finished <<< my_py_pkg [0.72s]
+```
+
+Se aparecer `Failed` ou `Aborted`, verifique se não esqueceu de adicionar a **vírgula** ou **aspas** no arquivo `setup.py`, que é o erro mais comum nessa fase.
+
+Você também poderia adicionar `--packages-select my_py_pkg` para compilar apenas este pacote.
+
+O executável agora deve estar criado e instalado no *workspace* (ele será colocado dentro do diretório `install`). Podemos dizer que seu nó Python foi compilado, ou instalado.
+
+
+### **Executando o nó**
+
+Agora você pode executar o seu primeiro nó, mas logo antes disso, certifique-se de que o *workspace* esteja devidamente ativado (*sourced*) no seu ambiente:
+
+```bash
+$ source ~/.bashrc
+```
+
+Este arquivo já contém a linha para ativar (*source*) o *workspace*; você também poderia apenas abrir um novo terminal ou ativar o script `setup.bash` diretamente do seu *workspace*.
+
+Agora você pode executar o seu nó usando o comando `ros2 run`:
+
+```bash
+$ ros2 run my_py_pkg test_node
+```
+ A saída esperada é semelhante a:
+```bash
+[INFO] [1772574526.720962140] [my_node_name]: Alô mundo! Este é o meu primeiro nó em ROS2 usando Python!
+```
+
+Excelente, vemos o log `Hello World`. Seu primeiro nó está rodando com sucesso. Note que escrevemos `test_node` no comando `ros2 run`, pois este é o nome do executável que escolhemos no arquivo `setup.py`.
+
+Agora, você deve notar que o programa fica "parado" ali. O nó ainda está vivo porque ele está girando (*spinning*). Para parar o nó, pressione **Ctrl + C**.
+
+> **Observação:**
+>
+> No ambiente **Docker**, podemos destacar dois pontos sobre o encerramento do processo:
+>
+> * **O que é o "Hanging" (Travamento):** O terminal não está travado por erro; ele está dedicado a manter o nó vivo. O comando `rclpy.spin(node)` que vocês escreveram é um loop infinito que fica aguardando eventos.
+> * **O Ciclo de Vida:** Ao pressionar **Ctrl + C**, o sinal de interrupção faz o `spin()` parar, o código segue para o `rclpy.shutdown()` (que limpa as comunicações) e o terminal volta a ficar livre para novos comandos.
+
+
+**Dica de exercício rápido:** Rode o nó, abra um segundo terminal no Docker (`docker exec -it ...`) e digite `ros2 node list`. Você verá o nome do nó lá. Depois, dê o **Ctrl + C** e execute o `ros2 node list` de novo — o nome terá sumido. Isso mostra que o ROS 2 gerencia dinamicamente quem está "vivo" na rede.
+
+### **Melhorando o nó – timer e callback**
+
+Neste ponto, você pode sentir que escrever, compilar e executar um nó é um processo longo e complicado. Na verdade, não é tão complexo assim, e fica mais fácil a cada novo nó que você cria. Além disso, modificar um nó existente é ainda mais simples. Vamos ver isso agora.
+
+O nó que executamos é muito básico. Vamos adicionar mais uma funcionalidade e fazer algo mais interessante.
+
+Nosso nó está imprimindo um texto quando é iniciado. Agora, queremos fazer com que o nó imprima uma string a cada segundo, enquanto estiver ativo.
+
+Esse comportamento de "fazer a ação X a cada Y segundos" é muito comum na robótica. Por exemplo, você poderia ter um nó que "lê uma temperatura a cada 2 segundos", ou que "envia um novo comando para o motor a cada 0,1 segundos".
+
+Como fazer isso? Adicionaremos um **timer** ao nosso nó. Um timer disparará uma função de **callback** em uma taxa (frequência) especificada.
+
+Vamos voltar ao código e modificar a classe `MyCustomNode`. O restante do código permanece o mesmo.
+
+---
+
+### **Dica para sua aula no IFES (O conceito de "Tempo Real"):**
+
+Fabio, para seus alunos de Engenharia, este é o momento de introduzir o conceito de **Sistemas de Tempo Real** e **Loops de Controle**.
+
+* **O que é um Timer?** Explique que o timer é como um despertador interno do ROS 2. Ele não "trava" o programa esperando o tempo passar; ele avisa ao processador: "Ei, passou 1 segundo, execute esta tarefa agora".
+* **O que é uma Callback?** É a função que será chamada pelo "despertador". Na robótica, quase tudo é baseado em callbacks (chegou um dado do sensor -> executa callback; passou o tempo do timer -> executa callback).
+
+**Exemplo Prático para o Raspberry Pi:**
+Se eles estiverem lendo o sensor de temperatura do meliponário, eles não querem que o processador fique 100% do tempo focado nisso. Eles configuram um timer para ler a cada 5 minutos, deixando o processador livre para outras tarefas (como gerenciar a rede ou a câmera) no intervalo.
+
+**Gostaria que eu traduzisse o novo código com o Timer para você mostrar como a estrutura de Classe (POO) facilita essa modificação?**
