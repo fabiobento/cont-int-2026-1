@@ -1,6 +1,6 @@
 # Aula 2: Escrevendo e Construindo um Nó ROS 2
 
-Para escrever seu próprio código personalizado com o ROS 2, você terá que criar programas ROS 2 ou, em outras palavras, nós (*nodes*). Você já descobriu o conceito de nós no Capítulo 3.
+Para escrever seu próprio código personalizado com o ROS 2, você terá que criar programas ROS 2 ou, em outras palavras, nós (*nodes*).
 
 Antes de criar um nó, há um pouco de configuração a fazer: você precisa criar um *workspace* (espaço de trabalho) do ROS 2, no qual construirá sua aplicação. Neste *workspace*, você adicionará pacotes para organizar melhor seus nós. Então, nesses pacotes, você poderá começar a escrever seus nós. Depois de escrever um nó, você irá compilá-lo (*build*) e executá-lo.
 
@@ -287,7 +287,7 @@ Aqui está uma explicação rápida do papel de cada arquivo ou diretório:
 
 Agora que você criou um ou mais pacotes, você pode compilá-los, mesmo que ainda não tenha nenhum nó dentro deles.
 
-Para compilar os pacotes, volte para a raiz do seu workspace ROS 2 e execute o comando `colcon build`. Mais uma vez, e como visto anteriormente neste capítulo, o local onde você executa este comando é **muito importante**.
+Para compilar os pacotes, volte para a raiz do seu workspace ROS 2 e execute o comando `colcon build`. Mais uma vez, e como visto anteriormente nesta aula , o local onde você executa este comando é **muito importante**.
 
 ```bash
 $ cd ~/master_ros2_ws
@@ -736,10 +736,13 @@ Agora, como isso é possível? Como o método `timer_callback()` (ou `print_hell
 
 Isso funciona porque o nó está girando (*spinning*), graças ao comando `rclpy.spin(node)`. Isso significa que o nó é mantido vivo e todos os *callbacks* registrados podem ser chamados durante esse tempo. O que fazemos com o `create_timer()` é simplesmente registrar um *callback*, que pode então ser chamado enquanto o nó está girando.
 
-Este foi o seu primeiro exemplo de um *callback* e, como você verá nos próximos capítulos do livro, tudo funciona com *callbacks* no ROS 2. Neste ponto, se você ainda tiver alguma dificuldade com a sintaxe, os *callbacks* e o *spinning*, não se preocupe muito. À medida que avançar no livro, você repetirá esse processo muitas vezes. Ao aprender ROS 2, o entendimento vem com a experiência prática.
-
-Terminamos agora este nó Python. Com o que você viu aqui, você deve ser capaz de criar seus próprios novos nós Python (no mesmo pacote ou em outro). Vamos agora mudar para o C++. Se você estiver interessado apenas em aprender ROS 2 com Python por enquanto, pode pular a seção de C++.
+Este foi o seu primeiro exemplo de um *callback* e, como você verá nas próximas aulas, tudo funciona com *callbacks* no ROS 2. Neste ponto, se você ainda tiver alguma dificuldade com a sintaxe, os *callbacks* e o *spinning*, não se preocupe muito. À medida que avançar na disciplina, você repetirá esse processo muitas vezes. Ao aprender ROS 2, o entendimento vem com a experiência prática.
 
 > **Uma pergunta para você:**
 >
 > "Se eu colocar um comando `while True: pass` antes do `rclpy.spin(node)`, o timer vai funcionar?"
+
+
+Terminamos agora este nó Python. Com o que você viu aqui, você deve ser capaz de criar seus próprios novos nós Python (no mesmo pacote ou em outro). Vamos agora mudar para o C++. Se você estiver interessado apenas em aprender ROS 2 com Python por enquanto, pode pular a seção de C++.
+
+
