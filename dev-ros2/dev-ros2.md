@@ -882,3 +882,221 @@ O nó está agora concluído, então podemos compilá-lo.
 >> 1. **Shared Pointers (`std::make_shared`):** É um "ponteiro inteligente". Ele limpa a memória sozinho quando o programa termina. É o que evita que o robô trave por falta de memória RAM após rodar por muitas horas.
 >> 2. **`std::bind` e `this`:** No Python, passávamos apenas `self.metodo`. No C++, o `std::bind` é como se estivéssemos "amarrando" a função ao objeto atual (`this`). É uma formalidade necessária para que o timer saiba qual função de qual objeto chamar.
 >> 3. **`std::chrono`:** É bem rigoroso com o tempo. Em vez de apenas passar `1.0`, usamos `std::chrono::seconds(1)` para deixar explícito que a unidade é segundos.
+
+### **Compilando e executando o nó**
+
+Não podemos simplesmente executar o arquivo C++; primeiro precisamos compilá-lo e criar um executável. Para fazer isso, editaremos o arquivo `CMakeLists.txt`. Abra este arquivo e, após algumas linhas, você encontrará algo como isto:
+
+```cmake
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+
+```
+
+**Explicação**
+A linha para encontrar o `rclcpp` está aqui porque fornecemos `--dependencies rclcpp` quando criamos o pacote com o comando `ros2 pkg create`. Futuramente, se seus nós neste pacote exigirem mais dependências, você poderá adicioná-las aqui, uma por linha.
+
+Logo após esta linha, adicione uma nova linha extra e, em seguida, as seguintes instruções:
+
+```cmake
+add_executable(test_node src/my_first_node.cpp)
+ament_target_dependencies(test_node rclcpp)
+
+install(TARGETS
+  test_node
+  DESTINATION lib/${PROJECT_NAME}/
+)
+
+```
+
+**Explicação**
+Para compilar um nó C++, precisamos fazer três coisas:
+
+1. **Adicionar um novo executável** com a função `add_executable()`. Aqui, você deve escolher um nome para o executável (aquele que será usado com `ros2 run <nome_do_pacote> <nome_do_executavel>`) e também especificar o caminho relativo para o arquivo C++.
+2. **Vincular todas as dependências** para este executável com a função `ament_target_dependencies()`.
+3. **Instalar o executável** com a instrução `install()`, para que possamos encontrá-lo ao usar o `ros2 run`. Aqui, colocamos o executável em um diretório `lib/<nome_do_pacote>`.
+
+Para cada novo executável que você criar, precisará repetir os passos 1 e 2 e adicionar o executável dentro da instrução `install()`, um por linha, sem vírgulas. Não há necessidade de criar uma nova instrução `install()` para cada executável.
+
+> **Observação - C++**
+>
+> O final do seu `CMakeLists.txt` conterá um bloco começando com `if(BUILD_TESTING)` e, em seguida, `ament_package()`. Como não estamos realizando testes de compilação aqui, você pode remover todo o bloco `if`. Apenas certifique-se de manter a linha `ament_package()`, que deve ser a última linha do arquivo.
+
+Agora você pode compilar o pacote com `colcon build`, que criará e instalará o executável:
+
+```bash
+$ cd ~/master_ros2_ws/
+$ colcon build --packages-select my_cpp_pkg
+
+```
+
+**Explicação**
+Se você obtiver qualquer erro durante o processo de compilação, certifique-se de corrigir seu código primeiro e depois compilar novamente. Em seguida, você pode ativar seu ambiente e executar seu executável:
+
+```bash
+$ source ~/.bashrc
+$ ros2 run my_cpp_pkg test_node
+```
+
+**Saída esperada:**
+
+```text
+[INFO] [1711006463.017149024] [my_node_name]: Hello 0
+[INFO] [1711006464.018055674] [my_node_name]: Hello 1
+[INFO] [1711006465.015927319] [my_node_name]: Hello 2
+[INFO] [1711006466.015355747] [my_node_name]: Hello 3
+
+```
+
+**Explicação**
+Como você pode ver, executamos o executável `test_node` (compilado a partir do arquivo `my_first_node.cpp`), que iniciará o nó `my_node_name`.
+
+Você escreveu com sucesso um nó C++. Para cada novo nó que criar, você terá que criar um novo arquivo C++, escrever a classe do nó, configurar as instruções de compilação para um novo executável no `CMakeLists.txt` e compilar o pacote. Então, para iniciar o nó, ative o ambiente e execute o executável com `ros2 run`.
+
+> **Observação - CMakeLists.txt**
+>
+> O `CMakeLists.txt` é frequentemente a maior fonte de erros "misteriosos". Vale a pena enfatizar:
+> 
+> * **O Nome do Executável vs Nome do Arquivo:** No exemplo, o arquivo é `my_first_node.cpp`, mas o comando para rodar é `ros2 run my_cpp_pkg test_node`. Mostre a eles que o nome que vale para o ROS é o que foi definido no `add_executable`.
+> * **A ordem importa:** A linha `ament_package()` **deve** ser sempre a última. Se eles colocarem algo depois dela, o `colcon` vai ignorar ou dar erro.
+> * **Esquecimento do Install:** Se eles compilarem mas o `ros2 run` disser que o executável não foi encontrado, 99% de chance de terem esquecido de adicionar o nome do executável dentro do bloco `install(TARGETS ...)`.
+
+## **Template de nó para nós Python e C++**
+
+Todos os nós que iniciaremos neste curso seguirão a mesma estrutura. Como uma ajuda adicional para começar rapidamente, criei um template (modelo) de nó que você pode usar para escrever a base de qualquer nó Python ou C++, já que o código pode ser bastante repetitivo.
+
+
+#### **Template para um nó Python**
+
+Use este código para iniciar qualquer novo nó Python:
+
+```python
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+
+class MyCustomNode(Node): # MODIFIQUE O NOME
+    def __init__(self):
+        super().__init__("node_name") # MODIFIQUE O NOME
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = MyCustomNode() # MODIFIQUE O NOME
+    rclpy.spin(node)
+    rclpy.shutdown()
+
+if __name__ == "__main__":
+    main()
+```
+
+**Explicação:**
+Tudo o que você precisa fazer é remover os comentários `MODIFIQUE O NOME` e alterar o nome da classe (`MyCustomNode`) e o nome do nó (`"node_name"`). É melhor usar nomes que façam sentido. Por exemplo, se você estiver escrevendo um nó para ler dados de um sensor de temperatura, poderia nomear a classe como `TemperatureSensorNode` e o nó como `temperature_sensor`.
+
+#### **Template para um nó C++**
+
+Use este código para iniciar qualquer novo nó C++:
+
+```cpp
+#include "rclcpp/rclcpp.hpp"
+
+class MyCustomNode : public rclcpp::Node // MODIFIQUE O NOME
+{
+public:
+    MyCustomNode() : Node("node_name") // MODIFIQUE O NOME
+    {
+    }
+
+private:
+};
+
+int main(int argc, char **argv)
+{
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<MyCustomNode>(); // MODIFIQUE O NOME
+    rclcpp::spin(node);
+    rclcpp::shutdown();
+    return 0;
+}
+
+```
+
+**Explicação:**
+Remova os comentários `MODIFIQUE O NOME` e renomeie a classe e o nó. Esses dois templates permitirão que você inicie seus nós mais rapidamente. Recomendo que os utilize o máximo possível.
+
+## **Inspecionando seus nós**
+
+Para finalizar essa aula, vamos praticar um pouco mais com a linha de comando `ros2 node`. Até agora, você viu como escrever um nó, compilá-lo e executá-lo. Uma parte que falta é saber como inspecionar seus nós. Mesmo que um nó consiga rodar, isso não significa que ele fará exatamente o que você deseja.
+
+Ser capaz de inspecionar seus nós ajudará você a corrigir erros que possa ter cometido no código. Também permitirá encontrar facilmente mais informações sobre outros nós que você está iniciando, mas que não escreveu.
+
+Para cada conceito central, vamos experimentar as ferramentas de linha de comando relacionadas ao conceito. A ferramenta para nós é a `ros2 node`.
+
+Primeiro, antes de usarmos o `ros2 node`, temos que iniciar um nó. Relembrando: para iniciar um nó, usamos `ros2 run <nome_do_pacote> <nome_do_executavel>`. Se iniciarmos o nó Python que criamos neste capítulo, usamos:
+
+```bash
+ros2 run my_py_pkg test_node
+```
+
+Somente após iniciarmos um nó é que podemos fazer alguma inspeção com o `ros2 node`.
+
+#### **Linha de comando ros2 node**
+
+Para listar todos os nós em execução, use `ros2 node list`:
+    
+```bash
+ros2 node list
+```
+
+A saída será:
+
+```text 
+/my_node_name
+```
+
+Encontramos o nome do nó que definimos no código. Uma vez que temos o nome do nó, podemos obter mais informações sobre ele com `ros2 node info <nome_do_no>`:
+
+```bash
+$ ros2 node info /my_node_name
+/my_node_name
+  Subscribers:
+  Publishers:
+    /parameter_events: rcl_interfaces/msg/ParameterEvent
+    /rosout: rcl_interfaces/msg/Log
+  Service Servers:
+    /my_node_name/describe_parameters: rcl_interfaces/srv/DescribeParameters
+    ... (outros serviços)
+  Service Clients:
+  Action Servers:
+  Action Clients:
+
+```
+
+Como você pode ver, há bastante informação no terminal. Conheceremos todas elas nas próximas aulas. Com `ros2 node info`, você pode ver todos os tópicos (publicadores/assinantes), serviços e ações rodando para este nó.
+
+---
+
+### **Alterando o nome do nó em tempo de execução**
+
+Aqui vai uma dica: ao iniciar um executável, você pode escolher usar o nome padrão do nó ou substituí-lo por um novo nome. Para adicionar qualquer argumento adicional ao `ros2 run`, primeiro adicione `--ros-args` (apenas uma vez). Então, para renomear o nó, adicione `-r __node:=<novo_nome>`.
+
+Por exemplo, se quisermos nomear o nó como `abc`:
+
+```bash
+$ ros2 run my_py_pkg test_node --ros-args -r __node:=abc
+```
+
+Nos logs, em vez de `my_node_name`, veremos `abc`. Se listarmos os nós agora:
+
+```bash
+$ ros2 node list
+/abc
+
+```
+
+Isso dá mais controle sobre como iniciar um nó sem precisar modificar o código diretamente.
+
+>**Observação - Nome do nó** 
+>
+>Ao rodar múltiplos nós, certifique-se de que cada um tenha um **nome único**. Ter dois nós com o mesmo nome pode levar a problemas inesperados e difíceis de depurar. No futuro, você pode querer rodar o mesmo nó várias vezes (ex: três sensores de temperatura); nesse caso, renomeie-os para `sensor_1`, `sensor_2`, etc.
+
