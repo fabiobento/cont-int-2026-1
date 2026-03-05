@@ -24,7 +24,7 @@ Para criar um workspace, você simplesmente criará um novo diretório dentro do
 
 Quanto ao nome do workspace, vamos mantê-lo simples por enquanto e usar algo que seja reconhecível: `master_ros2_ws`.
 
-> **Observação:**
+> **Observação - Nome do Workspace:**
 >
 > O nome do workspace não é importante e não afetará nada em sua aplicação. Como estamos apenas começando, temos apenas um workspace. À medida que você progredir e começar a trabalhar em diversas aplicações, a melhor prática é nomear cada workspace com o nome da aplicação ou do robô. Por exemplo, se você criar um workspace para um robô chamado **ABC V3**, poderá nomeá-lo como `abc_v3_ws`.
 
@@ -35,7 +35,8 @@ $ cd
 $ mkdir -p ~/master_ros2_ws/src
 ```
 Isso é tudo o que há para fazer. Para configurar um novo *workspace*, basta criar um novo diretório (em algum lugar na sua pasta pessoal) e criar um diretório `src` dentro dele.
-> **Observação Importante:**
+
+> **Observação - Container:**
 >
 > Como trabalharemos dentro de um container, o workspace será criado dentro dele. Então, antes de seguir os próximos passos, vá para o diretório `dev-ros2/scripts/docker_dev` do [repositório da disciplina](https://github.com/fabiobento/cont-int-2026-1) que você baixou e execute o script para iniciar o container:
 > ```bash
@@ -56,7 +57,7 @@ $ cd ~/master_ros2_ws
 $ colcon build
 ```
 
-> **Observação Importante:**
+> **Observação - Compilação:**
 >
 > Você deve sempre executar o `colcon build` a partir da raiz do diretório do seu workspace, e não de qualquer outro lugar. Se você cometer um erro e executar este comando em outro diretório (por exemplo, dentro do diretório `src` do workspace ou dentro de um pacote), simplesmente remova os novos diretórios `install`, `build` e `log` que foram criados no lugar errado. Em seguida, volte para o diretório raiz do workspace e compile novamente.
 
@@ -92,7 +93,9 @@ COLCON_IGNORE             _local_setup_util_sh.py  local_setup.ps1  local_setup.
 _local_setup_util_ps1.py  local_setup.bash         local_setup.sh   setup.bash       setup.sh
 ```
 
-> **Observação :** Esse arquivo `setup.bash` dentro da pasta `install` é o que "avisa" ao sistema operacional onde os seus novos programas (pacotes) estão localizados. Sem rodar esse arquivo, o comando `ros2 run` não conseguirá encontrar nada do que você desenvolveu.
+> **Observação - Sourcing:**
+>
+> Esse arquivo `setup.bash` dentro da pasta `install` é o que "avisa" ao sistema operacional onde os seus novos programas (pacotes) estão localizados. Sem rodar esse arquivo, o comando `ros2 run` não conseguirá encontrar nada do que você desenvolveu.
 
 Isso pode parecer familiar. Confira a linha 40 do [Dockerfile](https://github.com/fabiobento/cont-int-2026-1/blob/main/fundamentos-ros2/scripts/ros2_jazzy_docker/docker_gui/Dockerfile.master_ros2) que você usou anteriormente. Se você se lembra, após instalarmos o ROS 2, nós ativamos (*sourced*) um script bash semelhante a partir do diretório de instalação do ROS 2 (`/opt/ros/jazzy/setup.bash`) para que pudéssemos usar o ROS 2 em nosso ambiente. Precisaremos fazer o mesmo para o nosso *workspace*.
 
@@ -139,7 +142,7 @@ Para conferir se o texto foi inserido corretamente sem precisar de um editor, vo
 $ tail -n 5 ~/.bashrc
 ```
 
-> **Observação:**
+> **Observação - Sourcing:**
 >
 > Se você compilar o workspace em um ambiente que já foi ativado (*sourced*), ainda assim precisará ativar o workspace mais uma vez, pois houve alterações e o ambiente não está ciente delas. Neste caso, você pode ativar o script `setup.bash` do workspace diretamente, ativar o `.bashrc` ou simplesmente abrir um novo terminal.
 
@@ -151,7 +154,7 @@ Qualquer nó que você criar existirá dentro de um pacote. Portanto, para criar
 
 Mas primeiro, o que exatamente é um pacote?
 
-> **Observação**
+> **Observação - Pacotes:**
 > No ROS 2, **não se cria um script solto**. Tudo precisa estar organizado em pacotes para que o sistema de compilação (`colcon`) e o sistema de execução (`ros2 run`) consigam localizar as dependências e os executáveis.
 
 ### O que é um pacote do ROS 2?
@@ -174,7 +177,7 @@ Os pacotes são muito úteis para organizar os seus nós e também para gerir co
 
 Agora, vamos criar um pacote, e aqui você precisará fazer uma escolha. Se você quiser criar um nó com Python, criará um pacote Python; se quiser criar um nó com C++, criará um pacote C++. A arquitetura para cada tipo de pacote é bastante diferente.
 
-> **Observação**
+> **Observação - Pacotes:**
 > * **Pacotes Python:** Utilizam o `setuptools` e são mais dinâmicos para prototipagem rápida.
 > * **Pacotes C++:** Utilizam o `CMake`, exigindo uma estrutura de compilação um pouco mais rígida, mas oferecendo maior desempenho para tarefas críticas de tempo real.
 
@@ -185,7 +188,7 @@ Você criará todos os seus pacotes no diretório `src` do seu workspace ROS 2. 
 $ cd ~/master_ros2_ws/src
 ```
 
->> **Observação Importante**
+>> **Observação - Pacotes:**
 >> Regra de "ouro":
 >> * **Criar** pacotes e **escrever** código: sempre dentro da pasta **`src/`**.
 >> * **Compilar** (`colcon build`): sempre na **raiz** do workspace.
@@ -201,7 +204,7 @@ Vamos criar nosso primeiro pacote chamado **`my_py_pkg`**. Usaremos este nome co
 ```bash
 $ ros2 pkg create my_py_pkg --build-type ament_python --dependencies rclpy
 ```
-> **Observação:**
+> **Observação - Pacotes:**
 > O parâmetro `--build-type ament_python` é o que diferencia um projeto Python de um C++ (que usaria `ament_cmake`). Se você esquecer essa flag, o ROS 2 tentará criar um pacote C++ por padrão, o que causará erros quando você tentar rodar scripts Python.
 
 Com este comando, dizemos que queremos criar um pacote chamado **my_py_pkg**, com o tipo de compilação **ament_python**, e especificamos uma dependência: **rclpy** — esta é a biblioteca Python para ROS 2 que você usará em todos os seus nós Python.
@@ -225,7 +228,7 @@ Você poderá ver então que existe um novo diretório chamado `my_py_pkg`. Aqui
     └── test_pep257.py
 ```
 
-> **Observação:**
+> **Observação - Pacotes:**
 > O **rclpy** (ROS Client Library for Python) é o "coração" do desenvolvimento com Python no ROS 2. Sem adicionar essa dependência na criação do pacote (ou manualmente depois no `package.xml`), o código não conseguirá importar as funções básicas do ROS.
 
 Dentro do diretório de seu pacote, você encontrará a seguinte estrutura:
@@ -237,7 +240,7 @@ Dentro do diretório de seu pacote, você encontrará a seguinte estrutura:
 * **`resource/`**: Uma pasta usada pelo sistema de ferramentas do ROS 2 para identificar o pacote durante o processo de build.
 * **`test/`**: O local destinado a testes unitários para garantir que o seu código funciona como esperado.
 
-> **Observação:**
+> **Observação - Pacotes:**
 > Um erro comum é colocar o código diretamente na raiz da pasta `my_py_pkg`. É fundamental que o código vá para dentro da **subpasta** `my_py_pkg` (aquela que já contém um arquivo vazio chamado `__init__.py`).
 
 
@@ -254,7 +257,7 @@ $ cd ~/master_ros2_ws/src/
 $ ros2 pkg create my_cpp_pkg --build-type ament_cmake --dependencies rclcpp
 ```
 
-> **Observação:**
+> **Observação - Pacotes:**
 > * **Python (`ament_python`)**: Usa o `setup.py`. É interpretado, o que facilita testes rápidos no robô sem precisar de uma compilação pesada.
 > * **C++ (`ament_cmake`)**: Usa o `CMakeLists.txt`. É compilado, o que oferece uma performance superior para tarefas que exigem processamento intenso ou tempo real, mas a estrutura de pastas é mais rígida (com pastas separadas para `include` e `src`).
 
@@ -333,7 +336,7 @@ Summary: 1 package finished [1.26s]
 ```
 
 
-> **Observação:**
+> **Observação - Compilação:**
 > Quando estiver trabalhando no **Raspberry Pi** ou em containers com muitos pacotes, usar o comando `colcon build --packages-select <nome_do_pacote>` é uma ótima estratégia para:
 > * **Economia de tempo:** Conforme o projeto cresce, rodar apenas `colcon build` vai tentar compilar tudo o que estiver na pasta `src`. Se o aluno mudou apenas um script Python no `my_py_pkg`, não faz sentido o computador perder tempo verificando o pacote C++.
 > * **Foco no erro:** Se um pacote específico está com erro de compilação, usar o `--packages-select` ajuda a limpar a saída do terminal, mostrando apenas os logs que interessam para aquele problema.
@@ -520,7 +523,7 @@ Esta linha imprimirá "Alô mundo! Este é o meu primeiro nó em ROS2 usando Pyt
 
 Como a classe `MyCustomNode` herda da classe `Node`, temos acesso a todas as funcionalidades do ROS 2 para nós. Isso tornará as coisas bem convenientes para nós. Aqui, você tem um exemplo com a funcionalidade de *logging*: obtemos o método `get_logger()` da classe `Node`. Então, com o método `info()`, podemos imprimir um log com o nível de informação (*info level*).
 
-> **Observação**
+> **Observação - Nós:**
 > * **O Nome do Nó vs. Nome do Arquivo:** O nome que vai dentro do `super().__init__('my_node_name')` é o que aparecerá quando eles digitarem `ros2 node list` no terminal. Ele não precisa ser igual ao nome do arquivo `.py`.
 > * **O papel do `rclpy.spin(node)`:** O robô precisa ficar "escutando". Sem o `spin`, o código é apenas um script que executa e morre. Com o `spin`, ele se torna um processo de controle contínuo.
 > * **Logs vs. Prints:** O `self.get_logger().info()` é superior ao `print()` porque, em um sistema real, esses logs podem ser gravados em arquivos para análise posterior de falhas.
@@ -545,7 +548,7 @@ entry_points={
 },
 ```
 
-> **Observação Importante:**
+> **Observação - Nós:**
 >
 > Aqui é um momento em mais se cometem erros de sintaxe. > Lembre-se que a estrutura da linha que deve ser adicionada é a seguinte:
 >```python
@@ -574,7 +577,7 @@ Por exemplo, caso você tivesse dois nós (um para o sensor e outro para o motor
 ],
 ```
 
-> **Observação:**
+> **Observação - Nós:**
 >
 > Neste primeiro exemplo, fiz questão de usar um nome diferente para cada um, para que você perceba que são três coisas distintas. Mas, às vezes, todos os três nomes podem ser iguais. Por exemplo, você poderia criar um arquivo `sensor_temperatura.py`, e então nomear tanto o seu nó quanto o seu executável como `sensor_temperatura`.
 
@@ -624,7 +627,7 @@ Excelente, vemos o log `Hello World`. Seu primeiro nó está rodando com sucesso
 
 Agora, você deve notar que o programa fica "parado" ali. O nó ainda está vivo porque ele está girando (*spinning*). Para parar o nó, pressione **Ctrl + C**.
 
-> **Observação:**
+> **Observação -**
 >
 > No ambiente **Docker**, podemos destacar dois pontos sobre o encerramento do processo:
 >
@@ -648,16 +651,53 @@ Como fazer isso? Adicionaremos um **timer** ao nosso nó. Um timer disparará um
 
 Vamos voltar ao código e modificar a classe `MyCustomNode`. O restante do código permanece o mesmo.
 
----
+```python
+class MyCustomNode(Node):
+    def __init__(self):
+        super().__init__('my_node_name')
+        self.counter_ = 0
+        self.timer_ = self.create_timer(1.0, self.print_hello)
 
-### **Dica para sua aula no IFES (O conceito de "Tempo Real"):**
+    def print_hello(self):
+        self.get_logger().info("Hello " + str(self.counter_))
+        self.counter_ += 1
+```
 
-Fabio, para seus alunos de Engenharia, este é o momento de introduzir o conceito de **Sistemas de Tempo Real** e **Loops de Controle**.
+Ainda temos o construtor com o `super()`, mas agora o log está em um método separado. Além disso, em vez de apenas imprimir "Hello World", aqui criamos um atributo `counter_` que incrementamos toda vez que utilizamos o log.
 
-* **O que é um Timer?** Explique que o timer é como um despertador interno do ROS 2. Ele não "trava" o programa esperando o tempo passar; ele avisa ao processador: "Ei, passou 1 segundo, execute esta tarefa agora".
-* **O que é uma Callback?** É a função que será chamada pelo "despertador". Na robótica, quase tudo é baseado em callbacks (chegou um dado do sensor -> executa callback; passou o tempo do timer -> executa callback).
+A linha mais importante é aquela que cria o timer. Para criar o timer, usamos o método `create_timer()` da classe `Node`. Precisamos fornecer dois argumentos: a taxa (frequência/intervalo) na qual queremos chamar a função (um número real) e a função de *callback*. Note que a função de *callback* deve ser especificada sem parênteses.
 
-**Exemplo Prático para o Raspberry Pi:**
-Se eles estiverem lendo o sensor de temperatura do meliponário, eles não querem que o processador fique 100% do tempo focado nisso. Eles configuram um timer para ler a cada 5 minutos, deixando o processador livre para outras tarefas (como gerenciar a rede ou a câmera) no intervalo.
+Esta instrução significa que queremos chamar o método `print_hello` a cada `1.0` segundo.
 
-**Gostaria que eu traduzisse o novo código com o Timer para você mostrar como a estrutura de Classe (POO) facilita essa modificação?**
+> **Observação - Atributos de Classe:**
+>
+> Se você está se perguntando por que existe um sublinhado ao final (`_`) de cada atributo de classe, esta é uma convenção comum de POO (Programação Orientada a Objetos) que seguimos para especificar que uma variável é um atributo de classe. É simplesmente uma ajuda visual e não tem outra função. Você pode seguir a mesma convenção ou usar outra — apenas certifique-se de manter a consistência dentro de um projeto. Como o Python não tem palavras-chave como `private` ou `public` de forma rígida (como o C++ ou Java), essas convenções são o que mantém o código organizado.
+
+> **Observação - Sistema de Tempo Real:**
+>
+> Note que agora temos uma variável `self.counter_` que é incrementada a cada chamada da função `print_hello`. Isso é possível porque estamos usando uma classe, e a variável `self.counter_` pertence à instância da classe.
+> Vamos introduzir alguns conceitos de **Sistemas de Tempo Real** e **Loops de Controle**.
+>
+> * **O que é um Timer?**
+> O timer é como um despertador interno do ROS 2. Ele não "trava" o programa esperando o tempo passar; ele avisa ao processador: "Ei, passou 1 segundo, execute esta tarefa agora".
+>
+> * **O que é uma Callback?**
+> É a função que será chamada pelo "despertador". Na robótica, quase tudo é baseado em callbacks (chegou um dado do sensor -> executa callback; passou o tempo do timer -> executa callback).
+>
+> **Exemplo Prático :**
+> Em um Raspberry Pi, se você estiver lendo o sensor de temperatura de um sistema, você não quer que o processador fique 100% do tempo focado nisso. Você configura um timer para ler a cada 5 minutos, deixando o processador livre para outras tarefas (como gerenciar a rede ou a câmera) no intervalo.
+
+Vamos agora testar o código. Como já especificamos como criar um executável a partir deste arquivo no **`setup.py`**, não precisamos fazer isso novamente.
+
+Tudo o que temos que fazer é compilar, ativar e executar. Lembre-se: **“compilar, ativar, executar”** (ou *build, source, run*). Toda vez que você criar um novo nó ou modificar um já existente, você terá que “compilar, ativar e executar”.
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/dev-ros2/imagens/fluxo-trabalho-ros2.jpg)
+**Figura 2-2 - Fluxo de trabalho do ROS 2.** (Fonte: Gerada via modelo de linguagem de grande escala Gemini (Google), a partir de comandos do autor)
+
+
+Em um terminal, vá para o diretório raiz do seu *workspace* ROS 2 e compile o pacote:
+
+```bash
+$ cd ~/master_ros2_ws/
+$ colcon build --packages-select my_py_pkg
+```
