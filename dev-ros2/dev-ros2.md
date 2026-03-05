@@ -167,22 +167,14 @@ echo "source ~/master_ros2_ws/install/setup.bash" >> ~/.bashrc
 Após executar os comandos acima, você deve recarregar o arquivo para que as mudanças entrem em vigor imediatamente:
 
 ```bash
-<<<<<<< HEAD
 source ~/.bashrc
-=======
-source ~/.bashrc
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 Para conferir se o texto foi inserido corretamente sem precisar de um editor, você pode usar o comando `tail`:
 
 ```bash
 # Mostra as últimas 5 linhas do arquivo
-<<<<<<< HEAD
 tail -n 5 ~/.bashrc
-=======
-tail -n 5 ~/.bashrc
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 > **Observação - Sourcing:**
@@ -475,29 +467,17 @@ Crie um novo arquivo neste diretório e torne-o executável:
 
 1. **Navegar até o local correto:**
 ```bash
-<<<<<<< HEAD
 cd ~/master_ros2_ws/src/my_py_pkg/my_py_pkg/
-=======
-cd ~/master_ros2_ws/src/my_py_pkg/my_py_pkg/
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 2. **Criar o arquivo do nó:**
 ```bash
-<<<<<<< HEAD
 touch my_first_node.py
-=======
-touch my_first_node.py
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 3. **Dar permissão de execução (Essencial!):**
 ```bash
-<<<<<<< HEAD
 chmod +x my_first_node.py
-=======
-chmod +x my_first_node.py
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 > **Obervação**
@@ -788,22 +768,13 @@ Tudo o que temos que fazer é compilar, ativar e executar. Lembre-se: **“compi
 Em um terminal, vá para o diretório raiz do seu *workspace* ROS 2 e compile o pacote:
 
 ```bash
-<<<<<<< HEAD
 cd ~/master_ros2_ws/
 colcon build --packages-select my_py_pkg
-=======
-cd ~/master_ros2_ws/
-colcon build --packages-select my_py_pkg
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 Além do `--packages-select <nome_do_pacote>`, você pode adicionar a opção `--symlink-install`, para que não precise compilar o pacote toda vez que modificar seus nós Python; por exemplo:
 ```bash
-<<<<<<< HEAD
 colcon build --packages-select my_py_pkg --symlink-install
-=======
-colcon build --packages-select my_py_pkg --symlink-install
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 Você pode ver alguns logs de aviso (*warnings*), mas contanto que veja a linha começando com `Finished <<< my_py_pkg`, significa que funcionou corretamente. Isso instalará o executável e, se você modificar o código depois disso, deverá ser capaz de executá-lo sem precisar compilar novamente.
@@ -820,13 +791,8 @@ Duas coisas importantes:
 
 Então, a partir deste terminal ou de outro, ative (*source*) e execute o seguinte:
 ```bash
-<<<<<<< HEAD
 source ~/.bashrc
 ros2 run my_py_pkg test_node
-=======
-source ~/.bashrc
-ros2 run my_py_pkg test_node
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 Você verá o contador subindo a cada segundo. Pressione **Ctrl + C** para interromper a execução.
