@@ -701,3 +701,45 @@ Em um terminal, vá para o diretório raiz do seu *workspace* ROS 2 e compile o 
 $ cd ~/master_ros2_ws/
 $ colcon build --packages-select my_py_pkg
 ```
+
+Além do `--packages-select <nome_do_pacote>`, você pode adicionar a opção `--symlink-install`, para que não precise compilar o pacote toda vez que modificar seus nós Python; por exemplo:
+```bash
+$ colcon build --packages-select my_py_pkg --symlink-install
+```
+
+Você pode ver alguns logs de aviso (*warnings*), mas contanto que veja a linha começando com `Finished <<< my_py_pkg`, significa que funcionou corretamente. Isso instalará o executável e, se você modificar o código depois disso, deverá ser capaz de executá-lo sem precisar compilar novamente.
+
+Duas coisas importantes:
+1. Isso só funciona para pacotes **Python**.
+2. Você ainda terá que compilar o pacote para qualquer **novo executável** que criar (ou seja, se alterar o `setup.py`).
+
+> **Observação - Symlink Install:**
+> * **O que o Symlink faz:** Em vez de copiar o arquivo `.py` para a pasta `install`, o ROS 2 cria um link simbólico (um "atalho") que aponta diretamente para o arquivo que você está editando na pasta `src`.
+> * **Por que isso é bom:** Se você encontrar um erro de digitação no `self.get_logger().info()`, corrige o erro no VS Code, salva o arquivo e executa o `ros2 run` novamente. **Sem esperar o colcon terminar.**
+> * **Quando NÃO funciona:** Se você criar um arquivo novo chamado `meu_segundo_no.py` ou modificar algo no `setup.py`, o "atalho" antigo não serve para o arquivo novo. Aí sim, você precisa rodar o ciclo completo de novo.
+
+
+Então, a partir deste terminal ou de outro, ative (*source*) e execute o seguinte:
+```bash
+$ source ~/.bashrc
+$ ros2 run my_py_pkg test_node
+```
+
+Você verá o contador subindo a cada segundo. Pressione **Ctrl + C** para interromper a execução.
+```bash
+[1710999909.533443384] [my_node_name]: Hello 0[INFO] [1710999910.533169531] [my_node_name]: Hello 1[INFO] [1710999911.532731467] [my_node_name]: Hello 2[INFO] [1710999912.534052411] [my_node_name]: Hello 3
+```
+
+Como você pode ver, o processo de compilar, ativar e executar é bastante rápido e não é tão complicado. Aqui, podemos ver que o nó imprime um log a cada segundo, e o contador aumenta em cada novo log.
+
+Agora, como isso é possível? Como o método `timer_callback()` (ou `print_hello`) é chamado? Nós criamos um timer, sim, mas em nenhum lugar do código chamamos a função diretamente.
+
+Isso funciona porque o nó está girando (*spinning*), graças ao comando `rclpy.spin(node)`. Isso significa que o nó é mantido vivo e todos os *callbacks* registrados podem ser chamados durante esse tempo. O que fazemos com o `create_timer()` é simplesmente registrar um *callback*, que pode então ser chamado enquanto o nó está girando.
+
+Este foi o seu primeiro exemplo de um *callback* e, como você verá nos próximos capítulos do livro, tudo funciona com *callbacks* no ROS 2. Neste ponto, se você ainda tiver alguma dificuldade com a sintaxe, os *callbacks* e o *spinning*, não se preocupe muito. À medida que avançar no livro, você repetirá esse processo muitas vezes. Ao aprender ROS 2, o entendimento vem com a experiência prática.
+
+Terminamos agora este nó Python. Com o que você viu aqui, você deve ser capaz de criar seus próprios novos nós Python (no mesmo pacote ou em outro). Vamos agora mudar para o C++. Se você estiver interessado apenas em aprender ROS 2 com Python por enquanto, pode pular a seção de C++.
+
+> **Uma pergunta para você:**
+>
+> "Se eu colocar um comando `while True: pass` antes do `rclpy.spin(node)`, o timer vai funcionar?"
