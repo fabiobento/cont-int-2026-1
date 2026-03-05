@@ -760,3 +760,8 @@ Para criar um nó C++, primeiro precisamos de um pacote C++. Usaremos o pacote `
 ### **Escrevendo um nó C++**
 
 Vamos criar um arquivo para o nó. Vá para o diretório `src` dentro do pacote `my_cpp_pkg` e crie um arquivo `.cpp`:
+
+```bash
+cd ~/ros2_ws/src/my_cpp_pkg/src/
+touch my_first_node.cpp
+```
