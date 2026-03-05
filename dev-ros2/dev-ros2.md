@@ -31,13 +31,8 @@ Quanto ao nome do workspace, vamos mantê-lo simples por enquanto e usar algo qu
 Abra o terminal, e navegue para seu diretório pessoal (*home*), e crie o workspace. É aqui que você escreverá todo o código para a sua aplicação ROS 2:
 
 ```bash
-<<<<<<< HEAD
 cd
 mkdir -p ~/master_ros2_ws/src
-=======
-cd
-mkdir -p ~/master_ros2_ws/src
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 Isso é tudo o que há para fazer. Para configurar um novo *workspace*, basta criar um novo diretório (em algum lugar na sua pasta pessoal) e criar um diretório `src` dentro dele.
 
@@ -45,11 +40,7 @@ Isso é tudo o que há para fazer. Para configurar um novo *workspace*, basta cr
 >
 > Como trabalharemos dentro de um container, o workspace será criado dentro dele. Então, antes de seguir os próximos passos, vá para o diretório `dev-ros2/scripts/docker_dev` do [repositório da disciplina](https://github.com/fabiobento/cont-int-2026-1) que você baixou e execute o script para iniciar o container:
 > ```bash
-<<<<<<< HEAD
     > ./start_container.sh ros2_dev
-=======
-    > ./start_container.sh ros2_dev
->>>>>>> d07e15a (Arquivos base do notebook)
 > ```
 
 ### Compilando o workspace
@@ -62,13 +53,8 @@ Mesmo que o workspace esteja vazio (ainda não criamos nenhum pacote), ainda ass
 Vamos compilar o workspace:
 
 ```bash
-<<<<<<< HEAD
 cd ~/master_ros2_ws
 colcon build
-=======
-cd ~/master_ros2_ws
-colcon build
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 > **Observação - Compilação:**
@@ -79,21 +65,13 @@ colcon build
 Como você pode ver, nenhum pacote foi compilado, mas vamos listar todos os diretórios dentro de `~/master_ros2_ws`:
 
 ```bash
-<<<<<<< HEAD
 ls -F ~/master_ros2_ws
-=======
-ls -F ~/master_ros2_ws
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 Você verá a listagem dos seguintes diretórios:
 
 ```bash
-<<<<<<< HEAD
 build/  install/  log/  src/
-=======
-build/  install/  log/  src/
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 Após executar o comando de compilação `colcon build`, o seu workspace será organizado em quatro diretórios principais, cada um com uma função específica no ciclo de desenvolvimento:
@@ -110,11 +88,7 @@ Podemos comparar com um projeto de placa de circuito impresso (PCB): a pasta **`
 Se você navegar para dentro do diretório `install` recém-criado, poderá ver um arquivo `setup.bash`:
 
 ```bash
-<<<<<<< HEAD
 ls ~/master_ros2_ws/install
-=======
-ls ~/master_ros2_ws/install
->>>>>>> d07e15a (Arquivos base do notebook)
 COLCON_IGNORE             _local_setup_util_sh.py  local_setup.ps1  local_setup.zsh  setup.ps1  setup.zsh
 _local_setup_util_ps1.py  local_setup.bash         local_setup.sh   setup.bash       setup.sh
 ```
@@ -129,11 +103,7 @@ Toda vez que você compilar seu *workspace*, você deve ativá-lo para que o amb
 
 Para ativar o *workspace*, execute o script `setup.bash`:
 ```bash
-<<<<<<< HEAD
 source ~/master_ros2_ws/install/setup.bash
-=======
-source ~/master_ros2_ws/install/setup.bash
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 Então, como fizemos anteriormente, vamos adicionar essa linha ao nosso `.bashrc`. Dessa forma, você não precisará ativar (*source*) o workspace toda vez que abrir um novo terminal.
@@ -146,13 +116,8 @@ Execute o comando abaixo para adicionar a ativação da instalação global do R
 
 ```bash
 # Adicionando as configurações ao final do .bashrc
-<<<<<<< HEAD
 echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 echo "source ~/master_ros2_ws/install/setup.bash" >> ~/.bashrc
-=======
-echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
-echo "source ~/master_ros2_ws/install/setup.bash" >> ~/.bashrc
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 >> **Por que a ordem importa?**
 >
@@ -220,11 +185,7 @@ Agora, vamos criar um pacote, e aqui você precisará fazer uma escolha. Se voc�
 
 Você criará todos os seus pacotes no diretório `src` do seu workspace ROS 2. Portanto, certifique-se de navegar para este diretório antes de fazer qualquer outra coisa:
 ```bash
-<<<<<<< HEAD
 cd ~/master_ros2_ws/src
-=======
-cd ~/master_ros2_ws/src
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 >> **Observação - Pacotes:**
@@ -241,11 +202,7 @@ Aqui está como construir o comando para criar um pacote:
 Vamos criar nosso primeiro pacote chamado **`my_py_pkg`**. Usaremos este nome como um exemplo para trabalhar com os principais conceitos do ROS 2. Depois, conforme progredirmos, usaremos nomes mais significativos. No diretório `src` do seu workspace, execute o seguinte:
 
 ```bash
-<<<<<<< HEAD
 ros2 pkg create my_py_pkg --build-type ament_python --dependencies rclpy
-=======
-ros2 pkg create my_py_pkg --build-type ament_python --dependencies rclpy
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 > **Observação - Pacotes:**
 > O parâmetro `--build-type ament_python` é o que diferencia um projeto Python de um C++ (que usaria `ament_cmake`). Se você esquecer essa flag, o ROS 2 tentará criar um pacote C++ por padrão, o que causará erros quando você tentar rodar scripts Python.
@@ -296,13 +253,8 @@ Criar um pacote C++ é muito semelhante a criar um pacote Python; no entanto, a 
 Certifique-se de navegar até o diretório `src` do seu workspace e, em seguida, crie um novo pacote. Vamos usar um padrão semelhante ao que fizemos para o Python e nomear o pacote como `my_cpp_pkg`:
 
 ```bash
-<<<<<<< HEAD
 cd ~/master_ros2_ws/src/
 ros2 pkg create my_cpp_pkg --build-type ament_cmake --dependencies rclcpp
-=======
-cd ~/master_ros2_ws/src/
-ros2 pkg create my_cpp_pkg --build-type ament_cmake --dependencies rclcpp
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 > **Observação - Pacotes:**
@@ -338,13 +290,8 @@ Agora que você criou um ou mais pacotes, você pode compilá-los, mesmo que ain
 Para compilar os pacotes, volte para a raiz do seu workspace ROS 2 e execute o comando `colcon build`. Mais uma vez, e como visto anteriormente nesta aula , o local onde você executa este comando é **muito importante**.
 
 ```bash
-<<<<<<< HEAD
 cd ~/master_ros2_ws
 colcon build
-=======
-cd ~/master_ros2_ws
-colcon build
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 A saída será algo como:
 
@@ -382,11 +329,7 @@ Após compilar qualquer pacote, você também deve ativar (*source*) o seu *work
 Para compilar apenas um pacote específico, você pode usar a opção `--packages-select`, seguida pelo nome do pacote. Aqui está um exemplo:
 
 ```bash
-<<<<<<< HEAD
 colcon build --packages-select my_py_pkg
-=======
-colcon build --packages-select my_py_pkg
->>>>>>> d07e15a (Arquivos base do notebook)
 Starting >>> my_py_pkg
 Finished <<< my_py_pkg [1.01s]
 Summary: 1 package finished [1.26s]
@@ -641,13 +584,8 @@ Por exemplo, caso você tivesse dois nós (um para o sensor e outro para o motor
 Agora que você forneceu as instruções para criar um novo executável, vá para o diretório raiz do seu *workspace* e compile o pacote:
 
 ```bash
-<<<<<<< HEAD
 cd ~/master_ros2_ws
 colcon build
-=======
-cd ~/master_ros2_ws
-colcon build
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 A saída esperada é semelhante a:
@@ -670,11 +608,7 @@ O executável agora deve estar criado e instalado no *workspace* (ele será colo
 Agora você pode executar o seu primeiro nó, mas logo antes disso, certifique-se de que o *workspace* esteja devidamente ativado (*sourced*) no seu ambiente:
 
 ```bash
-<<<<<<< HEAD
 source ~/.bashrc
-=======
-source ~/.bashrc
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
 
 Este arquivo já contém a linha para ativar (*source*) o *workspace*; você também poderia apenas abrir um novo terminal ou ativar o script `setup.bash` diretamente do seu *workspace*.
@@ -682,11 +616,7 @@ Este arquivo já contém a linha para ativar (*source*) o *workspace*; você tam
 Agora você pode executar o seu nó usando o comando `ros2 run`:
 
 ```bash
-<<<<<<< HEAD
 ros2 run my_py_pkg test_node
-=======
-ros2 run my_py_pkg test_node
->>>>>>> d07e15a (Arquivos base do notebook)
 ```
  A saída esperada é semelhante a:
 ```bash
