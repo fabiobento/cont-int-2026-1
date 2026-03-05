@@ -330,6 +330,10 @@ Para compilar apenas um pacote específico, você pode usar a opção `--package
 
 ```bash
 colcon build --packages-select my_py_pkg
+```
+A saída será algo como:
+
+```bash
 Starting >>> my_py_pkg
 Finished <<< my_py_pkg [1.01s]
 Summary: 1 package finished [1.26s]
@@ -750,3 +754,131 @@ Terminamos agora este nó Python. Com o que você viu aqui, você deve ser capaz
 
 ## Escrevendo um nó com C++
 
+Vamos fazer exatamente a mesma coisa que fizemos para o nó Python: criar um arquivo, escrever o nó, compilar, ativar (*source*) e executar.
+
+Certifique-se de ter lido a seção anterior sobre Python, pois não repetirei tudo aqui. Basicamente, veremos apenas como aplicar o processo para um **nó C++**.
+
+Para criar um nó C++, primeiro precisamos de um pacote C++. Usaremos o pacote `my_cpp_pkg` que criamos anteriormente.
+
+### **Escrevendo um nó C++**
+
+Vamos criar um arquivo para o nó. Vá para o diretório `src` dentro do pacote `my_cpp_pkg` e crie um arquivo `.cpp`:
+
+```bash
+cd ~/master_ros2_ws/src/my_cpp_pkg/src/
+touch my_first_node.cpp
+```
+
+Você também pode criar o arquivo diretamente do seu IDE e não usar o terminal.
+Agora, se você ainda não fez isso, abra o seu *workspace* com o VS Code ou qualquer outro IDE:
+
+```bash
+cd ~/master_ros2_ws/src/
+code .
+```
+Abra o arquivo `my_first_node.cpp`. Aqui está o código mínimo para escrever um nó em C++:
+
+```cpp
+#include "rclcpp/rclcpp.hpp"
+class MyCustomNode : public rclcpp::Node
+{
+public:
+    MyCustomNode() : Node("my_node_name")
+    {
+    }
+private:
+};
+int main(int argc, char **argv)
+{
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<MyCustomNode>();
+    rclcpp::spin(node);
+    rclcpp::shutdown();
+    return 0;
+}
+```
+
+> **Observação- *Include Error***
+>
+> Se você estiver usando o VS Code e digitar este código, poderá ver um erro de inclusão (*include error*) para a biblioteca `rclcpp`. Certifique-se de salvar o arquivo e aguardar alguns segundos. Se a inclusão ainda não for reconhecida, vá para a aba de **Extensões** e desative e reative a **Robot Developer Extensions for ROS 2**.
+
+Como você pode ver (e isso foi semelhante com o Python), no ROS 2 utilizamos intensamente a POO (Programação Orientada a Objetos) com os nós em C++.
+
+Vamos analisar este código passo a passo:
+
+```cpp
+#include "rclcpp/rclcpp.hpp"
+```
+
+Primeiro, incluímos o `rclcpp`, a biblioteca C++ para o ROS 2. Esta biblioteca contém a classe `rclcpp::Node`:
+
+```cpp
+class MyCustomNode : public rclcpp::Node {
+public:
+    MyCustomNode() : Node("my_node_name")
+    {
+    }
+private:
+};
+```
+
+**Explicação**
+Como fizemos com o Python, criamos uma classe que herda da classe `Node`. A sintaxe é diferente, mas o princípio é o mesmo. A partir desta classe `Node`, seremos capazes de acessar todas as funcionalidades do ROS 2: logger, timer e assim por diante. Como você pode ver, também especificamos o nome do nó no construtor. Por enquanto, o nó não faz nada; adicionaremos mais funcionalidades daqui a pouco:
+
+```cpp
+int main(int argc, char **argv) {
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<MyCustomNode>();
+    rclcpp::spin(node);
+    rclcpp::shutdown();
+    return 0;
+}
+
+```
+
+**Explicação**
+Você precisa de uma função `main()` se quiser ser capaz de executar seu programa C++. Nesta função, fazemos exatamente a mesma coisa que no Python, apenas com algumas diferenças na sintaxe:
+
+1. Inicializamos as comunicações do ROS 2 com `rclcpp::init()`.
+2. Criamos um objeto de nó a partir da classe recém-escrita. Como você pode ver, não criamos um objeto diretamente, mas sim um **ponteiro inteligente** (*shared pointer*) para esse objeto. No ROS 2 e em C++, quase tudo o que você criar será um ponteiro inteligente (*shared*, *unique*, etc.).
+3. Fazemos o nó girar com `rclcpp::spin()`.
+4. Finalmente, quando o nó é interrompido (Ctrl + C), encerramos todas as comunicações do ROS 2 com `rclcpp::shutdown()`.
+
+Esta estrutura para a função `main()` será muito semelhante em todos os seus programas ROS 2. Como você pode ver, mais uma vez, o nó não é o programa em si; o nó é criado dentro do programa.
+
+Antes de prosseguirmos para compilar, ativar e executar nosso nó, vamos melhorá-lo agora com um timer, um *callback* e um log. Modifique a classe `MyCustomNode` e deixe o restante como está:
+
+```cpp
+class MyCustomNode : public rclcpp::Node {
+public:
+    MyCustomNode() : Node("my_node_name"), counter_(0)
+    {
+        timer_ = this->create_wall_timer(std::chrono::seconds(1), std::bind(&MyCustomNode::print_hello, this));
+    }
+    void print_hello()
+    {
+        RCLCPP_INFO(this->get_logger(), "Hello %d", counter_);
+        counter_++;
+    }
+private:
+    int counter_;
+    rclcpp::TimerBase::SharedPtr timer_;
+};
+
+```
+
+**Explicação**
+Este exemplo de código fará a mesma coisa que o nó Python. Criamos um timer para que possamos chamar uma função de *callback* a cada 1.0 segundo. Nesta função de *callback*, imprimimos "Hello" seguido de um contador que incrementamos a cada vez.
+
+Existem algumas especificidades relacionadas ao C++:
+
+* Para o timer, temos que criar um atributo de classe. Como você pode ver, também criamos um ponteiro inteligente aqui: `rclcpp::TimerBase::SharedPtr`.
+* Usamos `this->create_wall_timer()` para criar o timer. O `this->` não é obrigatório aqui, mas eu o adicionei para enfatizar que estamos usando o método `create_wall_timer()` da classe `Node`.
+* Para especificar o *callback* no timer, como estamos dentro de uma classe C++, temos que usar `std::bind(&NomeDaClasse::nome_do_metodo, this)`. Certifique-se de não usar parênteses para o nome do método.
+
+O nó está agora concluído, então podemos compilá-lo.
+
+>> ** Observação - C++**
+>> 1. **Shared Pointers (`std::make_shared`):** É um "ponteiro inteligente". Ele limpa a memória sozinho quando o programa termina. É o que evita que o robô trave por falta de memória RAM após rodar por muitas horas.
+>> 2. **`std::bind` e `this`:** No Python, passávamos apenas `self.metodo`. No C++, o `std::bind` é como se estivéssemos "amarrando" a função ao objeto atual (`this`). É uma formalidade necessária para que o timer saiba qual função de qual objeto chamar.
+>> 3. **`std::chrono`:** É bem rigoroso com o tempo. Em vez de apenas passar `1.0`, usamos `std::chrono::seconds(1)` para deixar explícito que a unidade é segundos.
