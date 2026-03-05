@@ -852,4 +852,5 @@ Este foi o seu primeiro exemplo de um *callback* e, como você verá nas próxim
 
 Terminamos agora este nó Python. Com o que você viu aqui, você deve ser capaz de criar seus próprios novos nós Python (no mesmo pacote ou em outro). Vamos agora mudar para o C++. Se você estiver interessado apenas em aprender ROS 2 com Python por enquanto, pode pular a seção de C++.
 
+## Escrevendo um nó com C++
 
