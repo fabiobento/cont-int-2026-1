@@ -184,6 +184,7 @@ Agora, vamos criar um pacote, e aqui você precisará fazer uma escolha. Se voc�
 ### Criando um pacote Python
 
 Você criará todos os seus pacotes no diretório `src` do seu workspace ROS 2. Portanto, certifique-se de navegar para este diretório antes de fazer qualquer outra coisa:
+
 ```bash
 cd ~/master_ros2_ws/src
 ```
