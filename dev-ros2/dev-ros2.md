@@ -727,7 +727,10 @@ $ ros2 run my_py_pkg test_node
 
 Você verá o contador subindo a cada segundo. Pressione **Ctrl + C** para interromper a execução.
 ```bash
-[1710999909.533443384] [my_node_name]: Hello 0[INFO] [1710999910.533169531] [my_node_name]: Hello 1[INFO] [1710999911.532731467] [my_node_name]: Hello 2[INFO] [1710999912.534052411] [my_node_name]: Hello 3
+[1710999909.533443384] [my_node_name]: Hello 0[INFO]
+[1710999910.533169531] [my_node_name]: Hello 1[INFO]
+[1710999911.532731467] [my_node_name]: Hello 2[INFO]
+[1710999912.534052411] [my_node_name]: Hello 3[INFO]
 ```
 
 Como você pode ver, o processo de compilar, ativar e executar é bastante rápido e não é tão complicado. Aqui, podemos ver que o nó imprime um log a cada segundo, e o contador aumenta em cada novo log.
