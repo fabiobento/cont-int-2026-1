@@ -98,10 +98,10 @@ int main(int argc, char **argv) {
 2.**Configuração Python:** No `setup.py`, adicione em `console_scripts`: `'patrulha = my_py_pkg.patrulha_node:main',`.
 
 
-3.**Configuração C++:** No `CMakeLists.txt`, adicione `add_executable(supervisor src/supervisor_node.cpp)` e as linhas de `ament_target_dependencies` e `install`.
+3.**Configuração C++:** No `CMakeLists.txt`, adicione `add_executable(supervisor src/supervisor_node.cpp)` e as linhas de `ament_target_dependencies(supervisor rclcpp)` e `supervisor` em `install`.
 
 
-4. **Build:** Na raiz do workspace: `colcon build --symlink-install`.
+4. **Build:** Na raiz do workspace: `cd ~/master_ros2_ws/` e`colcon build --symlink-install`.
 
 
 5. **Execução Multi-Terminal:**
