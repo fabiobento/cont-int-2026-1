@@ -452,3 +452,426 @@ ros2 run my_cpp_pkg number_publisher
 O nó contendo o publicador está ativo e rodando. Usando os comandos `ros2 topic list` e `ros2 topic echo /number` em outro terminal, você pode encontrar o tópico e ver o que está sendo publicado em tempo real.
 
 Agora que você criou um publicador em C++ e sabe que ele está funcionando, é hora de aprender como criar um assinante (*subscriber*) para esse tópico.
+
+## **Escrevendo um assinante de tópico**
+
+Para continuar melhorando nossa aplicação, vamos criar um novo nó que assinará (*subscribe*) o tópico `/number`. Cada número recebido será adicionado a um contador. Queremos imprimir esse contador toda vez que ele for atualizado.
+
+Como fizemos anteriormente, começaremos com as explicações completas em Python e, em seguida, veremos as especificidades da sintaxe em C++.
+
+### **Escrevendo um assinante em Python**
+
+Você pode encontrar o [código completo para este nó Python no GitHub](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_py_pkg/my_py_pkg/number_counter.py). Muitas coisas que precisamos fazer aqui são idênticas ao que fizemos anteriormente, então não vou detalhar cada passo. Em vez disso, focaremos nas partes mais importantes para escrevermos o assinante.
+
+**Criando um nó Python com um assinante**
+
+Crie um novo nó chamado `number_counter` dentro do pacote `my_py_pkg`:
+
+```bash
+$ cd ~/master_ros2_ws/src/my_py_pkg/my_py_pkg/
+$ touch number_counter.py
+$ chmod +x number_counter.py
+
+```
+
+Neste arquivo, você pode escrever o código para o nó e adicionar um assinante. Aqui está a explicação, passo a passo:
+
+```python
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from example_interfaces.msg import Int64
+```
+
+Como queremos criar um assinante para receber o que enviamos com o publicador, precisamos usar a mesma interface. Portanto, também importamos `Int64`. Em seguida, podemos criar o assinante:
+
+```python
+class NumberCounterNode(Node):
+    def __init__(self):
+        super().__init__("number_counter")
+        self.counter_ = 0
+        self.number_subscriber_ = self.create_subscription(Int64, "number", self.callback_number, 10)
+        self.get_logger().info("Number Counter has been started.")
+
+```
+
+Assim como para os publicadores, criaremos os assinantes no construtor do nó. Aqui, usamos o método `create_subscription()` da classe `Node`. Com este método, você precisa fornecer quatro argumentos:
+
+1. **Interface do tópico:** `Int64`. Esta precisa ser a mesma tanto para o publicador quanto para o assinante.
+2. **Nome do tópico:** `number`. Este é o mesmo nome usado no publicador. Note que não forneço nenhuma barra adicional aqui. Ela será adicionada automaticamente, então o nome do tópico se tornará `/number`.
+3. **Função de *callback*:** Lembra quando eu disse que quase tudo é um *callback* no ROS 2? Usamos um método de *callback* para o assinante aqui também. Quando o nó está em execução (*spinning*), ele permanecerá ativo e todos os *callbacks* registrados estarão prontos para serem chamados. Sempre que uma mensagem for publicada no tópico `/number`, ela será recebida aqui, e poderemos usá-la e processá-la dentro do método de *callback* (que precisamos implementar).
+4. **Tamanho da fila (*Queue size*):** Como visto anteriormente, você pode defini-lo como `10` e não se preocupar com isso por enquanto.
+
+Agora, vamos ver a implementação do método de *callback*, que nomeei como `callback_number`:
+
+**Observação**
+Como boa prática, recomendo nomear os métodos de *callback* para tópicos como `callback_<nome_do_topico>`. Ao adicionar o prefixo `callback_`, você deixa claro que este método é um *callback* e não deve ser chamado diretamente no seu código. Isso pode evitar muitos erros no futuro.
+
+```python
+    def callback_number(self, msg: Int64):
+        self.counter_ += msg.data
+        self.get_logger().info("Counter:  " + str(self.counter_))
+
+```
+
+Em um *callback* de assinante, você recebe a mensagem diretamente nos parâmetros da função. Como sabemos que `Int64` contém um campo `data`, podemos acessá-lo usando `msg.data`.
+
+Agora, adicionamos o número recebido a um atributo `counter_` e imprimimos o contador toda vez com um log do ROS 2.
+
+**Observação**
+Como boa prática, especifiquei o tipo `Int64` para o argumento `msg` do método. Isso não é obrigatório para que o código Python funcione, mas adiciona um nível extra de segurança (temos certeza de que devemos receber um `Int64` e nada mais) e, às vezes, pode fazer com que o preenchimento automático (*auto-completion*) da sua IDE funcione melhor.
+
+Para finalizar o nó, não se esqueça de adicionar a função padrão `main()` após a classe `NumberCounterNode`.
+
+**Executando o assinante em Python**
+
+Agora, para testar o código, adicione um novo executável ao arquivo `setup.py` do seu pacote Python:
+
+```python
+    entry_points={
+        'console_scripts': [
+            "test_node = my_py_pkg.my_first_node:main",
+            "number_publisher = my_py_pkg.number_publisher:main",
+            "number_counter = my_py_pkg.number_counter:main"
+        ],
+    },
+```
+
+Em seguida, compile o pacote e carregue as variáveis do *workspace* (daqui em diante, não escreverei esses comandos toda vez, pois são sempre os mesmos).
+
+Agora, execute cada nó (`number_publisher` e `number_counter`) em um Terminal diferente:
+
+```bash
+ros2 run my_py_pkg number_publisher
+[INFO] [1711529824.816514561] [number_publisher]: Number publisher has been started.
+
+ros2 run my_py_pkg number_counter
+[INFO] [1711528797.363370081] [number_counter]: Number Counter has been started.
+[INFO] [1711528815.739270510] [number_counter]: Counter:  2
+[INFO] [1711528816.739186942] [number_counter]: Counter:  4
+[INFO] [1711528817.739050485] [number_counter]: Counter:  6
+[INFO] [1711528818.738992607] [number_counter]: Counter:  8
+
+```
+
+Como você pode ver, o nó `number_counter` adiciona `2` ao contador a cada `1.0` segundo. Se você vir isso, significa que a comunicação de publicação/assinatura entre seus dois nós está funcionando perfeitamente.
+
+Você pode parar e iniciar o nó `number_publisher` e verá que toda vez que você o iniciar, o `number_counter` continuará a somar os números a partir da contagem atual.
+
+### **Escrevendo um assinante em C++**
+
+Vamos criar o nó `number_counter` em C++. O princípio é o mesmo, então vamos focar apenas na sintaxe aqui.
+
+**Criando um nó C++ com um assinante**
+
+Crie um novo arquivo para o seu nó:
+
+```bash
+cd ~/master_ros2_ws/src/my_cpp_pkg/src/
+touch number_counter.cpp
+```
+
+Abra este arquivo e escreva o código para o nó (mais uma vez, [o código completo](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_cpp_pkg/src/number_counter.cpp) estará no repositório da disciplina no GitHub).
+
+Para criar um assinante em seu nó, use o seguinte código no construtor:
+
+```cpp
+number_subscriber_ = this->create_subscription<example_interfaces::msg::Int64>(
+           "number",
+           10,
+           std::bind(&NumberCounterNode::callbackNumber, this, std::placeholders::_1));
+```
+
+Encontramos os mesmos componentes do Python (mas em uma ordem diferente): interface do tópico, nome do tópico, tamanho da fila e o *callback* para as mensagens recebidas. Para que o `_1` funcione, não se esqueça de adicionar `using namespace std::placeholders;` antes dele.
+
+**Observação**
+Mesmo que as bibliotecas `rclpy` e `rclcpp` devam ser baseadas no mesmo código subjacente, ainda pode haver algumas diferenças na API. Não se preocupe se o código às vezes não parecer o mesmo entre Python e C++.
+
+O objeto assinante é declarado como um atributo privado:
+
+```cpp
+rclcpp::Subscription<example_interfaces::msg::Int64>::SharedPtr number_subscriber_;
+```
+
+Usamos a classe `rclcpp::Subscription` aqui e, mais uma vez, criamos um ponteiro compartilhado (*shared pointer*) para esse objeto.
+
+Temos então o método de *callback*, `callbackNumber`:
+
+```cpp
+void callbackNumber(const example_interfaces::msg::Int64::SharedPtr msg)
+{
+    counter_ += msg->data;
+    RCLCPP_INFO(this->get_logger(), "Counter: %d", counter_);
+}
+```
+
+A mensagem que recebemos no *callback* também é um ponteiro compartilhado (constante). Portanto, **não se esqueça de usar `->**` em vez do ponto `.` ao acessar o campo `data`.
+
+Neste *callback*, adicionamos o número recebido ao contador e o imprimimos.
+
+**Executando o assinante em C++**
+
+Crie um novo executável para esse nó. Abra o `CMakeLists.txt` e adicione o seguinte código:
+
+```cmake
+add_executable(number_counter src/number_counter.cpp)
+ament_target_dependencies(number_counter rclcpp example_interfaces)
+
+install(TARGETS
+  test_node
+  number_publisher
+  number_counter
+  DESTINATION lib/${PROJECT_NAME}/
+)
+```
+
+Em seguida, compile o pacote `my_cpp_pkg`, carregue o *workspace* e execute tanto o nó publicador quanto o nó assinante em Terminais diferentes. Você deve ver uma saída semelhante à que tivemos com o Python.
+
+### **Executando os nós em Python e C++ juntos**
+
+Acabamos de criar um publicador e um assinante tanto em Python quanto em C++. O tópico que utilizamos possui o mesmo nome (`number`) e a mesma interface (`example_interfaces/msg/Int64`).
+
+Se o tópico é o mesmo, isso significa que você poderia iniciar o nó `number_publisher` em Python junto com o nó `number_counter` em C++, por exemplo.
+
+Vamos verificar isso:
+
+```bash
+$ ros2 run my_py_pkg number_publisher
+[INFO] [1711597703.615546913] [number_publisher]: Number publisher has been started.
+
+$ ros2 run my_cpp_pkg number_counter
+[INFO] [1711597740.879160448] [number_counter]: Number Counter has been started.
+[INFO] [1711597741.607444197] [number_counter]: Counter: 2
+[INFO] [1711597742.607408224] [number_counter]: Counter: 4
+
+```
+
+Você também pode tentar o inverso, executando o nó `number_publisher` em C++ com o nó `number_counter` em Python.
+
+**Por que isso funciona?**
+
+Simplesmente porque o ROS 2 é agnóstico em relação à linguagem. Você pode ter um nó escrito em qualquer linguagem de programação suportada, e esse nó poderá se comunicar com todos os outros nós da rede, utilizando tópicos e outras formas de comunicação do ROS 2.
+
+As comunicações do ROS 2 ocorrem em um nível mais baixo, utilizando o *Data Distribution Service* (DDS). Esta é a camada de *middleware* responsável pelo envio e recebimento de mensagens entre os nós. Quando você escreve um nó em Python ou C++, está utilizando a mesma funcionalidade do DDS, apenas com uma API implementada em `rclpy` ou `rclcpp`.
+
+Não vou me aprofundar muito nessa explicação, pois é um assunto bastante avançado. Se há apenas uma coisa para se lembrar de tudo isso, é que nós em Python e C++ podem se comunicar entre si perfeitamente usando os recursos do ROS 2. Você pode criar alguns nós em Python e outros em C++; basta garantir o uso do mesmo nome de comunicação e da mesma interface de ambos os lados.
+
+##  **Ferramentas adicionais para lidar com tópicos**
+
+Você acabou de escrever alguns nós contendo publicadores e assinantes. Agora, exploraremos como as ferramentas do ROS 2 podem ajudá-lo a fazer mais coisas com os tópicos.
+
+> Exploraremos os seguintes tópicos:
+> 
+> * Introspecção com `rqt_graph`
+> * Introspecção e depuração com a linha de comando `ros2 topic`
+> * Alteração do nome de um tópico ao iniciar um nó
+> * Reprodução de dados de tópicos com bags (*ROS 2 bags*)
+
+
+
+### **Introspecção de tópicos com rqt_graph**
+
+Nós usamos o `rqt_graph` para visualizar os nós na Aula 1. Vamos executá-lo novamente e ver como inspecionar o publicador e o assinante que acabamos de criar.
+
+Primeiro, inicie ambos os nós `number_publisher` e `number_counter` (de qualquer pacote: `my_py_pkg` ou `my_cpp_pkg`).
+
+Em seguida, inicie o `rqt_graph` em outro Terminal:
+
+```bash
+rqt_graph
+```
+
+Se necessário, atualize a visualização algumas vezes e selecione `Nodes/Topics (all)`. Você também pode desmarcar a caixa `Dead sinks` e a caixa `Leaf topics`. Isso permitirá que você veja os tópicos mesmo se houver apenas um assinante e nenhum publicador, ou um publicador e nenhum assinante:
+
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/topics-rqt.png)
+**O tópico `number` no rqt_graph** (Fonte: O autor, gerado via `rqt_graph`)
+
+Lá, podemos ver o nó `number_publisher` e o nó `number_counter`. No meio, temos o tópico `/number`, e podemos ver qual nó é um publicador ou um assinante.
+
+O pacote `rqt_graph` pode ser extremamente útil ao depurar tópicos. Imagine que você executa alguns nós e se pergunta por que as mensagens do tópico não são recebidas por um assinante. Talvez esses nós não estejam usando o mesmo nome de tópico. Você pode ver isso facilmente com o `rqt_graph`:
+
+*[Figura 5.8 – Incompatibilidade de nome de tópico entre publicador e assinante]*
+
+Neste exemplo, cometi um erro intencional no nome do tópico dentro do publicador. Em vez de `number`, escrevi `numberr`. Com o `rqt_graph`, posso ver onde está o problema. Os dois nós não estão se comunicando um com o outro.
+
+
+### **A linha de comando ros2 topic**
+
+Com o `ros2 node`, obtemos ferramentas de linha de comando adicionais para os nós. Para os tópicos, usaremos o `ros2 topic`.
+
+Se você executar `ros2 topic -h`, verá que há muitos comandos. Você já conhece alguns deles. Aqui, farei uma rápida recapitulação e explorarei mais alguns comandos que podem ser úteis ao depurar tópicos.
+
+Primeiro, para listar todos os tópicos, use `ros2 topic list`:
+
+```bash
+$ ros2 topic list
+/number
+/parameter_events
+/rosout
+
+```
+
+Como você pode ver, obtemos o tópico `/number`. Você também sempre obterá `/parameter_events` e `/rosout` (todos os logs do ROS 2 são publicados neste tópico).
+
+Com `ros2 topic info <nome_do_topico>`, você pode obter a interface do tópico, bem como o número de publicadores e assinantes para aquele tópico:
+
+```bash
+$ ros2 topic info /number
+Type: example_interfaces/msg/Int64
+Publisher count: 1
+Subscription count: 1
+
+```
+
+Então, para ir mais longe e ver os detalhes da interface, você pode executar o seguinte comando:
+
+```bash
+$ ros2 interface show example_interfaces/msg/Int64
+# some comments
+int64 data
+
+```
+
+Com isso, temos todas as informações de que precisamos para criar um publicador ou assinante adicional para o tópico.
+
+Além disso, também podemos assinar o tópico diretamente pelo Terminal com `ros2 topic echo <nome_do_topico>`. Foi o que fizemos logo após escrever o publicador para garantir que ele estivesse funcionando antes de escrevermos qualquer assinante:
+
+```bash
+$ ros2 topic echo /number
+data: 2
+---
+data: 2
+---
+
+```
+
+Por outro lado, você pode publicar em um tópico diretamente pelo Terminal com `ros2 topic pub -r <frequência> <nome_do_topico> <interface> <mensagem_em_json>`. Para testar isso, pare todos os nós e inicie apenas o nó `number_counter` em um Terminal. Além do log inicial, nada será impresso. Em seguida, execute o seguinte comando em outro Terminal:
+
+```bash
+$ ros2 topic pub -r 2.0 /number example_interfaces/msg/Int64 "{data: 7}"
+publisher: beginning loop
+publishing #1: example_interfaces.msg.Int64(data=7)
+publishing #2: example_interfaces.msg.Int64(data=7)
+
+```
+
+Isso publicará no tópico `/number` a `2.0` Hertz (a cada `0.5` segundos). Ao executar isso, você verá alguns logs no nó `number_counter`, o que significa que as mensagens foram recebidas:
+
+```bash
+[INFO] [1711600360.459298369] [number_counter]: Counter: 7
+[INFO] [1711600360.960216275] [number_counter]: Counter: 14
+[INFO] [1711600361.459896877] [number_counter]: Counter: 21
+
+```
+
+Dessa forma, você pode testar um assinante sem precisar escrever um publicador primeiro. Note que isso só funciona bem para tópicos com uma interface simples. Quando a interface contém muitos campos, torna-se muito complicado escrever tudo no Terminal.
+
+**Observação**
+Tanto o `ros2 topic echo` quanto o `ros2 topic pub` podem economizar muito tempo, e isso também é ótimo para colaborar com outras pessoas em um projeto. Você poderia ser responsável por escrever um publicador, e outra pessoa escreveria um assinante. Com essas ferramentas de linha de comando, ambos podem garantir que a comunicação do tópico esteja funcionando. Assim, quando vocês executarem os dois nós juntos, saberão que os dados enviados ou recebidos estão corretos.
+
+---
+
+### **Alterando o nome de um tópico em tempo de execução**
+
+Na Aula 2, você aprendeu como alterar o nome de um nó em tempo de execução — ou seja, adicionando `--ros-args -r __node:=<novo_nome>` após o comando `ros2 run`.
+
+Então, para qualquer argumento adicional que você passar após o `ros2 run`, adicione `--ros-args`, mas apenas uma vez.
+
+Logo, você também pode alterar o nome de um tópico em tempo de execução. Para fazer isso, adicione outro `-r`, seguido por `<nome_do_topico>:=<novo_nome_do_topico>`.
+
+Por exemplo, vamos renomear nosso tópico de `number` para `my_number`:
+
+```bash
+$ ros2 run my_py_pkg number_publisher --ros-args -r number:=my_number
+
+```
+
+Agora, se iniciarmos o nó `number_counter`, para podermos receber as mensagens, também precisamos modificar o nome do tópico dele:
+
+```bash
+$ ros2 run my_py_pkg number_counter --ros-args -r number:=my_number
+
+```
+
+Com isso, a comunicação funcionará, mas desta vez usando o tópico `my_number`.
+
+Para tornar as coisas um pouco mais interessantes, vamos manter esses dois nós rodando e vamos executar outro publicador para este tópico, usando o mesmo nó `number_publisher`. Como você sabe, não podemos ter dois nós rodando com o mesmo nome. Portanto, teremos que renomear tanto o nó quanto o tópico. Em um terceiro Terminal, execute o seguinte comando:
+
+```bash
+$ ros2 run my_py_pkg number_publisher --ros-args -r __node:=number_publisher_2 -r number:=my_number
+
+```
+
+Após executar isso, você verá que o `number_counter` recebe mensagens duas vezes mais rápido, já que há dois nós publicando uma mensagem a cada `1.0` segundo.
+
+Além disso, vamos iniciar o `rqt_graph`:
+
+*[Figura 5.9 – Dois publicadores e um assinante, com um tópico renomeado]*
+
+Veremos que temos dois nós contendo um publicador no tópico `my_number` e um nó contendo um assinante.
+
+A alteração de nomes de tópicos em tempo de execução será bastante útil para você, especialmente quando quiser executar vários nós existentes que você não pode modificar (por exemplo, os nós dos drivers das câmeras no Raspberry Pi do nosso projeto). Mesmo que você não possa reescrever o código, você pode modificar os nomes na hora de rodar.
+
+---
+
+### **Reproduzindo dados de tópicos com bags**
+
+Imagine este cenário: você está trabalhando em um robô móvel que deve ter um determinado desempenho ao navegar do lado de fora enquanto está chovendo.
+
+Isso significa que você precisará executar o robô nessas condições para poder desenvolver sua aplicação. Há alguns problemas: talvez você não tenha acesso ao robô o tempo todo, ou não possa levá-lo para fora, ou simplesmente não chove todo dia.
+
+Uma solução para isso é usar bags (*ROS 2 bags*). Os bags permitem que você grave um tópico e o reproduza mais tarde. Assim, você pode executar o experimento uma vez com as condições necessárias e, em seguida, reproduzir os dados exatamente como foram gravados. Com esses dados em loop, você pode desenvolver a sua aplicação de controle no conforto do laboratório.
+
+Vamos considerar outro cenário comum em Sistemas Embarcados: você trabalha com um hardware (um sensor ultrassônico ou uma IMU) que ainda não está estável. Na maior parte do tempo, ele não funciona corretamente. Você poderia gravar um bag enquanto o hardware estiver funcionando bem e, em seguida, reproduzir esse bag para desenvolver sua aplicação de controle em vez de tentar usar o hardware de novo e de novo e perder tempo com as falhas dele.
+
+Para trabalhar com bags no ROS 2, você deve usar a ferramenta de linha de comando `ros2 bag`. Vamos aprender como salvar e reproduzir um tópico com bags.
+
+Primeiro, pare todos os nós e execute apenas o nó `number_publisher`.
+
+Já sabemos que o nome do tópico é `/number`. Você pode recuperar isso com `ros2 topic list` se necessário. Em seguida, em outro Terminal, grave o bag com `ros2 bag record <lista_de_topicos> -o <nome_do_bag>`. Para deixar as coisas mais organizadas, sugiro que você crie uma pasta `bags` e grave de dentro dessa pasta:
+
+```bash
+$ mkdir ~/bags
+$ cd ~/bags/
+$ ros2 bag record /number -o bag1
+...
+[INFO] [1711602240.190476880] [rosbag2_recorder]: Subscribed to topic '/number'
+[INFO] [1711602240.190542569] [rosbag2_recorder]: Recording...
+[INFO] [1711602240.190729185] [rosbag2_recorder]: All requested topics are subscribed. Stopping discovery...
+
+```
+
+Neste ponto, o bag está gravando e salvando todas as mensagens recebidas dentro de um banco de dados. Deixe-o rodar por alguns segundos e, em seguida, pare-o com `Ctrl + C`:
+
+```bash
+[INFO] [1711602269.786924027] [rosbag2_cpp]: Writing remaining messages from cache to the bag. It may take a while
+[INFO] [1711602269.787416646] [rosbag2_recorder]: Event publisher thread: Exiting
+[INFO] [1711602269.787547010] [rosbag2_recorder]: Recording stopped
+
+```
+
+O comando `ros2 bag` será encerrado e você terminará com um novo diretório chamado `bag1`. Neste diretório, você encontrará um arquivo `.mcap` contendo as mensagens gravadas e um arquivo YAML com mais informações. Se você abrir este arquivo YAML, verá a duração da gravação, o número de mensagens gravadas e os tópicos que foram gravados.
+
+Agora, você pode reproduzir o bag, o que significa que ele publicará no tópico exatamente como foi feito durante a gravação.
+
+Pare o nó `number_publisher` (pois não queremos dados falsos se misturando com a gravação) e reproduza o bag com `ros2 bag play <caminho_para_o_bag>`:
+
+```bash
+$ ros2 bag play ~/bags/bag1/
+
+```
+
+Isso publicará todas as mensagens gravadas, com a mesma duração da gravação. Então, se você gravou por 3 minutos e 14 segundos, o bag reproduzirá o tópico por 3 minutos e 14 segundos. Depois disso, o bag será encerrado, e você poderá reproduzi-lo novamente se quiser.
+
+Enquanto o bag estiver sendo reproduzido, você pode executar seu(s) assinante(s). Você pode fazer um teste rápido com `ros2 topic echo /number` e ver os dados passando. Você também pode executar seu nó `number_counter`, e verá que as mensagens são recebidas como se o sensor real estivesse lá.
+
+Você agora é capaz de salvar e reproduzir um tópico usando os bags do ROS 2. Você pode explorar opções mais avançadas usando `ros2 bag -h`.
+
+Como você viu, existem várias ferramentas disponíveis para lidar com tópicos. Use essas ferramentas com a maior frequência possível para inspecionar, depurar e testar seus tópicos. Elas pouparão muito do seu tempo ao desenvolver sua aplicação de controle no ROS 2.
+
+Estamos quase terminando com os tópicos. Até agora, tudo o que fizemos foi usar interfaces (*messages*) existentes. A seguir, vamos aprender como criar uma interface de dados personalizada.
+
+> **Observação**
+>
+> É exatamente assim que se trabalha com *Machine Learning* e *MLOps* aplicado à robótica. O fluxo de trabalho padrão da indústria é colocar o robô em operação, usar o `ros2 bag record` para gravar os dados dos sensores (câmera, lidar, posição), e depois usar esse `.mcap` gravado para treinar as redes neurais e algoritmos genéticos *offline*, garantindo que os dados de treino reflitam as condições reais do hardware.

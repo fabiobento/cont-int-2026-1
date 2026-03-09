@@ -9,11 +9,11 @@ class NumberCounterNode(Node):
         super().__init__("number_counter")
         self.counter_ = 0
         self.number_subscriber_ = self.create_subscription(Int64, "number", self.callback_number, 10)
-        self.get_logger().info("Number Counter has been started.")
+        self.get_logger().info("Contagem de números iniciada.")
 
     def callback_number(self, msg: Int64):
         self.counter_ += msg.data
-        self.get_logger().info("Counter:  " + str(self.counter_))
+        self.get_logger().info("Contador:  " + str(self.counter_))
 
 
 def main(args=None):
