@@ -279,7 +279,176 @@ Agora, vá para o diretório raiz do seu workspace e compile o pacote `my_py_pkg
 
 ```bash
 cd ~/master_ros2_ws/
-colcon build --packages-select my_py_pkg
+colcon build --packages-select my_py_pkg --symlink-install
+```
+Usamos `--symlink-install` para que não precisemos rodar o `colcon build` toda vez que modificarmos o nó `number_publisher`.
+
+**Executando o publicador**
+
+Após o pacote ter sido compilado com sucesso, faça o *source* do seu *workspace* e inicie o nó:
+
+```bash
+source ~/master_ros2_ws/install/setup.bash
+ros2 run my_py_pkg number_publisher
+[INFO] [1773082036.235805556] [number_publisher]: O publicador de números foi iniciado
 ```
 
-Você pode adicionar `--symlink-install` se quiser, para não precisar rodar o `colcon build` toda vez que modificar o nó `number_publisher`.
+O nó está rodando, mas além do log inicial, nada é exibido. Isso é normal — não pedimos para o nó imprimir mais nada.
+
+Como sabemos que o publicador está funcionando? Poderíamos escrever um nó assinante agora mesmo e ver se recebemos as mensagens. Mas, antes de fazermos isso, podemos testar o publicador diretamente do Terminal.
+
+Abra uma nova janela de Terminal e liste todos os tópicos:
+
+```bash
+$ ros2 topic list
+/number
+/parameter_events
+/rosout
+```
+
+Aqui, você pode encontrar o tópico `/number`.
+
+> **Observação:**
+>
+>Como você pode ver, há uma barra inicial adicionada à frente do nome do tópico. Nós escrevemos apenas `number` no código, não `/number`. Isso ocorre porque os nomes no ROS 2 (nós, tópicos e assim por diante) são organizados em *namespaces* (espaços de nomes). Mais tarde, veremos que você pode adicionar um *namespace* para colocar todos os seus tópicos ou nós dentro do *namespace* `/abc`, por exemplo. Neste caso, o nome do tópico seria `/abc/number`. Aqui, como nenhum *namespace* é fornecido, uma barra inicial é adicionada ao nome, mesmo que não a tenhamos fornecido no código. Poderíamos chamar isso de *namespace* global.
+
+Com o comando `ros2 topic echo <nome_do_topico>`, você pode assinar o tópico diretamente pelo Terminal e ver o que está sendo publicado. Aprenderemos mais sobre este comando mais adiante:
+
+```bash
+$ ros2 topic echo /number
+data: 2
+---
+data: 2
+---
+```
+
+Como você pode ver, recebemos uma nova mensagem por segundo, que contém um campo `data` com o valor `2`. Isso é exatamente o que queríamos fazer no código.
+
+Com isso, terminamos nosso primeiro publicador em Python. Vamos mudar para C++.
+
+> **Observação:**
+>
+> "Na Engenharia, nós nunca conectamos a saída de um sistema à entrada de outro sem antes medir o sinal com um osciloscópio ou multímetro. O comando `ros2 topic echo` é o nosso 'multímetro virtual'. Ele permite validar se o sinal (os dados) está sendo gerado corretamente pelo publicador antes de perdermos tempo tentando debugar o código do assinante (o controlador)."
+
+### **Escrevendo um publicador em C++**
+
+Aqui, o processo é o mesmo que para o Python. Vamos criar um novo nó e, neste nó, adicionar um publicador e um temporizador (*timer*). Na função de *callback* do temporizador, criaremos uma mensagem e a publicaremos.
+
+Vou passar um pouco mais rápido por esta seção, pois as explicações lógicas são as mesmas. Focaremos apenas nas especificidades da sintaxe do C++ com o ROS 2.
+
+> **Observação**
+>
+> Para tudo relacionado a C++ neste material, certifique-se de acompanhar as explicações usando o código no GitHub em uma janela ao lado. Posso não fornecer o código completo aqui no texto, apenas os trechos importantes que são importantes para você entender. *(Nota: O código completo estará no repositório da disciplina).*
+
+**Criando um nó com um publicador e um temporizador**
+
+Primeiro, vamos criar um novo arquivo para o nosso nó `number_publisher` no pacote `my_cpp_pkg`:
+
+```bash
+$ cd ~/master_ros2_ws/src/my_cpp_pkg/src/
+$ touch number_publisher.cpp
+```
+
+Abra este arquivo e escreva o código para o nó. Você pode começar a partir do [template de Programação Orientada a Objetos (POO)](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/scripts/node_oop_template/node_oop_template.cpp) e adicionar o publicador, o temporizador e a função de *callback*.
+
+Vou agora comentar sobre algumas linhas importantes:
+
+```cpp
+#include "rclcpp/rclcpp.hpp"
+#include "example_interfaces/msg/int64.hpp"
+
+```
+
+Para incluir uma interface para um tópico em C++, use `"<nome_do_pacote>/msg/<nome_da_mensagem>.hpp"`. Note que o nome do arquivo da mensagem fica em letras minúsculas.
+
+Em seguida, no construtor, adicione o seguinte:
+
+```cpp
+number_publisher_ = this->create_publisher<example_interfaces::msg::Int64>("number", 10);
+
+```
+
+Em C++, também usamos o método `create_publisher()` da classe `Node`. A sintaxe é um pouco diferente, pois utiliza *templates* (`< >`), mas você ainda pode identificar a interface do tópico, o nome do tópico e o tamanho da fila (como lembrete, você pode defini-lo como `10` todas as vezes por enquanto).
+
+O publicador também é declarado como um atributo privado na classe:
+
+```cpp
+rclcpp::Publisher<example_interfaces::msg::Int64>::SharedPtr number_publisher_;
+
+```
+
+Como você pode ver, usamos a classe `rclcpp::Publisher` e, como em muitas coisas no ROS 2, usamos um ponteiro inteligente compartilhado (*shared pointer*). Para várias classes comuns, o ROS 2 fornece o `::SharedPtr`, o que seria a mesma coisa que escrever `std::shared_ptr<o_publicador>`.
+
+Vamos voltar ao construtor:
+
+```cpp
+number_timer_ = this->create_wall_timer(std::chrono::seconds(1), std::bind(&NumberPublisherNode::publishNumber, this));
+RCLCPP_INFO(this->get_logger(), "Number publisher has been started.");
+
+```
+
+Após criar o publicador, criamos um temporizador para chamar o método `publishNumber` a cada `1.0` segundo. Por fim, imprimimos um log para sabermos que o código do construtor foi executado com sucesso.
+
+```cpp
+void publishNumber(){
+    auto msg = example_interfaces::msg::Int64();
+    msg.data = number_;
+    number_publisher_->publish(msg);
+}
+
+```
+
+Este é o método de *callback*. Assim como no Python, criamos um objeto a partir da classe da interface, preenchemos qualquer campo desta interface (no caso, `data`) e publicamos a mensagem.
+
+**Compilando e executando o publicador**
+
+Uma vez que você tenha escrito o nó com o publicador, temporizador e função de *callback*, é hora de compilá-lo.
+
+Como fizemos para o Python, abra o arquivo `package.xml` do pacote `my_cpp_pkg` e adicione uma linha para a dependência ao `example_interfaces`:
+
+```xml
+<depend>rclcpp</depend>
+<depend>example_interfaces</depend>
+
+```
+
+Em seguida, abra o arquivo `CMakeLists.txt` do pacote `my_cpp_pkg` e adicione as seguintes linhas:
+
+```cmake
+find_package(rclcpp REQUIRED)
+find_package(example_interfaces REQUIRED)
+
+add_executable(test_node src/my_first_node.cpp)
+ament_target_dependencies(test_node rclcpp)
+
+add_executable(number_publisher src/number_publisher.cpp)
+ament_target_dependencies(number_publisher rclcpp example_interfaces)
+
+install(TARGETS
+  test_node
+  number_publisher
+  DESTINATION lib/${PROJECT_NAME}/
+)
+
+```
+
+Para qualquer nova dependência de mensagem, precisamos adicionar uma nova linha `find_package()`.
+
+Em seguida, criamos um novo executável. Note que também fornecemos `example_interfaces` nos argumentos de `ament_target_dependencies()`. Se você omitir isso, o vinculador (linker) do C++ falhará e você receberá um erro durante a compilação.
+
+Por fim, não há necessidade de recriar o bloco `install()`. Apenas adicione o nome do novo executável em uma nova linha dentro dele, **sem vírgulas** entre as linhas (diferente do Python).
+
+Agora, você pode compilar, carregar as variáveis de ambiente (*source*) e executar:
+
+```bash
+cd ~/master_ros2_ws/
+colcon build --packages-select my_cpp_pkg
+source install/setup.bash
+ros2 run my_cpp_pkg number_publisher
+[INFO] [1711528108.225880935] [number_publisher]: O publicador de números foi iniciado.
+
+```
+
+O nó contendo o publicador está ativo e rodando. Usando os comandos `ros2 topic list` e `ros2 topic echo /number` em outro terminal, você pode encontrar o tópico e ver o que está sendo publicado em tempo real.
+
+Agora que você criou um publicador em C++ e sabe que ele está funcionando, é hora de aprender como criar um assinante (*subscriber*) para esse tópico.
