@@ -860,7 +860,6 @@ Pare o nó `number_publisher` (pois não queremos dados falsos se misturando com
 
 ```bash
 $ ros2 bag play ~/bags/bag1/
-
 ```
 
 Isso publicará todas as mensagens gravadas, com a mesma duração da gravação. Então, se você gravou por 3 minutos e 14 segundos, o bag reproduzirá o tópico por 3 minutos e 14 segundos. Depois disso, o bag será encerrado, e você poderá reproduzi-lo novamente se quiser.
@@ -876,3 +875,283 @@ Estamos quase terminando com os tópicos. Até agora, tudo o que fizemos foi usa
 > **Observação**
 >
 > É exatamente assim que se trabalha com *Machine Learning* e *MLOps* aplicado à robótica. O fluxo de trabalho padrão da indústria é colocar o robô em operação, usar o `ros2 bag record` para gravar os dados dos sensores (câmera, lidar, posição), e depois usar esse `.mcap` gravado para treinar as redes neurais e algoritmos genéticos *offline*, garantindo que os dados de treino reflitam as condições reais do hardware.
+
+## **Criando uma interface personalizada para um tópico**
+
+Ao criar um publicador (*publisher*) ou assinante (*subscriber*) para um tópico, você sabe que precisa usar um nome e uma interface.
+
+É bem fácil publicar ou assinar um tópico existente: você encontra o nome e a interface usando a linha de comando `ros2` e usa isso no seu código.
+
+Agora, se você quiser iniciar um publicador ou assinante para um novo tópico, precisará escolher um nome e uma interface por conta própria:
+
+* **Nome:** Sem problemas — é apenas uma cadeia de caracteres.
+* **Interface:** Você tem duas opções — usar uma interface existente que funcione com o seu tópico ou criar uma nova.
+
+Vamos tentar aplicar a filosofia do ROS 2 de não reinventar a roda. Ao criar um novo tópico, verifique se há alguma interface existente que atenda às suas necessidades. Se houver, use-a; não a recrie.
+
+Primeiro, você aprenderá onde encontrar interfaces existentes. Depois, aprenderá como criar uma nova.
+
+**Observação**
+É bastante comum usar a palavra *mensagem* (*message*) quando falamos sobre interfaces de tópicos. Eu poderia ter nomeado esta seção como *Criando uma mensagem personalizada*. Na próxima seção, quando eu falar sobre mensagens, estarei me referindo a interfaces de tópicos.
+
+### **Usando interfaces existentes**
+
+Antes de iniciar um novo publicador ou assinante para um tópico, reserve um tempo para pensar sobre que tipo de dados você deseja enviar ou receber. Em seguida, verifique se uma interface já existente contém o que você precisa.
+
+**Onde encontrar interfaces**
+
+Assim como os nós, as interfaces são organizadas em pacotes. Você pode encontrar os pacotes mais comuns para interfaces do ROS 2 aqui: [https://github.com/ros2/common_interfaces](https://github.com/ros2/common_interfaces). Nem todas as interfaces existentes estão listadas aqui, mas já é bastante coisa. Para outras interfaces, uma simples pesquisa na internet deve levá-lo ao repositório correspondente no GitHub.
+
+Neste repositório de interfaces comuns, você pode encontrar a mensagem `Twist` que usamos com o Turtlesim, dentro do pacote `geometry_msgs`. Como você pode ver, para interfaces de tópicos, temos então uma pasta adicional `msg`, que contém todas as definições de mensagens para aquele pacote.
+
+Agora, digamos que você queira criar um nó de *driver* para uma câmera e publicar as imagens em um tópico. Se você olhar dentro do pacote `sensor_msgs` e, em seguida, dentro da pasta `msg`, encontrará um arquivo chamado `Image.msg`. Esta mensagem `Image` provavelmente é adequada para as suas necessidades. Ela também é usada por muitas outras pessoas, o que facilitará ainda mais a sua vida.
+
+**Usando uma interface existente no seu código**
+
+Para usar esta mensagem, certifique-se de ter instalado o pacote que a contém — neste caso, `sensor_msgs`. Como um lembrete rápido, para instalar um pacote ROS 2, você pode rodar `sudo apt install ros-<distro>-<nome_do_pacote>`:
+
+```bash
+sudo apt install ros-jazzy-sensor-msgs
+```
+
+Talvez o pacote já estivesse instalado. Caso contrário, carregue as variáveis do seu ambiente (*source*) novamente em seguida. Então, você pode encontrar os detalhes sobre a interface com `ros2 interface show <interface>`:
+
+```bash
+ros2 interface show sensor_msgs/msg/Image
+```
+
+Para usar esta mensagem no seu código, basta seguir o que fizemos neste capítulo (com a mensagem `example_interfaces/msg/Int64`):
+
+1. No arquivo `package.xml` do pacote onde você escreve seus nós, adicione a dependência ao pacote da interface.
+2. No seu código, importe a mensagem e use-a no seu publicador ou assinante.
+3. **Apenas para C++:** Adicione a dependência ao pacote da interface no arquivo `CMakeLists.txt`.
+
+Veremos outro exemplo deste processo muito em breve, logo após criarmos nossa própria interface.
+
+Neste ponto, você sabe como encontrar e usar mensagens existentes no seu código. Mas você deve sempre fazer isso?
+
+**Quando não usar mensagens existentes**
+
+Para casos de uso comuns, sensores e atuadores, você provavelmente encontrará o que precisa. No entanto, se a interface não corresponder exatamente ao que você deseja, você terá que criar uma nova.
+
+Existem alguns pacotes contendo interfaces básicas, como `example_interfaces` ou até mesmo `std_msgs`. Você pode se sentir tentado a usá-las no seu código real. Como melhor prática, é melhor evitar isso. Basta ler os comentários das definições dessas mensagens para ter certeza disso:
+
+```bash
+ros2 interface show example_interfaces/msg/Int64
+# This is an example message of using a primitive datatype, int64.
+# If you want to test with this that's fine, but if you are deploying it into a system you should create a semantically meaningful message type.
+# If you want to embed it in another message, use the primitive data type instead.
+int64 data
+
+ros2 interface show std_msgs/msg/Int64
+# This was originally provided as an example message.
+# It is deprecated as of Foxy
+# It is recommended to create your own semantically meaningful message.
+# However if you would like to continue using this please use the equivalent in example_msgs.
+int64 data
+
+```
+
+Como você pode ver, o pacote `std_msgs` está obsoleto (*deprecated*), e o pacote `example_interfaces` é recomendado apenas para fazer testes — que foi o que fizemos neste capítulo até agora para nos ajudar a aprender os vários conceitos de tópicos.
+
+Como regra geral, se você não encontrar exatamente o que precisa nos pacotes de interfaces existentes, então crie a sua própria interface. Não é difícil de fazer e será sempre o mesmo processo.
+
+### **Criando uma nova interface de tópico**
+
+Você agora criará sua primeira interface personalizada para um tópico. Veremos como configurar um pacote para isso, como criar e compilar (*build*) a interface e como usá-la em nosso código.
+
+**Criando e configurando um pacote de interfaces**
+
+Antes de criarmos qualquer interface de tópico (mensagem), precisamos criar um novo pacote e configurá-lo para construir interfaces. Como boa prática, na sua aplicação, você terá **um pacote dedicado** a interfaces personalizadas. Isso significa que você cria interfaces apenas neste pacote e mantém este pacote apenas para interfaces — sem nós ou outras coisas, apenas interfaces. Isso tornará muito mais fácil quando você estiver escalando a aplicação e ajudará a evitar a criação de uma bagunça de dependências.
+
+Uma prática comum ao nomear este pacote de interfaces é começar com o nome da sua aplicação ou robô e adicionar o sufixo `_interfaces`. Portanto, se o seu robô se chama `abc`, você deve usar `abc_interfaces`.
+
+Não temos um robô para este exemplo, então vamos apenas nomear o pacote como `my_robot_interfaces`.
+
+Crie um novo pacote com o tipo de build `ament_cmake` e sem dependências. Você nem precisa fornecer o tipo de build, pois o `ament_cmake` é o usado por padrão para C++ e criação de mensagens. Navegue até o diretório `src` do seu *workspace* e crie este pacote:
+
+```bash
+$ cd ~/master_ros2_ws/src/
+$ ros2 pkg create my_robot_interfaces
+
+```
+
+Neste ponto, seu *workspace* deve conter três pacotes: `my_py_pkg`, `my_cpp_pkg` e `my_robot_interfaces`.
+
+Precisamos configurar este novo pacote e modificar algumas coisas para que ele possa construir mensagens. Entre no pacote, remova os diretórios `src` e `include` (pois não escreveremos código C++ nele) e crie uma nova pasta `msg`:
+
+```bash
+$ cd my_robot_interfaces/
+$ rm -r src/ include/
+$ mkdir msg
+
+```
+
+Agora, abra o arquivo `package.xml` deste pacote. Após `<buildtool_depend>ament_cmake</buildtool_depend>`, adicione as seguintes três linhas. Recomendo que você simplesmente copie e cole para não cometer nenhum erro de digitação:
+
+```xml
+<build_depend>rosidl_default_generators</build_depend>
+<exec_depend>rosidl_default_runtime</exec_depend>
+<member_of_group>rosidl_interface_packages</member_of_group>
+
+```
+
+Com isso, o arquivo `package.xml` está completo e você não precisará fazer mais nada com ele por enquanto.
+
+Abra o arquivo `CMakeLists.txt`. Após `find_package(ament_cmake REQUIRED)` e antes de `ament_package()`, adicione as seguintes linhas (você também pode remover o bloco `if(BUILD_TESTING)`):
+
+```cmake
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  # adicionaremos o nome das nossas interfaces personalizadas aqui depois
+)
+
+ament_export_dependencies(rosidl_default_runtime)
+
+```
+
+Não há muito o que entender sobre essas linhas que você está adicionando. Elas encontrarão algumas dependências (pacotes `rosidl`) e prepararão seu pacote para que ele possa construir interfaces.
+
+Neste ponto, seu pacote está pronto e você pode adicionar novas interfaces. Você só precisará fazer esta fase de configuração uma vez. Daqui para frente, adicionar uma nova interface será muito rápido.
+
+
+
+### **Criando e construindo uma nova interface de tópico**
+
+Digamos que queremos criar um publicador para enviar algum tipo de status de hardware do nosso robô, incluindo a versão do robô, a temperatura interna, um sinalizador (flag) para saber se os motores estão prontos e uma mensagem de depuração.
+
+Pesquisamos nas interfaces existentes e nada corresponde perfeitamente. Como você pode nomear esta nova interface? Aqui estão as regras que você deve seguir:
+
+* **Use UpperCamelCase** — por exemplo, `HardwareStatus`.
+* **Não escreva `Msg` ou `Interface` no nome**, pois isso adicionaria redundância desnecessária.
+* **Use `.msg**` para a extensão do arquivo.
+
+Seguindo essas regras, crie um novo arquivo chamado `HardwareStatus.msg` na pasta `msg`:
+
+```bash
+$ cd ~/master_ros2_ws/src/my_robot_interfaces/msg/
+$ touch HardwareStatus.msg
+
+```
+
+Dentro deste arquivo, podemos adicionar a definição para a mensagem. Aqui está o que você pode usar:
+
+* **Tipos embutidos (*Built-in types*)**, como `bool`, `byte`, `int64`, `float64` e `string`, bem como arrays desses tipos.
+* **Outras mensagens existentes**, usando o nome do pacote, seguido pelo nome da mensagem — por exemplo, `geometry_msgs/Twist` (não adicione a pasta `msg` aqui).
+
+Para simplificar as coisas, começaremos com apenas tipos embutidos. Escreva o seguinte dentro do arquivo da mensagem:
+
+```msg
+int64 version
+float64 temperature
+bool are_motors_ready
+string debug_message
+
+```
+
+Para cada campo, fornecemos o tipo de dado e, em seguida, o nome do campo.
+
+Agora, como vamos construir (*build*) esta mensagem? Como podemos obter uma classe Python ou C++ que possamos importar/incluir e usar no nosso código?
+
+Para construir a mensagem, você simplesmente precisa adicionar uma linha ao `CMakeLists.txt`, especificando o caminho relativo para o arquivo da mensagem:
+
+```cmake
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/HardwareStatus.msg"
+)
+
+```
+
+Para cada nova interface que você construir neste pacote, você adicionará uma linha dentro da função `rosidl_generate_interfaces()`. **Não adicione vírgulas** entre as linhas.
+
+Agora, salve todos os arquivos e compile o seu novo pacote:
+
+```bash
+$ cd ~/master_ros2_ws/
+$ colcon build --packages-select my_robot_interfaces
+Starting >>> my_robot_interfaces
+Finished <<< my_robot_interfaces [4.00s]
+Summary: 1 package finished [4.28s]
+
+```
+
+O sistema de build pegará a definição de interface que você escreveu e a usará para gerar o código-fonte automaticamente tanto para Python quanto para C++:
+
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/build-system-interface.jpg)
+**Sistema de build para interfaces** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
+
+
+Depois de compilar o pacote, certifique-se de carregar as variáveis do ambiente (*source*). Você deverá ser capaz de ver sua interface pelo Terminal (não se esqueça de usar o preenchimento automático com a tecla *Tab* para construir o comando mais rápido e ter certeza de que tem o nome correto):
+
+```bash
+$ source ~/.bashrc
+$ ros2 interface show my_robot_interfaces/msg/HardwareStatus
+int64 version
+float64 temperature
+bool are_motors_ready
+string debug_message
+
+```
+
+Se você vir isso, significa que o processo de build foi bem-sucedido. Se você não conseguir ver a interface no Terminal, precisará voltar e verificar se fez todas as etapas corretamente (especialmente no `CMakeLists.txt`).
+
+**Usando sua mensagem personalizada no seu código**
+
+Digamos que você queira usar a sua nova interface no nó `number_publisher` que você criou neste capítulo, dentro do pacote `my_py_pkg`.
+
+Primeiro, abra o arquivo `package.xml` do pacote `my_py_pkg` e adicione uma dependência ao `my_robot_interfaces`:
+
+```xml
+<depend>rclpy</depend>
+<depend>example_interfaces</depend>
+<depend>my_robot_interfaces</depend>
+
+```
+
+Em seguida, para o **Python**, faça o seguinte:
+
+Importe a mensagem adicionando a seguinte linha no topo do seu código:
+
+```python
+from my_robot_interfaces.msg import HardwareStatus
+
+```
+
+Ao criar o publicador, especifique a interface `HardwareStatus`.
+Crie uma mensagem no seu código, preenchendo os campos assim:
+
+```python
+msg = HardwareStatus()
+msg.temperature = 34.5
+msg.version = 1
+msg.are_motors_ready = True
+msg.debug_message = "All systems go!"
+
+```
+
+**Observação para VS Code em Python:**
+Se você estiver usando o VS Code, a mensagem pode não ser reconhecida e ficar sublinhada em vermelho após a importação. Feche o VS Code e abra-o novamente em um Terminal onde você já tenha feito o `source ~/.bashrc`.
+
+Se você quiser usar esta mensagem no seu nó **C++** do pacote `my_cpp_pkg`:
+
+1. Adicione a dependência ao `my_robot_interfaces` no arquivo `package.xml` e no `CMakeLists.txt` do `my_cpp_pkg`.
+2. Importe a mensagem adicionando a seguinte linha de `#include` no seu código:
+
+```cpp
+#include "my_robot_interfaces/msg/hardware_status.hpp"
+
+```
+
+3. Crie um publicador e especifique a interface com `<my_robot_interfaces::msg::HardwareStatus>`.
+4. Crie uma mensagem no seu código, assim:
+
+```cpp
+auto msg = my_robot_interfaces::msg::HardwareStatus();
+msg.temperature = 34.5;
+msg.are_motors_ready = true;
+
+```
+
+Você agora pode criar e usar a sua interface personalizada para tópicos. Como você viu, primeiro, verifique se há alguma interface existente que atenda às suas necessidades. Se houver, não reinvente a roda. Se nada se encaixar perfeitamente, no entanto, não hesite em criar sua própria interface. Para fazer isso, você deve criar um pacote novo dedicado a interfaces. Uma vez que você tenha terminado o processo de configuração para este pacote, você pode adicionar quantas interfaces quiser.
