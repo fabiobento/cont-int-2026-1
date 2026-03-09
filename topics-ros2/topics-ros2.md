@@ -694,7 +694,7 @@ O pacote `rqt_graph` pode ser extremamente útil ao depurar tópicos. Imagine qu
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/topics-rqt-error.png)
 **Incompatibilidade de nome de tópico entre publicador e assinante** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
 
-Neste exemplo, cometi um erro intencional no nome do tópico dentro do publicador. Em vez de `number`, escrevi `numberr`. Com o `rqt_graph`, posso ver onde está o problema. Os dois nós não estão se comunicando um com o outro.
+Neste exemplo, foi cometido um erro intencional no nome do tópico dentro do publicador. Em vez de `number`, escreveu-se `numberr`. Com o `rqt_graph`, posso ver onde está o problema. Os dois nós não estão se comunicando um com o outro.
 
 
 ### **A linha de comando ros2 topic**
@@ -729,7 +729,7 @@ Então, para ir mais longe e ver os detalhes da interface, você pode executar o
 
 ```bash
 $ ros2 interface show example_interfaces/msg/Int64
-# some comments
+# alguns comentários
 int64 data
 
 ```
@@ -750,7 +750,7 @@ data: 2
 Por outro lado, você pode publicar em um tópico diretamente pelo Terminal com `ros2 topic pub -r <frequência> <nome_do_topico> <interface> <mensagem_em_json>`. Para testar isso, pare todos os nós e inicie apenas o nó `number_counter` em um Terminal. Além do log inicial, nada será impresso. Em seguida, execute o seguinte comando em outro Terminal:
 
 ```bash
-$ ros2 topic pub -r 2.0 /number example_interfaces/msg/Int64 "{data: 7}"
+ros2 topic pub -r 2.0 /number example_interfaces/msg/Int64 "{data: 7}"
 publisher: beginning loop
 publishing #1: example_interfaces.msg.Int64(data=7)
 publishing #2: example_interfaces.msg.Int64(data=7)
@@ -771,7 +771,6 @@ Dessa forma, você pode testar um assinante sem precisar escrever um publicador 
 **Observação**
 Tanto o `ros2 topic echo` quanto o `ros2 topic pub` podem economizar muito tempo, e isso também é ótimo para colaborar com outras pessoas em um projeto. Você poderia ser responsável por escrever um publicador, e outra pessoa escreveria um assinante. Com essas ferramentas de linha de comando, ambos podem garantir que a comunicação do tópico esteja funcionando. Assim, quando vocês executarem os dois nós juntos, saberão que os dados enviados ou recebidos estão corretos.
 
----
 
 ### **Alterando o nome de um tópico em tempo de execução**
 
@@ -784,14 +783,14 @@ Logo, você também pode alterar o nome de um tópico em tempo de execução. Pa
 Por exemplo, vamos renomear nosso tópico de `number` para `my_number`:
 
 ```bash
-$ ros2 run my_py_pkg number_publisher --ros-args -r number:=my_number
+ros2 run my_py_pkg number_publisher --ros-args -r number:=my_number
 
 ```
 
 Agora, se iniciarmos o nó `number_counter`, para podermos receber as mensagens, também precisamos modificar o nome do tópico dele:
 
 ```bash
-$ ros2 run my_py_pkg number_counter --ros-args -r number:=my_number
+ros2 run my_py_pkg number_counter --ros-args -r number:=my_number
 
 ```
 
@@ -808,13 +807,15 @@ Após executar isso, você verá que o `number_counter` recebe mensagens duas ve
 
 Além disso, vamos iniciar o `rqt_graph`:
 
-*[Figura 5.9 – Dois publicadores e um assinante, com um tópico renomeado]*
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/topics-renamed-nodes.png)
+**Dois publicadores e um assinante, com um tópico renomeado** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
+
 
 Veremos que temos dois nós contendo um publicador no tópico `my_number` e um nó contendo um assinante.
 
 A alteração de nomes de tópicos em tempo de execução será bastante útil para você, especialmente quando quiser executar vários nós existentes que você não pode modificar (por exemplo, os nós dos drivers das câmeras no Raspberry Pi do nosso projeto). Mesmo que você não possa reescrever o código, você pode modificar os nomes na hora de rodar.
 
----
 
 ### **Reproduzindo dados de tópicos com bags**
 
