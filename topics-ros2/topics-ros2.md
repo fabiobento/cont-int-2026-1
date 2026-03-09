@@ -17,7 +17,7 @@ Os tópicos são usados em toda parte no ROS 2. Quer você deseje criar uma apli
 
 ## **O que é um tópico ROS 2?**
 
-Você já teve contato com o conceito de tópicos através de experimentos práticos na Aula 1. Com isso, você já deve ter uma intuição básica de como as coisas funcionam.
+Você já teve contato com o conceito de tópicos através do controle da tartaruga pelo teclado na Aula 1. Nesse experimento, o nó do teclado enviava comandos de velocidade para o nó da tartaruga. Com isso, você já deve ter uma intuição básica de como as coisas funcionam.
 
 Agora vamos explicar os tópicos usando uma analogia da vida real que facilita o entendimento. Vamos construir um exemplo, passo a passo, e depois recapitular os pontos mais importantes.
 
@@ -31,7 +31,7 @@ Neste caso, podemos dizer que **98,7 é um tópico**. O transmissor de rádio é
 
 
 
-![](https://github.com/fabiobento/cont-int-2026-1/raw/main/dev-ros2/imagens/radio-pub.jpg)
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/radio-pub.jpg)
 **Transmissor de rádio publicando no tópico 98,7.** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
 
 Agora, digamos que você queira ouvir essa rádio do seu celular. Você pedirá ao seu celular para se conectar à 98.7 para receber os dados.
@@ -44,12 +44,12 @@ Da mesma forma, com os tópicos do ROS 2, tanto o publicador quanto o assinante 
 
 É isso que define um tópico: um **nome** e uma **interface**:
 
-*[Figura 5.2 – Publicador e assinante usando a mesma interface]*
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/radio-pub-sub.jpg)
+**Publicador e assinante usando a mesma interface** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
+
 
 Com isso, a comunicação está completa. O transmissor de rádio publica um sinal AM no tópico 98.7. O celular assina o tópico 98.7, decodificando um sinal AM.
 
----
 
-### **Dica de Adaptação para o Material do IFES:**
-
-Na sua apostila ou repositório, você pode querer alterar a frase *"experimentos práticos no Capítulo 3"* para *"experimentos práticos na Aula 1 (quando controlamos a tartaruga pelo teclado)"*. Isso conecta a analogia da rádio diretamente à experiência que eles já tiveram enviando dados de movimento (`Twist`) para o simulador.
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/radio-pub-sub-mult.jpg)
+**Tópico com vários assinantes** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
