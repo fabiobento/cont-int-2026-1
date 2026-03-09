@@ -139,9 +139,147 @@ $ touch number_publisher.py
 $ chmod +x number_publisher.py
 ```
 
-Agora, abra este arquivo, utilize o template de nó orientado a objetos (disponibilizado na Aula 2) e modifique os campos necessários para usar nomes que façam sentido:
+Agora, abra este arquivo python que acabou de criar, e utilize o template de nó orientado a objetos (disponibilizado na Aula 2 - [Template para um nó Python](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/scripts/node_oop_template/node_oop_template.py)) e modifique os campos necessários para usar nomes que façam sentido:
 
 ```python
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
 
+
+class NumberPublisherNode(Node):
+    def __init__(self):
+        super().__init__("number_publisher")
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = NumberPublisherNode()
+    rclpy.spin(node)
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
 ```
 
+Agora que você tem uma função `main()` e uma classe `NumberPublisherNode` para o seu nó, podemos criar um publicador.
+
+**Adicionando um publicador ao nó**
+
+Onde podemos criar um publicador neste nó? Faremos isso no construtor.
+
+> E antes de escrevermos o código, precisamos nos fazer uma pergunta: qual é o nome e a interface para este tópico?
+> 
+> * **Caso 1:** Você está publicando em um tópico que já existe (outros publicadores ou assinantes nesse tópico), e então você usa o mesmo nome e interface.
+> * **Caso 2:** Você cria um publicador para um tópico novo (o que estamos fazendo agora), e então você precisa escolher um nome e uma interface.
+
+Para o nome, vamos manter as coisas simples e usar `number`. Se publicarmos um número, podemos esperar receber esse número em um tópico `number`. Se você fosse publicar uma temperatura, poderia nomear o tópico como `temperature`.
+
+Para a interface, você tem duas escolhas: usar uma interface existente ou criar uma personalizada. Para começar, usaremos uma interface existente. Para facilitar, eu simplesmente direi qual usar; você aprenderá a encontrar outras interfaces por conta própria mais tarde.
+
+Vamos usar `example_interfaces/msg/Int64`. Para obter mais detalhes sobre o que há na interface, podemos rodar `ros2 interface show <nome_da_interface>` no Terminal:
+
+```bash
+$ ros2 interface show example_interfaces/msg/Int64
+# Alguns comentários
+int64 data
+```
+
+Isso é exatamente o que precisamos: um número `int64`.
+
+Agora que temos essa informação, vamos criar o publicador. Primeiro, importe a interface e, em seguida, crie o publicador no construtor:
+
+```python
+import rclpy
+from rclpy.node import Node
+from example_interfaces.msg import Int64
+
+class NumberPublisherNode(Node):
+    def __init__(self):
+        super().__init__("number_publisher")
+        self.number_publisher_ = self.create_publisher(Int64,"number", 10)
+```  
+
+Para importar a interface, devemos especificar o nome do pacote (`example_interfaces`), depois o nome da pasta para mensagens de tópico (`msg`) e, finalmente, a classe para a interface (`Int64`).
+
+Para criar o publicador, devemos usar o método `create_publisher()` da classe `Node`. Herdar dessa classe nos dá acesso a todas as funcionalidades do ROS 2. Neste método, você deve fornecer três argumentos:
+
+* **Interface do tópico:** Usaremos `Int64` do pacote `example_interfaces`.
+* **Nome do tópico:** Como definido anteriormente, este é `number`.
+* **Tamanho da fila (*Queue size*):** Se as mensagens forem publicadas muito rápido e os assinantes não conseguirem acompanhar, as mensagens serão armazenadas em um *buffer* (até 10, neste caso) para que não sejam perdidas. Isso pode ser importante se você enviar mensagens grandes (como imagens) em alta frequência, em uma rede com perda de pacotes. Como estamos apenas começando, não há necessidade de se preocupar com isso; recomendo que você simplesmente defina o tamanho da fila como `10` todas as vezes.
+
+Com isso, agora temos um publicador no tópico `number`. No entanto, se você simplesmente executar seu código assim, nada acontecerá. Um publicador não publicará automaticamente em um tópico. Você tem que escrever o código para que isso aconteça.
+
+**Publicando com um temporizador (*Timer*)**
+
+Um comportamento comum em robótica é realizar uma ação *X* a cada *Y* segundos — por exemplo, publicar uma imagem de uma câmera a cada 0,5 segundos ou, neste caso, publicar um número em um tópico a cada 1,0 segundo. Como visto na **Aula 2**, para fazer isso, você deve implementar um temporizador e uma função de *callback*.
+
+Modifique o código dentro do nó para que você publique no tópico a partir de um *callback* de temporizador:
+
+```python
+def __init__(self):
+    super().__init__("number_publisher")
+    self.number_ = 2
+    self.number_publisher_ = self.create_publisher(Int64, "number",10)
+    self.number_timer_ = self.create_timer(1.0, self.publish_number_callback)
+    self.get_logger().info("O publicador de números foi iniciado.")
+
+def publish_number_callback(self):
+    msg = Int64()
+    msg.data = self.number_
+    self.number_publisher_.publish(msg)
+```
+
+Após criar o publicador com `self.create_publisher()`, criamos um temporizador (*timer*) com `self.create_timer()`. Aqui, dizemos que queremos que o método `publish_number()` seja chamado a cada `1.0` segundo. Isso acontecerá enquanto o nó estiver em execução (processando o `spin`).
+
+Além disso, também adicionei um *log* no final do construtor para informar que o nó foi iniciado. Geralmente faço isso como uma boa prática, para poder ver no Terminal quando o nó está totalmente inicializado.
+
+No método `publish_number()`, nós publicamos no tópico:
+
+* Criamos um objeto a partir da classe `Int64`. Esta é a interface — em outras palavras, a mensagem a ser enviada.
+* Este objeto contém um campo `data`. Como sabemos disso? Descobrimos isso anteriormente quando rodamos `ros2 interface show example_interfaces/msg/Int64`. Portanto, fornecemos um número no campo `data` da mensagem. Por simplicidade, especificamos o mesmo número toda vez que executamos a função de *callback*.
+* Publicamos a mensagem usando o método `publish()` do publicador.
+
+Esta estrutura de código é super comum no ROS 2. Sempre que você quiser publicar dados de um sensor, você escreverá algo semelhante.
+
+**Compilando o publicador**
+
+Para testar seu código, você precisa instalar o nó.
+
+Antes de fazermos isso, como estamos usando uma nova dependência (o pacote `example_interfaces`), também precisamos adicionar uma linha ao arquivo `package.xml` do pacote `my_py_pkg`:
+
+```xml
+<depend>rclpy</depend>
+<depend>example_interfaces</depend>
+```
+
+À medida que você adicionar mais funcionalidades dentro do seu pacote, você adicionará qualquer outra dependência do ROS 2 aqui.
+
+Para instalar o nó, abra o arquivo `setup.py` do pacote `my_py_pkg` e adicione uma nova linha para criar outro executável:
+
+```python
+entry_points={
+    'console_scripts': [
+        "test_node = my_py_pkg.my_first_node:main",
+        "number_publisher = my_py_pkg.number_publisher:main"
+    ],
+},
+```
+
+Certifique-se de adicionar uma vírgula entre cada linha; caso contrário, você poderá encontrar alguns erros estranhos ao compilar o pacote.
+
+Aqui, criamos um novo executável chamado `number_publisher`.
+
+> **Observação**
+>
+> Desta vez, como você pode ver neste exemplo, o nome do nó, o nome do arquivo e o nome do executável são os mesmos: `number_publisher`. Esta é uma prática comum de se fazer. Apenas lembre-se de que esses nomes representam três coisas diferentes.
+
+Agora, vá para o diretório raiz do seu workspace e compile o pacote `my_py_pkg`:
+
+```bash
+cd ~/master_ros2_ws/
+colcon build --packages-select my_py_pkg
+```
+
+Você pode adicionar `--symlink-install` se quiser, para não precisar rodar o `colcon build` toda vez que modificar o nó `number_publisher`.

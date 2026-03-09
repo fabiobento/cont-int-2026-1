@@ -969,7 +969,7 @@ Todos os nós que iniciaremos neste curso seguirão a mesma estrutura. Como uma 
 
 #### **Template para um nó Python**
 
-Use este código para iniciar qualquer novo nó Python:
+Use [este código](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/scripts/node_oop_template/node_oop_template.py) para iniciar qualquer novo nó Python:
 
 ```python
 #!/usr/bin/env python3
@@ -995,7 +995,7 @@ Tudo o que você precisa fazer é remover os comentários `MODIFIQUE O NOME` e a
 
 #### **Template para um nó C++**
 
-Use este código para iniciar qualquer novo nó C++:
+Use [este código](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/scripts/node_oop_template/node_oop_template.cpp) para iniciar qualquer novo nó C++:
 
 ```cpp
 #include "rclcpp/rclcpp.hpp"
