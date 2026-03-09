@@ -75,6 +75,33 @@ Por outro lado, ambos os transmissores de rádio não têm conhecimento um do ou
 Qualquer combinação de publicadores e assinantes é possível. Por exemplo, você pode ter dois publicadores no tópico e zero assinantes. Neste caso, os dados ainda são publicados corretamente, mas ninguém os recebe. Alternativamente, você poderia ter zero publicadores e um ou mais assinantes. Os assinantes ouvirão o tópico, mas não receberão nada.
 
 
+##  **Múltiplos publicadores e assinantes dentro de um nó**
+
+Um nó não está limitado a ter apenas um publicador ou um assinante.
+
+Vamos adicionar outra rádio ao nosso exemplo. Vamos chamá-la de 101.3, e seu tipo de dado é sinal FM.
+
+O segundo transmissor de rádio agora está publicando tanto no tópico 98.7 quanto no tópico 101.3, enviando o tipo de dado apropriado para cada tópico. Vamos também fazer o carro ouvir o tópico 101.3:
+
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/radio-2pub-node.jpg)
+**Um nó com dois publicadores** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
+
+
+Como você pode ver, o segundo transmissor de rádio pode publicar em vários tópicos, desde que use o nome e a interface corretos para cada tópico.
+
+Agora, imagine que o carro, enquanto ouve a rádio, também está enviando suas coordenadas GPS para um servidor remoto. Poderíamos criar um tópico chamado `car_location`, e a interface conteria uma latitude e uma longitude. O nó do carro agora contém um assinante do tópico 98.7 e um publicador para o tópico `car_location`:
+
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/radio-pub-sub-node.jpg)
+**Um nó com tanto um publicador quanto um assinante** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
+
+
+Na figura anterior, também adicionei outro nó para o servidor, representado por um computador. O nó do servidor assinará o tópico `car_location` para que possa receber as coordenadas GPS. Obviamente, tanto o publicador quanto o assinante estão usando a mesma interface (latitude e longitude).
+
+Assim, dentro de um nó, você pode ter qualquer número de publicadores e assinantes para diferentes tópicos com diferentes tipos de dados. Um nó pode se comunicar com vários nós ao mesmo tempo.
+
+
 
 
 
