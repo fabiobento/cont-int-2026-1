@@ -691,7 +691,8 @@ Lá, podemos ver o nó `number_publisher` e o nó `number_counter`. No meio, tem
 
 O pacote `rqt_graph` pode ser extremamente útil ao depurar tópicos. Imagine que você executa alguns nós e se pergunta por que as mensagens do tópico não são recebidas por um assinante. Talvez esses nós não estejam usando o mesmo nome de tópico. Você pode ver isso facilmente com o `rqt_graph`:
 
-*[Figura 5.8 – Incompatibilidade de nome de tópico entre publicador e assinante]*
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/topics-rqt-error.png)
+**Incompatibilidade de nome de tópico entre publicador e assinante** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
 
 Neste exemplo, cometi um erro intencional no nome do tópico dentro do publicador. Em vez de `number`, escrevi `numberr`. Com o `rqt_graph`, posso ver onde está o problema. Os dois nós não estão se comunicando um com o outro.
 
