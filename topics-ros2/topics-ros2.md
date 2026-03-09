@@ -1155,3 +1155,33 @@ msg.are_motors_ready = true;
 ```
 
 Você agora pode criar e usar a sua interface personalizada para tópicos. Como você viu, primeiro, verifique se há alguma interface existente que atenda às suas necessidades. Se houver, não reinvente a roda. Se nada se encaixar perfeitamente, no entanto, não hesite em criar sua própria interface. Para fazer isso, você deve criar um pacote novo dedicado a interfaces. Uma vez que você tenha terminado o processo de configuração para este pacote, você pode adicionar quantas interfaces quiser.
+
+## **Desafio de Tópicos – controle em malha fechada**
+
+Aqui está um desafio para você continuar praticando a criação de nós, publicadores e assinantes. Iniciaremos um novo projeto ROS 2 e o aprimoraremos ao longo dos próximos capítulos, à medida que descobrirmos mais conceitos.
+
+Encorajo você a ler as instruções e reservar um tempo para tentar completar este desafio antes de verificar a solução. Praticar é a chave para um aprendizado eficaz.
+
+Não fornecerei uma explicação completa de todas as etapas aqui, apenas algumas observações sobre os pontos importantes. Você pode encontrar o código da solução completa no repositório da disciplina no GitHub, tanto para Python quanto para C++.
+
+Seu desafio é escrever um controlador para o nó `turtlesim`. Até agora, usamos apenas números básicos e simples para publicar e assinar tópicos. Com este exercício, você pode praticar como se estivesse trabalhando na lógica de um robô real.
+
+### **O Desafio**
+
+O objetivo é simples: queremos fazer a tartaruga se mover em círculos. Além disso, também queremos modificar a velocidade da tartaruga dependendo se ela está no lado direito ou esquerdo da tela.
+
+Para obter a coordenada X de uma tartaruga na tela, você pode assinar o tópico `pose` daquela tartaruga. Então, encontrar o meio da tela é fácil: o valor X mínimo à esquerda é `0`, e o valor X máximo à direita é cerca de `11`. Assumiremos que a coordenada X para o meio da tela é `5.5`.
+
+Você pode então enviar um comando de velocidade publicando no tópico `cmd_vel` da tartaruga. Para fazer a tartaruga se mover em um círculo, você só precisa publicar valores constantes para a velocidade linear (em X) e para a velocidade angular (em Z). Use `1.0` para ambas as velocidades se a tartaruga estiver à esquerda ($X < 5.5$), e `2.0` para ambas se a tartaruga estiver à direita.
+
+Siga estas etapas para começar:
+
+1. Crie um novo pacote (vamos chamá-lo de `turtle_controller`). Você pode decidir criar um pacote Python ou C++. Se fizer ambos, certifique-se de dar a cada um um nome diferente.
+2. Dentro deste pacote, crie um novo nó chamado `turtle_controller`.
+3. No construtor do nó, adicione um publicador (para a velocidade de comando) e um assinante (para a pose).
+4. Aqui é onde as coisas ficam um pouco diferentes de antes: em vez de criar um temporizador (*timer*) e publicar a partir do *callback* do temporizador, **você pode publicar diretamente a partir do *callback* do assinante**. O nó `turtlesim` está constantemente publicando no tópico `pose`. Publicar um comando a partir do *callback* do assinante permite que você crie uma espécie de controle em malha fechada (*closed-loop control*). Você obtém a coordenada X atual e envia um comando de velocidade diferente, dependendo de onde a tartaruga está.
+5. Para testar seu código, crie um executável. Em seguida, execute o `turtlesim` em um Terminal e o seu nó em outro. Você deverá ver a tartaruga desenhando um círculo, com uma velocidade diferente dependendo de que lado da tela ela está.
+
+> **Observação**
+>
+> O Passo 4 descreve a essência de um **Sistema de Controle em Malha Fechada**. A publicação constante do `turtlesim` no tópico `pose` age como o nosso sensor (realimentação). O nosso *callback* de assinatura atua como o **Controlador**, avaliando a posição atual ($X$) e calculando imediatamente a ação de controle (a nova velocidade em `cmd_vel`). Como não estamos usando um temporizador para ditar o ritmo, a frequência de amostragem do nosso controle é perfeitamente ditada pela frequência com que o sensor consegue nos enviar dados!"
