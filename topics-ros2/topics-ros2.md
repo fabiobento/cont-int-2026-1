@@ -800,7 +800,6 @@ Para tornar as coisas um pouco mais interessantes, vamos manter esses dois nós 
 
 ```bash
 $ ros2 run my_py_pkg number_publisher --ros-args -r __node:=number_publisher_2 -r number:=my_number
-
 ```
 
 Após executar isso, você verá que o `number_counter` recebe mensagens duas vezes mais rápido, já que há dois nós publicando uma mensagem a cada `1.0` segundo.
