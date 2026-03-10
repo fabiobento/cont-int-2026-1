@@ -107,11 +107,10 @@ Abra o VSCode e clique no canto inferior esquerdo, conforme a figura abaixo
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nodes-ros2/imagens/open-remote.png)
 
-**Abertura de janela remota no VSCode.**
-
 Em seguida clique em "Attach to Running Container" e selecione o container `ros2_dev`.
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nodes-ros2/imagens/attach-run-container.png)
+
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nodes-ros2/imagens/select-container.png)
 
