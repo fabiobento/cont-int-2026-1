@@ -115,7 +115,7 @@ Em seguida clique em "Attach to Running Container" e selecione o container `ros2
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nodes-ros2/imagens/select-container.png)
 
 
-
+Agora você deve ver o terminal dentro do container clicando na opção "Terminal" no menu superior e depois em "New Terminal".
 
 
 ### Compilando o workspace
