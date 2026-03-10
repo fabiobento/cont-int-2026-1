@@ -10,6 +10,68 @@ Ao final desta aula, você será capaz de criar seus próprios pacotes e nós do
 
 Todas as explicações começarão com Python, seguidas por C++, que cobriremos mais rapidamente. Se você deseja aprender apenas com Python, pode pular as seções de C++. No entanto, se quiser aprender com C++, a leitura das explicações anteriores de Python é obrigatória para a compreensão.
 
+## Requisitos Técnicos 
+
+Para acompanhar este roteiro, é recomendável ter um computador ou placa embarcada (por exemplo, Raspberry Pi, placa Jetson, etc.) com o Ubuntu 24.04 LTS instalado ou qualquer outra versão do Ubuntu.
+
+
+### **Preparando o Ambiente: Obtendo o Código da Disciplina**
+
+Para realizarmos as práticas de ROS 2, você precisará dos scripts, *packages* e arquivos de configuração mais recentes. Todo o material é atualizado constantemente no repositório da disciplina no GitHub.
+
+Siga as instruções abaixo de acordo com a sua situação no laboratório de hoje:
+
+**1. Primeira vez usando o repositório (Ainda não baixou)**
+Se você está usando um computador novo no laboratório ou ainda não baixou o material deste semestre, abra o Terminal e execute o comando de clonagem para trazer o projeto para a sua máquina:
+
+```bash
+git clone https://github.com/fabiobento/cont-int-2026-1.git
+```
+
+**2. Atualizando o repositório existente (Já baixou anteriormente)**
+Se você já tem a pasta do projeto no seu computador, precisaremos sincronizá-la com as atualizações da semana.
+
+> **Atenção:** Durante as aulas práticas, é esperado e recomendável que vocês editem os códigos para testar hipóteses. No entanto, para iniciar a aula de hoje sem erros de conflito, usaremos uma sequência de comandos que baixa as novidades e **sobrescreve** qualquer alteração local. Isso garante que o seu ambiente fique exatamente igual à versão oficial para o roteiro de hoje.
+
+Abra o Terminal e execute a seguinte sequência:
+
+```bash
+cd cont-int-2026-1
+git fetch
+git reset --hard origin/main
+```
+
+**O que esses comandos fazem?**
+
+* **`cd cont-int-2026-1`**: Garante que você está dentro da pasta correta do projeto.
+* **`git fetch`**: Consulta o GitHub e baixa silenciosamente as informações mais recentes do servidor, mas ainda não altera os seus arquivos visíveis.
+* **`git reset --hard origin/master`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`master`) oficial, descartando testes e modificações residuais das aulas anteriores.
+
+
+### **Preparando o Ambiente: Container**
+
+Como trabalharemos dentro de um container, o workspace será criado dentro dele. Então, antes de seguir os próximos passos precisamos iniciar o container.
+
+A essa altura, é esperado que você já tenha criado o container na [Aula 1: Primeiros Passos com ROS 2](https://github.com/fabiobento/cont-int-2026-1/blob/main/fundamentos-ros2/ros-basic.md). Verifique se você já criou o container com a seguinte linha de comando:
+ ```bash
+     docker ps -a
+ ```   
+ É esperado que você veja uma resposta parecida com essa:
+ ```bash
+    CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS         PORTS         NAMES
+     ba9c9274a55c   ros2_gui:v0.1    "/ros_ws_entrypoint.…"   45 minutes ago   Up 43 minutes             ros2_dev
+ ```
+ Se você ainda não criou o container execute a seguinte linha de comando:
+ ```bash
+    cd ~/cont-int-2026-1/nodes-ros2/scripts/docker_dev/
+    ./create_container.sh ros2_gui:v0.1 master_ros2_ws ros2_dev
+```
+ 
+ Agora que o container foi criado, basta iniciá-lo com o comando:
+ ```bash
+     docker start ros2_dev
+ ```
+
 ## Criando e configurando um workspace do ROS 2
 
 Antes de escrevermos qualquer código, precisamos de um pouco de organização. Os nós existirão dentro de pacotes, e todos os seus pacotes existirão dentro de um *workspace* (espaço de trabalho) do ROS 2.
@@ -35,13 +97,6 @@ cd
 mkdir -p ~/master_ros2_ws/src
 ```
 Isso é tudo o que há para fazer. Para configurar um novo *workspace*, basta criar um novo diretório (em algum lugar na sua pasta pessoal) e criar um diretório `src` dentro dele.
-
-> **Observação - Container:**
->
-> Como trabalharemos dentro de um container, o workspace será criado dentro dele. Então, antes de seguir os próximos passos, vá para o diretório `dev-ros2/scripts/docker_dev` do [repositório da disciplina](https://github.com/fabiobento/cont-int-2026-1) que você baixou e execute o script para iniciar o container:
-> ```bash
-    > ./start_container.sh ros2_dev
-> ```
 
 ### Compilando o workspace
 

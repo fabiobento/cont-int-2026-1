@@ -24,7 +24,40 @@ Na aula de hoje você terá uma visão prática de como configurar rapidamente o
 
 Para acompanhar este roteiro, é recomendável ter um computador ou placa embarcada (por exemplo, Raspberry Pi, placa Jetson, etc.) com o Ubuntu 24.04 LTS instalado ou qualquer outra versão do Ubuntu.
 
-Os materiais de referência para este roteiro podem ser encontrados na pasta `fundamentos-ros2` do seguinte repositório no GitHub: https://github.com/fabiobento/cont-int-2026-1/tree/main/fundamentos-ros2.
+
+### Preparando o Ambiente: Obtendo o Código da Disciplina
+
+Para realizarmos as práticas de ROS 2, você precisará dos scripts, *packages* e arquivos de configuração mais recentes. Todo o material é atualizado constantemente no repositório da disciplina no GitHub.
+
+Siga as instruções abaixo de acordo com a sua situação no laboratório de hoje:
+
+**1. Primeira vez usando o repositório (Ainda não baixou)**
+Se você está usando um computador novo no laboratório ou ainda não baixou o material deste semestre, abra o Terminal e execute o comando de clonagem para trazer o projeto para a sua máquina:
+
+```bash
+git clone https://github.com/fabiobento/cont-int-2026-1.git
+```
+
+**2. Atualizando o repositório existente (Já baixou anteriormente)**
+Se você já tem a pasta do projeto no seu computador, precisaremos sincronizá-la com as atualizações da semana.
+
+> **Atenção:** Durante as aulas práticas, é esperado e recomendável que vocês editem os códigos para testar hipóteses. No entanto, para iniciar a aula de hoje sem erros de conflito, usaremos uma sequência de comandos que baixa as novidades e **sobrescreve** qualquer alteração local. Isso garante que o seu ambiente fique exatamente igual à versão oficial para o roteiro de hoje.
+
+Abra o Terminal e execute a seguinte sequência:
+
+```bash
+cd cont-int-2026-1
+git fetch
+git reset --hard origin/main
+```
+
+**O que esses comandos fazem?**
+
+* **`cd cont-int-2026-1`**: Garante que você está dentro da pasta correta do projeto.
+* **`git fetch`**: Consulta o GitHub e baixa silenciosamente as informações mais recentes do servidor, mas ainda não altera os seus arquivos visíveis.
+* **`git reset --hard origin/master`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`master`) oficial, descartando testes e modificações residuais das aulas anteriores.
+
+
 
 ## Instalação do ROS 2
 
