@@ -90,13 +90,25 @@ Quanto ao nome do workspace, vamos mantê-lo simples por enquanto e usar algo qu
 >
 > O nome do workspace não é importante e não afetará nada em sua aplicação. Como estamos apenas começando, temos apenas um workspace. À medida que você progredir e começar a trabalhar em diversas aplicações, a melhor prática é nomear cada workspace com o nome da aplicação ou do robô. Por exemplo, se você criar um workspace para um robô chamado **ABC V3**, poderá nomeá-lo como `abc_v3_ws`.
 
-Abra o terminal, e navegue para seu diretório pessoal (*home*), e crie o workspace. É aqui que você escreverá todo o código para a sua aplicação ROS 2:
+Abra o terminal em seu computador *host* (**não é dentro do container**), e navegue para seu diretório pessoal (*home*), e crie o workspace. É aqui que você escreverá todo o código para a sua aplicação ROS 2:
 
 ```bash
 cd
 mkdir -p ~/master_ros2_ws/src
 ```
 Isso é tudo o que há para fazer. Para configurar um novo *workspace*, basta criar um novo diretório (em algum lugar na sua pasta pessoal) e criar um diretório `src` dentro dele.
+
+> **IMPORTANTE**
+>
+> Daqui para a frente nessa aula você deve executar todos os comandos **dentro do container** .
+> 
+
+Abra o VSCode e clique no canto inferior esquerdo.
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nodes-ros2/imagens/open-remote.png)
+**Figura 2-2 - Exemplo da organização de pacotes para um pacote em nós.** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
+
+
 
 ### Compilando o workspace
 
@@ -222,7 +234,7 @@ Poderíamos ter um pacote para gerir uma câmera, outro pacote para o controle d
 
 <a id="figure-2-1"></a>
 
-![](https://github.com/fabiobento/cont-int-2026-1/raw/main/dev-ros2/imagens/pacote-ros2.jpg)
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nodes-ros2/imagens/pacote-ros2.jpg)
 **Figura 2-1 - Exemplo da organização de pacotes para um robô de pick and place.** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
 
 
@@ -429,7 +441,7 @@ Vamos voltar à arquitetura de pacotes que tínhamos na [Figura 2-1](#figure-2-1
 
 <a id="figure-2-2"></a>
 
-![](https://github.com/fabiobento/cont-int-2026-1/raw/main/dev-ros2/imagens/pacote-org-ros2.jpg)
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nodes-ros2/imagens/pacote-org-ros2.jpg)
 **Figura 2-2 - Exemplo da organização de pacotes para um pacote em nós.** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
 
 Como você pode ver, no pacote da câmera, poderíamos ter um nó responsável por gerenciar o hardware da câmera. Este nó enviaria imagens para um nó de processamento de imagem, e este último extrairia as coordenadas dos objetos para o robô coletar.
@@ -750,7 +762,7 @@ Vamos agora testar o código. Como já especificamos como criar um executável a
 
 Tudo o que temos que fazer é compilar, ativar e executar. Lembre-se: **“compilar, ativar, executar”** (ou *build, source, run*). Toda vez que você criar um novo nó ou modificar um já existente, você terá que “compilar, ativar e executar”.
 
-![](https://github.com/fabiobento/cont-int-2026-1/raw/main/dev-ros2/imagens/fluxo-trabalho-ros2.jpg)
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nodes-ros2/imagens/fluxo-trabalho-ros2.jpg)
 **Figura 2-2 - Fluxo de trabalho do ROS 2.** (Fonte: Gerada via modelo de linguagem de grande escala Gemini (Google), a partir de comandos do autor)
 
 
