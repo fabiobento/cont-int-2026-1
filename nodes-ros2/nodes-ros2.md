@@ -103,10 +103,14 @@ Isso é tudo o que há para fazer. Para configurar um novo *workspace*, basta cr
 > Daqui para a frente nessa aula você deve executar todos os comandos **dentro do container** .
 > 
 
-Abra o VSCode e clique no canto inferior esquerdo.
+Abra o VSCode e clique no canto inferior esquerdo, conforme a figura abaixo
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nodes-ros2/imagens/open-remote.png)
-**Figura 2-2 - Exemplo da organização de pacotes para um pacote em nós.** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
+
+**Abertura de janela remota no VSCode.**
+
+Em seguida clique em "Attach to Running Container" e selecione o container `ros2_dev`.
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nodes-ros2/imagens/attach-run-container.png)
 
 
 
