@@ -55,7 +55,7 @@ git reset --hard origin/main
 
 * **`cd cont-int-2026-1`**: Garante que você está dentro da pasta correta do projeto.
 * **`git fetch`**: Consulta o GitHub e baixa silenciosamente as informações mais recentes do servidor, mas ainda não altera os seus arquivos visíveis.
-* **`git reset --hard origin/main`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`master`) oficial, descartando testes e modificações residuais das aulas anteriores.
+* **`git reset --hard origin/main`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`main`) oficial, descartando testes e modificações residuais das aulas anteriores.
 
 
 
@@ -504,7 +504,7 @@ mkdir -p ~/master_ros2_ws/src
 
 ```
 
-Após criar esta pasta, você pode iniciar a construção da imagem Docker usando o comando a seguir. Certifique-se de estar executando-o dentro da pasta `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_gui` do repositório:
+Após criar esta pasta, você pode iniciar a construção da imagem Docker usando o comando a seguir. Certifique-se de estar executando-o dentro da pasta `fundamentos-ros2/scripts/ros2_jazzy_docker/docker_gui` do repositório da disciplina que você baixou no início da aula:
 
 ```bash
 ./build_image.sh ros2_gui:v0.1 master_ros2_ws robot
