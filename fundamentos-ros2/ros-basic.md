@@ -55,7 +55,7 @@ git reset --hard origin/main
 
 * **`cd cont-int-2026-1`**: Garante que você está dentro da pasta correta do projeto.
 * **`git fetch`**: Consulta o GitHub e baixa silenciosamente as informações mais recentes do servidor, mas ainda não altera os seus arquivos visíveis.
-* **`git reset --hard origin/master`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`master`) oficial, descartando testes e modificações residuais das aulas anteriores.
+* **`git reset --hard origin/main`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`master`) oficial, descartando testes e modificações residuais das aulas anteriores.
 
 
 
