@@ -514,7 +514,9 @@ Se você não tem ideia do que usar, sugiro usar o **VS Code** em extensão remo
 
 ### Escrevendo um nó Python ROS 2 mínimo
 
-Aqui está o código inicial para qualquer nó Python que você criar. Você pode escrever este código no arquivo `my_first_node.py`:
+Aqui está o código inicial para qualquer nó Python que você criar. Você pode escrever este código no arquivo `my_first_node.py`. Você pode encontrar o código completo no link abaixo:
+
+[Código completo](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/nodes-ros2/scripts/my_py_pkg/my_py_pkg/my_first_node.py)
 
 ```python
 #!/usr/bin/env python3
@@ -533,6 +535,25 @@ def main(args=None):
 if __name__ == '__main__':
     main()
 ```
+
+
+> **⚠️ Atenção: O Inimigo Invisível do Copiar e Colar (Erro U202F)**
+>
+> Durante as aulas práticas, é muito comum copiarmos trechos de código do roteiro em PDF ou do navegador direto para os scripts no VS Code. No entanto, se você estiver programando em **Python** e se deparar com um erro parecido com este no terminal do container:
+>
+>`SyntaxError: invalid character 'U+202F' (U+202F)`
+>
+> **Não entre em pânico! O seu código não está errado.** O que acontece é que editores de texto e PDFs costumam injetar um caractere especial chamado *Narrow No-Break Space* (um tipo de espaço inquebrável) para manter a formatação bonita na tela. Ele é visualmente idêntico a um espaço normal, mas o interpretador do Python é extremamente rigoroso e lê isso como um caractere alienígena, quebrando a compilação do nó.
+> 
+>> **Como limpar o seu script no VS Code:**
+>
+>> 1. **Abra a ferramenta de Substituição:** Pressione `Ctrl + H` no seu teclado.
+>> 2. **Capture o invasor:** Vá até a linha do seu código onde o erro foi apontado, selecione o "espaço" suspeito com o mouse e copie (`Ctrl + C`). Cole isso no campo superior de busca (*Find*).
+>> 3. **Coloque o espaço correto:** No campo inferior (*Replace*), aperte a barra de espaço do seu teclado **uma única vez** para inserir um espaço limpo e padrão.
+>> 4. **Limpe o arquivo inteiro:** Clique no botão **Substituir Tudo** (ou pressione `Alt + A`).
+>
+> Pronto! Salve o arquivo (`Ctrl + S`) e rode o seu código novamente.
+
 
 Como você pode ver, usamos POO aqui. A POO (Programação Orientada a Objetos) está em toda parte no ROS 2, e esta é a maneira padrão (e recomendada) de escrever um nó.
 
