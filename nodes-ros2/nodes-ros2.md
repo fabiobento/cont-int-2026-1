@@ -493,9 +493,11 @@ cd ~/master_ros2_ws/src/my_py_pkg/my_py_pkg/
 ```
 
 2. **Criar o arquivo do nó:**
+Use o comando abaixo para criar o arquivo do nó:
 ```bash
 touch my_first_node.py
 ```
+Você também pode criar o arquivo diretamente do seu IDE e não usar o terminal.
 
 3. **Dar permissão de execução (Essencial!):**
 ```bash
@@ -514,9 +516,7 @@ Se você não tem ideia do que usar, sugiro usar o **VS Code** em extensão remo
 
 ### Escrevendo um nó Python ROS 2 mínimo
 
-Aqui está o código inicial para qualquer nó Python que você criar. Você pode escrever este código no arquivo `my_first_node.py`. Você pode encontrar o código completo no link abaixo:
-
-[Código completo](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/nodes-ros2/scripts/my_py_pkg/my_py_pkg/my_first_node.py)
+Aqui está o código inicial para qualquer nó Python que você criar. Você pode escrever este código no arquivo `my_first_node.py`.
 
 ```python
 #!/usr/bin/env python3
@@ -723,7 +723,7 @@ ros2 run my_py_pkg test_node
 [INFO] [1772574526.720962140] [my_node_name]: Alô mundo! Este é o meu primeiro nó em ROS2 usando Python!
 ```
 
-Excelente, vemos o log `Hello World`. Seu primeiro nó está rodando com sucesso. Note que escrevemos `test_node` no comando `ros2 run`, pois este é o nome do executável que escolhemos no arquivo `setup.py`.
+Excelente, vemos o log `Alô mundo`. Seu primeiro nó está rodando com sucesso. Note que escrevemos `test_node` no comando `ros2 run`, pois este é o nome do executável que escolhemos no arquivo `setup.py`.
 
 Agora, você deve notar que o programa fica "parado" ali. O nó ainda está vivo porque ele está girando (*spinning*). Para parar o nó, pressione **Ctrl + C**.
 
@@ -759,11 +759,11 @@ class MyCustomNode(Node):
         self.timer_ = self.create_timer(1.0, self.print_hello)
 
     def print_hello(self):
-        self.get_logger().info("Hello " + str(self.counter_))
+        self.get_logger().info("Alô " + str(self.counter_))
         self.counter_ += 1
 ```
 
-Ainda temos o construtor com o `super()`, mas agora o log está em um método separado. Além disso, em vez de apenas imprimir "Hello World", aqui criamos um atributo `counter_` que incrementamos toda vez que utilizamos o log.
+Ainda temos o construtor com o `super()`, mas agora o log está em um método separado. Além disso, em vez de apenas imprimir "Alô Mundo", aqui criamos um atributo `counter_` que incrementamos toda vez que utilizamos o log.
 
 A linha mais importante é aquela que cria o timer. Para criar o timer, usamos o método `create_timer()` da classe `Node`. Precisamos fornecer dois argumentos: a taxa (frequência/intervalo) na qual queremos chamar a função (um número real) e a função de *callback*. Note que a função de *callback* deve ser especificada sem parênteses.
 
@@ -771,7 +771,7 @@ Esta instrução significa que queremos chamar o método `print_hello` a cada `1
 
 > **Observação - Atributos de Classe:**
 >
-> Se você está se perguntando por que existe um sublinhado ao final (`_`) de cada atributo de classe, esta é uma convenção comum de POO (Programação Orientada a Objetos) que seguimos para especificar que uma variável é um atributo de classe. É simplesmente uma ajuda visual e não tem outra função. Você pode seguir a mesma convenção ou usar outra — apenas certifique-se de manter a consistência dentro de um projeto. Como o Python não tem palavras-chave como `private` ou `public` de forma rígida (como o C++ ou Java), essas convenções são o que mantém o código organizado.
+> Se você está se perguntando por que existe um sublinhado ao final (`_'`) de cada atributo de classe, esta é uma convenção comum de POO (Programação Orientada a Objetos) que seguimos para especificar que uma variável é um atributo de classe. É simplesmente uma ajuda visual e não tem outra função. Você pode seguir a mesma convenção ou usar outra — apenas certifique-se de manter a consistência dentro de um projeto. Como o Python não tem palavras-chave como `private` ou `public` de forma rígida (como o C++ ou Java), essas convenções são o que mantém o código organizado.
 
 > **Observação - Sistema de Tempo Real:**
 >
@@ -827,10 +827,10 @@ ros2 run my_py_pkg test_node
 
 Você verá o contador subindo a cada segundo. Pressione **Ctrl + C** para interromper a execução.
 ```bash
-[1710999909.533443384] [my_node_name]: Hello 0[INFO]
-[1710999910.533169531] [my_node_name]: Hello 1[INFO]
-[1710999911.532731467] [my_node_name]: Hello 2[INFO]
-[1710999912.534052411] [my_node_name]: Hello 3[INFO]
+[1710999909.533443384] [my_node_name]: Alô 0[INFO]
+[1710999910.533169531] [my_node_name]: Alô 1[INFO]
+[1710999911.532731467] [my_node_name]: Alô 2[INFO]
+[1710999912.534052411] [my_node_name]: Alô 3[INFO]
 ```
 
 Como você pode ver, o processo de compilar, ativar e executar é bastante rápido e não é tão complicado. Aqui, podemos ver que o nó imprime um log a cada segundo, e o contador aumenta em cada novo log.
@@ -866,13 +866,8 @@ touch my_first_node.cpp
 ```
 
 Você também pode criar o arquivo diretamente do seu IDE e não usar o terminal.
-Agora, se você ainda não fez isso, abra o seu *workspace* com o VS Code ou qualquer outro IDE:
 
-```bash
-cd ~/master_ros2_ws/src/
-code .
-```
-Abra o arquivo `my_first_node.cpp`. Aqui está o código mínimo para escrever um nó em C++:
+Aqui está o código mínimo para escrever um nó em C++:
 
 ```cpp
 #include "rclcpp/rclcpp.hpp"
@@ -953,7 +948,7 @@ public:
     }
     void print_hello()
     {
-        RCLCPP_INFO(this->get_logger(), "Hello %d", counter_);
+        RCLCPP_INFO(this->get_logger(), "Alô %d", counter_);
         counter_++;
     }
 private:
@@ -964,7 +959,7 @@ private:
 ```
 
 **Explicação**
-Este exemplo de código fará a mesma coisa que o nó Python. Criamos um timer para que possamos chamar uma função de *callback* a cada 1.0 segundo. Nesta função de *callback*, imprimimos "Hello" seguido de um contador que incrementamos a cada vez.
+Este exemplo de código fará a mesma coisa que o nó Python. Criamos um timer para que possamos chamar uma função de *callback* a cada 1.0 segundo. Nesta função de *callback*, imprimimos "Alô" seguido de um contador que incrementamos a cada vez.
 
 Existem algumas especificidades relacionadas ao C++:
 
@@ -1038,10 +1033,10 @@ $ ros2 run my_cpp_pkg test_node
 **Saída esperada:**
 
 ```text
-[INFO] [1711006463.017149024] [my_node_name]: Hello 0
-[INFO] [1711006464.018055674] [my_node_name]: Hello 1
-[INFO] [1711006465.015927319] [my_node_name]: Hello 2
-[INFO] [1711006466.015355747] [my_node_name]: Hello 3
+[INFO] [1711006463.017149024] [my_node_name]: Alô 0
+[INFO] [1711006464.018055674] [my_node_name]: Alô 1
+[INFO] [1711006465.015927319] [my_node_name]: Alô 2
+[INFO] [1711006466.015355747] [my_node_name]: Alô 3
 
 ```
 
