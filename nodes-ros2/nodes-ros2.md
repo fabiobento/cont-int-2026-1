@@ -113,6 +113,13 @@ Em seguida clique em "Attach to Running Container" e selecione o container `ros2
 
 Agora você deve ver o terminal dentro do container clicando na opção "Terminal" no menu superior e depois em "New Terminal".
 
+### Desenvolvendo o seu projeto no VsCode
+Se você não vai desenvolver o seu projeto dentro do container, digite os seguintes comandos para abrir o VSCode no seu workspace:
+
+```bash
+cd ~/master_ros2_ws/
+code .
+```
 
 ### Compilando o workspace
 
