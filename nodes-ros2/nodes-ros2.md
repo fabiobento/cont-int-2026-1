@@ -47,31 +47,6 @@ git reset --hard origin/main
 * **`git fetch`**: Consulta o GitHub e baixa silenciosamente as informações mais recentes do servidor, mas ainda não altera os seus arquivos visíveis.
 * **`git reset --hard origin/master`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`master`) oficial, descartando testes e modificações residuais das aulas anteriores.
 
-
-### **Preparando o Ambiente: Container**
-
-Como trabalharemos dentro de um container, o workspace será criado dentro dele. Então, antes de seguir os próximos passos precisamos iniciar o container.
-
-A essa altura, é esperado que você já tenha criado o container na [Aula 1: Primeiros Passos com ROS 2](https://github.com/fabiobento/cont-int-2026-1/blob/main/fundamentos-ros2/ros-basic.md). Verifique se você já criou o container com a seguinte linha de comando:
- ```bash
-     docker ps -a
- ```   
- É esperado que você veja uma resposta parecida com essa:
- ```bash
-    CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS         PORTS         NAMES
-     ba9c9274a55c   ros2_gui:v0.1    "/ros_ws_entrypoint.…"   45 minutes ago   Up 43 minutes             ros2_dev
- ```
- Se observou no comando acima que você ainda não criou o container `ros2_dev`, execute a seguinte linha de comando:
- ```bash
-    cd ~/cont-int-2026-1/nodes-ros2/scripts/docker_dev/
-    ./create_container.sh ros2_gui:v0.1 master_ros2_ws ros2_dev
-```
- 
- Agora que o container foi criado, basta iniciá-lo com o comando:
- ```bash
-     docker start ros2_dev
- ```
-
 ## Criando e configurando um workspace do ROS 2
 
 Antes de escrevermos qualquer código, precisamos de um pouco de organização. Os nós existirão dentro de pacotes, e todos os seus pacotes existirão dentro de um *workspace* (espaço de trabalho) do ROS 2.
@@ -98,10 +73,31 @@ mkdir -p ~/master_ros2_ws/src
 ```
 Isso é tudo o que há para fazer. Para configurar um novo *workspace*, basta criar um novo diretório (em algum lugar na sua pasta pessoal) e criar um diretório `src` dentro dele.
 
-> **IMPORTANTE**
->
-> Daqui para a frente nessa aula você deve executar todos os comandos **dentro do container** .
-> 
+### **Container(OPCIONAL)**
+
+> **ATENÇÃO:**
+>   
+> Só execute os passos dessa seção **se você for trabalhar dentro de um container**. 
+
+A essa altura, é esperado que você já tenha criado o container na [Aula 1: Primeiros Passos com ROS 2](https://github.com/fabiobento/cont-int-2026-1/blob/main/fundamentos-ros2/ros-basic.md). Verifique se você já criou o container com a seguinte linha de comando:
+ ```bash
+     docker ps -a
+ ```   
+ É esperado que você veja uma resposta parecida com essa:
+ ```bash
+    CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS         PORTS         NAMES
+     ba9c9274a55c   ros2_gui:v0.1    "/ros_ws_entrypoint.…"   45 minutes ago   Up 43 minutes             ros2_dev
+ ```
+ Se observou no comando acima que você ainda não criou o container `ros2_dev`, execute a seguinte linha de comando:
+ ```bash
+    cd ~/cont-int-2026-1/nodes-ros2/scripts/docker_dev/
+    ./create_container.sh ros2_gui:v0.1 master_ros2_ws ros2_dev
+```
+ 
+ Agora que o container foi criado, basta iniciá-lo com o comando:
+ ```bash
+     ./start_container.sh ros2_dev
+ ```
 
 Abra o VSCode e clique no canto inferior esquerdo, conforme a figura abaixo
 
