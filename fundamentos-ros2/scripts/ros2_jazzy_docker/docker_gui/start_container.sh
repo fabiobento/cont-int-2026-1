@@ -1,26 +1,33 @@
-#!/bin/sh
+#!/bin/bash
 
-# Nome do container criado anteriormente através do script "create_container.sh".
 CONTAINER_NAME="$1"
 
-# Habilita o controle de acesso para o servidor X para evitar problemas com a interface gráfica (GUI).
-xhost +local:docker
-
-XSOCK=/tmp/.X11-unix
-XAUTH=/tmp/.docker.xauth
-XAUTH_DOCKER=/tmp/.docker.xauth
-
-# Cria o arquivo Xauth caso ele não exista para autenticação do X11.
-if [ ! -f $XAUTH ]; then
-    xauth_list=$(xauth nlist :0 | sed -e 's/^..../ffff/')
-    if [ ! -z "$xauth_list" ]; then
-        echo "$xauth_list" | xauth -f $XAUTH nmerge -
-    else
-        touch $XAUTH
-    fi
-    chmod a+r $XAUTH
+if [ -z "$CONTAINER_NAME" ]; then
+    echo "Uso: ./start_container.sh nome_do_container"
+    exit 1
 fi
 
-# Inicia o container e abre um terminal interativo bash.
-docker start $CONTAINER_NAME 
-docker exec -it $CONTAINER_NAME bash  
+# 1. Libera acesso ao X
+xhost +local:docker
+
+XAUTH=/tmp/.docker.xauth
+
+# 2. Força a recriação do arquivo como FILE (não diretório)
+# Remove se existir para evitar o erro de "not a directory"
+sudo rm -rf $XAUTH
+touch $XAUTH
+
+# 3. Gera os tokens de autorização
+xauth_list=$(xauth nlist $DISPLAY | sed -e 's/^..../ffff/')
+if [ ! -z "$xauth_list" ]; then
+    echo "$xauth_list" | xauth -f $XAUTH nmerge -
+fi
+
+# 4. Ajusta permissões para o Docker conseguir ler
+chmod 777 $XAUTH
+
+# 5. Inicia o container
+docker start $CONTAINER_NAME
+
+# 6. Entra no container
+docker exec -it $CONTAINER_NAME bash

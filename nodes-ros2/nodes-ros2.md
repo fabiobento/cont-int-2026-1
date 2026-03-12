@@ -36,7 +36,7 @@ Se você já tem a pasta do projeto no seu computador, precisaremos sincronizá-
 Abra o Terminal e execute a seguinte sequência:
 
 ```bash
-cd cont-int-2026-1
+cd ~/cont-int-2026-1
 git fetch
 git reset --hard origin/main
 ```
@@ -61,7 +61,7 @@ A essa altura, é esperado que você já tenha criado o container na [Aula 1: Pr
     CONTAINER ID   IMAGE             COMMAND                  CREATED         STATUS         PORTS         NAMES
      ba9c9274a55c   ros2_gui:v0.1    "/ros_ws_entrypoint.…"   45 minutes ago   Up 43 minutes             ros2_dev
  ```
- Se você ainda não criou o container execute a seguinte linha de comando:
+ Se observou no comando acima que você ainda não criou o container `ros2_dev`, execute a seguinte linha de comando:
  ```bash
     cd ~/cont-int-2026-1/nodes-ros2/scripts/docker_dev/
     ./create_container.sh ros2_gui:v0.1 master_ros2_ws ros2_dev
