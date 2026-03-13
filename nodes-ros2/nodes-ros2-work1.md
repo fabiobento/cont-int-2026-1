@@ -6,10 +6,7 @@ Desenvolver um sistema com dois nós operando simultaneamente: um nó **Python**
 
 ## 2. Preparação do Ambiente
 
-1. Inicie o seu container de desenvolvimento: `./start_container.sh ros2_dev`.
-
-
-2. Em um terminal dentro do container, inicie o simulador: `ros2 run turtlesim turtlesim_node`.
+1. Em um terminal dentro do container, inicie o simulador: `ros2 run turtlesim turtlesim_node`.
 
 
 3. Certifique-se de que seu workspace `master_ros2_ws` está configurado e ativo no seu `.bashrc`.
@@ -155,7 +152,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='Fabio Bento',
-    maintainer_email='fabio@ifes.edu.br',
+    maintainer_email='fbento@ifes.edu.br',
     description='Trabalho pratico de Patrulha ROS 2 no IFES',
     license='TODO: License declaration',
     tests_require=['pytest'],
