@@ -96,9 +96,13 @@ Utilize o comando `ros2 bag record` para gravar 30 segundos da trajetória da su
 ---
 ---
 
+## GABARITO
+
+### Controlador em malha fechada em python
+
 Para o caso de que você esteja com dificuldades, forneço abaixo o código-fonte base para o novo controlador de malha fechada em Python, integrando a leitura da pose real da tartaruga e a publicação do status personalizado.
 
-### Código: `turtle_closed_loop.py`
+#### Código: `turtle_closed_loop.py`
 
 Este script deve ser salvo em `~/master_ros2_ws/src/my_py_pkg/my_py_pkg/`.
 
@@ -166,8 +170,6 @@ if __name__ == "__main__":
     main()
 ```
 
-### Explicação Técnica para esse gabarito do Roteiro
-
 * **Ponteiros de Memória e Objetos:** Observe que criamos os objetos `Twist()` e `RobotStatus()` dentro do *callback*. Isso garante que cada leitura de sensor gere uma resposta de controle fresca e independente.
 
 
@@ -176,14 +178,82 @@ if __name__ == "__main__":
 
 * **Semântica:** O uso da string `current_state` na nossa interface personalizada permite que um supervisor humano ou outro nó entenda o que o controlador está "pensando".
 
-### Próximos Passos
+>Além disso:
+> 
+> 1. Não esqueça de adicionar `<depend>turtlesim</depend>` e `<depend>my_robot_interfaces</depend>` no seu `package.xml`.
+>
+> 2. Torne o arquivo executável com `chmod +x`.
+>
+> 3. Compile o workspace na raiz com `colcon build --symlink-install`.
 
-1. Não esqueça de adicionar `<depend>turtlesim</depend>` e `<depend>my_robot_interfaces</depend>` no seu `package.xml`.
+### Supervisor em C++
+
+Para garantir que o seu nó **Supervisor em C++** monitore corretamente o sistema utilizando a interface personalizada, aqui está o código-fonte sugerido.
+
+Este script deve ser salvo em `~/master_ros2_ws/src/my_cpp_pkg/src/supervisor_node.cpp`.
+
+### Código: `supervisor_node.cpp`
+
+```cpp
+#include "rclcpp/rclcpp.hpp"
+#include "turtlesim/msg/pose.hpp"
+#include "my_robot_interfaces/msg/robot_status.hpp"
+
+using std::placeholders::_1;
+
+class SupervisorNode : public rclcpp::Node {
+public:
+    SupervisorNode() : Node("supervisor_node") {
+        // 1. Assinante para o Status Personalizado (Criado na Atividade 3)
+        status_subscriber_ = this->create_subscription<my_robot_interfaces::msg::RobotStatus>(
+            "/robot_status", 10, std::bind(&SupervisorNode::callback_status, this, _1));
+
+        // 2. Assinante para a Pose (Para monitorar a posição real)
+        pose_subscriber_ = this->create_subscription<turtlesim::msg::Pose>(
+            "/turtle1/pose", 10, std::bind(&SupervisorNode::callback_pose, this, _1));
+
+        RCLCPP_INFO(this->get_logger(), "Supervisor de Segurança e Status Iniciado.");
+    }
+
+private:
+    void callback_status(const my_robot_interfaces::msg::RobotStatus::SharedPtr msg) {
+        // Exibe o status que o controlador está reportando
+        RCLCPP_INFO(this->get_logger(), "[STATUS] Estado: %s | Vel Lin: %.2f", 
+                    msg->current_state.c_str(), msg->linear_velocity);
+    }
+
+    void callback_pose(const turtlesim::msg::Pose::SharedPtr msg) {
+        // Monitoramento de segurança: Alerta se a tartaruga chegar perto das bordas
+        if (msg->x > 9.0 || msg->x < 2.0 || msg->y > 9.0 || msg->y < 2.0) {
+            RCLCPP_WARN(this->get_logger(), "[ALERTA] Tartaruga próxima à parede! Posição: (%.2f, %.2f)", 
+                        msg->x, msg->y);
+        }
+    }
+
+    rclcpp::Subscription<my_robot_interfaces::msg::RobotStatus>::SharedPtr status_subscriber_;
+    rclcpp::Subscription<turtlesim::msg::Pose>::SharedPtr pose_subscriber_;
+};
+
+int main(int argc, char **argv) {
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<SupervisorNode>());
+    rclcpp::shutdown();
+    return 0;
+}
+
+```
+
+* **Interfaces Customizadas:** Para incluir sua mensagem em C++, o padrão é `<nome_do_pacote>/msg/<nome_do_arquivo_em_snake_case>.hpp`. Por isso usamos `my_robot_interfaces/msg/robot_status.hpp`.
 
 
-2. Torne o arquivo executável com `chmod +x`.
+* **Ponteiros Compartilhados:** Em C++, as mensagens recebidas via callback são sempre `SharedPtr` (ponteiros inteligentes). Lembre-se de usar a seta (`->`) para acessar os campos, como em `msg->current_state`.
 
-
-3. Compile o workspace na raiz com `colcon build --symlink-install`.
-
-
+> Além disso:
+> 
+> *Certifique-se de que o bloco de dependências do supervisor inclua todos os pacotes utilizados no código acima:
+> 
+> ```cmake
+> add_executable(supervisor src/supervisor_node.cpp)
+> ament_target_dependencies(supervisor rclcpp turtlesim > my_robot_interfaces)
+> 
+> ```
