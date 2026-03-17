@@ -243,6 +243,39 @@ No método `publish_number()`, nós publicamos no tópico:
 
 Esta estrutura de código é super comum no ROS 2. Sempre que você quiser publicar dados de um sensor, você escreverá algo semelhante.
 
+Aqui está o código completo para o nó publicador em Python *(também disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_py_pkg/my_py_pkg/number_publisher.py))*:
+
+```python
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from example_interfaces.msg import Int64
+
+class NumberPublisherNode(Node):
+    def __init__(self):
+        super().__init__("number_publisher")
+        self.number = 2
+        self.number_publisher_ = self.create_publisher(Int64,"number", 10)        
+        self.number_timer_ = self.create_timer(1.0, self.publish_number_callback)
+        self.get_logger().info("O publicador de números foi iniciado.")      
+
+    def publish_number_callback(self):
+        msg = Int64()
+        msg.data = self.number
+        self.number_publisher_.publish(msg)
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = NumberPublisherNode()
+    rclpy.spin(node)
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+```
+
 **Compilando o publicador**
 
 Para testar seu código, você precisa instalar o nó.
@@ -255,6 +288,31 @@ Antes de fazermos isso, como estamos usando uma nova dependência (o pacote `exa
 ```
 
 À medida que você adicionar mais funcionalidades dentro do seu pacote, você adicionará qualquer outra dependência do ROS 2 aqui.
+
+Aqui está o código completo para o `package.xml` do pacote `my_py_pkg` *(também disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_py_pkg/package.xml))*:
+```xml
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>my_py_pkg</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="todo.todo@todo.com">ed</maintainer>
+  <license>TODO: License declaration</license>
+
+  <depend>rclpy</depend>
+  <depend>example_interfaces</depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+```
 
 Para instalar o nó, abra o arquivo `setup.py` do pacote `my_py_pkg` e adicione uma nova linha para criar outro executável:
 
@@ -269,11 +327,44 @@ entry_points={
 
 Certifique-se de adicionar uma vírgula entre cada linha; caso contrário, você poderá encontrar alguns erros estranhos ao compilar o pacote.
 
+
 Aqui, criamos um novo executável chamado `number_publisher`.
 
 > **Observação**
 >
 > Desta vez, como você pode ver neste exemplo, o nome do nó, o nome do arquivo e o nome do executável são os mesmos: `number_publisher`. Esta é uma prática comum de se fazer. Apenas lembre-se de que esses nomes representam três coisas diferentes.
+
+Aqui está o código completo do `setup.py` *(também disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_py_pkg/setup.py))*:
+```python
+from setuptools import find_packages, setup
+
+package_name = 'my_py_pkg'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='ed',
+    maintainer_email='todo.todo@todo.com',
+    description='TODO: Package description',
+    license='TODO: License declaration',
+    tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+            "test_node = my_py_pkg.my_first_node:main",
+            "number_publisher = my_py_pkg.number_publisher:main",
+            "number_counter = my_py_pkg.number_counter:main"
+        ],
+    },
+)
+```
 
 Agora, vá para o diretório raiz do seu workspace e compile o pacote `my_py_pkg`:
 
@@ -288,7 +379,7 @@ Usamos `--symlink-install` para que não precisemos rodar o `colcon build` toda 
 Após o pacote ter sido compilado com sucesso, faça o *source* do seu *workspace* e inicie o nó:
 
 ```bash
-source ~/master_ros2_ws/install/setup.bash
+source ~/.bashrc
 ros2 run my_py_pkg number_publisher
 [INFO] [1773082036.235805556] [number_publisher]: O publicador de números foi iniciado
 ```
@@ -345,8 +436,8 @@ Vou passar um pouco mais rápido por esta seção, pois as explicações lógica
 Primeiro, vamos criar um novo arquivo para o nosso nó `number_publisher` no pacote `my_cpp_pkg`:
 
 ```bash
-$ cd ~/master_ros2_ws/src/my_cpp_pkg/src/
-$ touch number_publisher.cpp
+cd ~/master_ros2_ws/src/my_cpp_pkg/src/
+touch number_publisher.cpp
 ```
 
 Abra este arquivo e escreva o código para o nó. Você pode começar a partir do [template de Programação Orientada a Objetos (POO)](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/scripts/node_oop_template/node_oop_template.cpp) e adicionar o publicador, o temporizador e a função de *callback*.
@@ -400,6 +491,46 @@ void publishNumber(){
 
 Este é o método de *callback*. Assim como no Python, criamos um objeto a partir da classe da interface, preenchemos qualquer campo desta interface (no caso, `data`) e publicamos a mensagem.
 
+Aqui está o código completo para esse nó publicador em C++ *(também disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_cpp_pkg/src/number_publisher.cpp))*:
+
+```cpp
+#include "example_interfaces/msg/int64.hpp"
+#include "rclcpp/rclcpp.hpp"
+
+class NumberPublisherNode : public rclcpp::Node {
+public:
+  NumberPublisherNode() : Node("number_publisher") {
+    number_ = 2;
+    number_publisher_ =
+        this->create_publisher<example_interfaces::msg::Int64>("number", 10);
+    number_timer_ = this->create_wall_timer(
+        std::chrono::seconds(1),
+        std::bind(&NumberPublisherNode::publishNumber, this));
+    RCLCPP_INFO(this->get_logger(), "Number publisher has been started.");
+  }
+
+private:
+  void publishNumber() {
+    auto msg = example_interfaces::msg::Int64();
+    msg.data = number_;
+    number_publisher_->publish(msg);
+  }
+
+  int number_;
+  rclcpp::Publisher<example_interfaces::msg::Int64>::SharedPtr
+      number_publisher_;
+  rclcpp::TimerBase::SharedPtr number_timer_;
+};
+
+int main(int argc, char **argv) {
+  rclcpp::init(argc, argv);
+  auto node = std::make_shared<NumberPublisherNode>();
+  rclcpp::spin(node);
+  rclcpp::shutdown();
+  return 0;
+}
+```
+
 **Compilando e executando o publicador**
 
 Uma vez que você tenha escrito o nó com o publicador, temporizador e função de *callback*, é hora de compilá-lo.
@@ -412,20 +543,43 @@ Como fizemos para o Python, abra o arquivo `package.xml` do pacote `my_cpp_pkg` 
 
 ```
 
+Aqui está o código completo para o `package.xml` do pacote `my_cpp_pkg` *(também disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_cpp_pkg/package.xml))*:
+
+```xml
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>my_cpp_pkg</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="todo.todo@todo.com">ed</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>example_interfaces</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+
+```
+
 Em seguida, abra o arquivo `CMakeLists.txt` do pacote `my_cpp_pkg` e adicione as seguintes linhas:
 
 ```cmake
 find_package(rclcpp REQUIRED)
 find_package(example_interfaces REQUIRED)
 
-add_executable(test_node src/my_first_node.cpp)
-ament_target_dependencies(test_node rclcpp)
-
 add_executable(number_publisher src/number_publisher.cpp)
 ament_target_dependencies(number_publisher rclcpp example_interfaces)
 
 install(TARGETS
-  test_node
   number_publisher
   DESTINATION lib/${PROJECT_NAME}/
 )
@@ -438,12 +592,43 @@ Em seguida, criamos um novo executável. Note que também fornecemos `example_in
 
 Por fim, não há necessidade de recriar o bloco `install()`. Apenas adicione o nome do novo executável em uma nova linha dentro dele, **sem vírgulas** entre as linhas (diferente do Python).
 
+Aqui está o código completo para o `CMakeLists.txt` do pacote `my_cpp_pkg` *(também disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_cpp_pkg/package.xml)):
+
+```cmake
+cmake_minimum_required(VERSION 3.8)
+project(my_cpp_pkg)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(example_interfaces REQUIRED)
+
+add_executable(test_node src/my_first_node.cpp)
+ament_target_dependencies(test_node rclcpp)
+
+add_executable(number_publisher src/number_publisher.cpp)
+ament_target_dependencies(number_publisher rclcpp example_interfaces)
+
+install(TARGETS
+ test_node
+ number_publisher
+ DESTINATION lib/${PROJECT_NAME}/
+)
+
+ament_package()
+
+```
+
 Agora, você pode compilar, carregar as variáveis de ambiente (*source*) e executar:
 
 ```bash
 cd ~/master_ros2_ws/
 colcon build --packages-select my_cpp_pkg
-source install/setup.bash
+source ~/.bashrc
 ros2 run my_cpp_pkg number_publisher
 [INFO] [1711528108.225880935] [number_publisher]: O publicador de números foi iniciado.
 
@@ -468,9 +653,9 @@ Você pode encontrar o [código completo para este nó Python no GitHub](https:/
 Crie um novo nó chamado `number_counter` dentro do pacote `my_py_pkg`:
 
 ```bash
-$ cd ~/master_ros2_ws/src/my_py_pkg/my_py_pkg/
-$ touch number_counter.py
-$ chmod +x number_counter.py
+cd ~/master_ros2_ws/src/my_py_pkg/my_py_pkg/
+touch number_counter.py
+chmod +x number_counter.py
 
 ```
 
@@ -518,10 +703,43 @@ Em um *callback* de assinante, você recebe a mensagem diretamente nos parâmetr
 
 Agora, adicionamos o número recebido a um atributo `counter_` e imprimimos o contador toda vez com um log do ROS 2.
 
-**Observação**
-Como boa prática, especifiquei o tipo `Int64` para o argumento `msg` do método. Isso não é obrigatório para que o código Python funcione, mas adiciona um nível extra de segurança (temos certeza de que devemos receber um `Int64` e nada mais) e, às vezes, pode fazer com que o preenchimento automático (*auto-completion*) da sua IDE funcione melhor.
+> **Observação**
+>
+> Como boa prática, especifiquei o tipo `Int64` para o argumento `msg` do método. Isso não é obrigatório para que o código Python funcione, mas adiciona um nível extra de segurança (temos certeza de que devemos receber um `Int64` e nada mais) e, às vezes, pode fazer com que o preenchimento automático (*auto-completion*) da sua IDE funcione melhor.
 
 Para finalizar o nó, não se esqueça de adicionar a função padrão `main()` após a classe `NumberCounterNode`.
+
+Aqui está o código completo para o nó assinante em Python *(também disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_py_pkg/my_py_pkg/number_counter.py))*:
+```python
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from example_interfaces.msg import Int64
+
+
+class NumberCounterNode(Node):
+    def __init__(self):
+        super().__init__("number_counter")
+        self.counter_ = 0
+        self.number_subscriber_ = self.create_subscription(Int64, "number", self.callback_number, 10)
+        self.get_logger().info("Contagem de números iniciada.")
+
+    def callback_number(self, msg: Int64):
+        self.counter_ += msg.data
+        self.get_logger().info("Contador:  " + str(self.counter_))
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = NumberCounterNode()
+    rclpy.spin(node)
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+``` 
+
 
 **Executando o assinante em Python**
 
@@ -535,6 +753,38 @@ Agora, para testar o código, adicione um novo executável ao arquivo `setup.py`
             "number_counter = my_py_pkg.number_counter:main"
         ],
     },
+```
+
+Aqui o código completo do `setup.py`(também disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_py_pkg/setup.py)):
+```python
+from setuptools import find_packages, setup
+
+package_name = 'my_py_pkg'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='ed',
+    maintainer_email='todo.todo@todo.com',
+    description='TODO: Package description',
+    license='TODO: License declaration',
+    tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+            "test_node = my_py_pkg.my_first_node:main",
+            "number_publisher = my_py_pkg.number_publisher:main",
+            "number_counter = my_py_pkg.number_counter:main"
+        ],
+    },
+)
 ```
 
 Em seguida, compile o pacote e carregue as variáveis do *workspace* (daqui em diante, não escreverei esses comandos toda vez, pois são sempre os mesmos).
