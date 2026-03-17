@@ -971,8 +971,8 @@ Não temos um robô para este exemplo, então vamos apenas nomear o pacote como 
 Crie um novo pacote com o tipo de build `ament_cmake` e sem dependências. Você nem precisa fornecer o tipo de build, pois o `ament_cmake` é o usado por padrão para C++ e criação de mensagens. Navegue até o diretório `src` do seu *workspace* e crie este pacote:
 
 ```bash
-$ cd ~/master_ros2_ws/src/
-$ ros2 pkg create my_robot_interfaces
+cd ~/master_ros2_ws/src/
+ros2 pkg create my_robot_interfaces
 
 ```
 
@@ -981,9 +981,9 @@ Neste ponto, seu *workspace* deve conter três pacotes: `my_py_pkg`, `my_cpp_pkg
 Precisamos configurar este novo pacote e modificar algumas coisas para que ele possa construir mensagens. Entre no pacote, remova os diretórios `src` e `include` (pois não escreveremos código C++ nele) e crie uma nova pasta `msg`:
 
 ```bash
-$ cd my_robot_interfaces/
-$ rm -r src/ include/
-$ mkdir msg
+cd my_robot_interfaces/
+rm -r src/ include/
+mkdir msg
 
 ```
 
@@ -1030,9 +1030,8 @@ Pesquisamos nas interfaces existentes e nada corresponde perfeitamente. Como voc
 Seguindo essas regras, crie um novo arquivo chamado `HardwareStatus.msg` na pasta `msg`:
 
 ```bash
-$ cd ~/master_ros2_ws/src/my_robot_interfaces/msg/
-$ touch HardwareStatus.msg
-
+cd ~/master_ros2_ws/src/my_robot_interfaces/msg/
+touch HardwareStatus.msg
 ```
 
 Dentro deste arquivo, podemos adicionar a definição para a mensagem. Aqui está o que você pode usar:
@@ -1068,8 +1067,8 @@ Para cada nova interface que você construir neste pacote, você adicionará uma
 Agora, salve todos os arquivos e compile o seu novo pacote:
 
 ```bash
-$ cd ~/master_ros2_ws/
-$ colcon build --packages-select my_robot_interfaces
+cd ~/master_ros2_ws/
+colcon build --packages-select my_robot_interfaces
 Starting >>> my_robot_interfaces
 Finished <<< my_robot_interfaces [4.00s]
 Summary: 1 package finished [4.28s]
@@ -1099,7 +1098,7 @@ Se você vir isso, significa que o processo de build foi bem-sucedido. Se você 
 
 **Usando sua mensagem personalizada no seu código**
 
-Digamos que você queira usar a sua nova interface no nó `number_publisher` que você criou neste capítulo, dentro do pacote `my_py_pkg`.
+Digamos que você queira usar a sua nova interface no nó `number_publisher` que você criou nesta aula, dentro do pacote `my_py_pkg`.
 
 Primeiro, abra o arquivo `package.xml` do pacote `my_py_pkg` e adicione uma dependência ao `my_robot_interfaces`:
 

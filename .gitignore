@@ -1,2 +1,4 @@
 nodes-ros2/superados
 .vscode/*
+topics-ros2/scripts/turtle_controller
+topics-ros2/scripts/turtle_controller_cpp

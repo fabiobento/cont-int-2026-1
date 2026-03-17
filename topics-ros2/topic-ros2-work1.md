@@ -17,7 +17,7 @@ git reset --hard origin/master
 
 ### 3. Parte A: Criando a Interface Personalizada `RobotStatus`
 
-Para monitorar o robô de forma profissional, não usaremos apenas textos genéricos. Vamos criar um pacote dedicado a interfaces.
+Para monitorar o robô de forma mais profissional, não usaremos apenas textos genéricos. Vamos criar um pacote dedicado a interfaces.
 
 1. **Criar o pacote de interfaces**:
 
