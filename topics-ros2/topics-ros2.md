@@ -134,9 +134,9 @@ Para escrever um publicador, precisamos criar um nó; para criar um nó, precisa
 Navegue até o interior do pacote `my_py_pkg`, crie um arquivo Python e torne-o executável:
 
 ```bash
-$ cd ~/master_ros2_ws/src/my_py_pkg/my_py_pkg/
-$ touch number_publisher.py
-$ chmod +x number_publisher.py
+cd ~/master_ros2_ws/src/my_py_pkg/my_py_pkg/
+touch number_publisher.py
+chmod +x number_publisher.py
 ```
 
 Agora, abra este arquivo python que acabou de criar, e utilize o template de nó orientado a objetos (disponibilizado na Aula 2 - [Template para um nó Python](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/scripts/node_oop_template/node_oop_template.py)) e modifique os campos necessários para usar nomes que façam sentido:
@@ -656,7 +656,6 @@ Crie um novo nó chamado `number_counter` dentro do pacote `my_py_pkg`:
 cd ~/master_ros2_ws/src/my_py_pkg/my_py_pkg/
 touch number_counter.py
 chmod +x number_counter.py
-
 ```
 
 Neste arquivo, você pode escrever o código para o nó e adicionar um assinante. Aqui está a explicação, passo a passo:
@@ -668,7 +667,9 @@ from rclpy.node import Node
 from example_interfaces.msg import Int64
 ```
 
-Como queremos criar um assinante para receber o que enviamos com o publicador, precisamos usar a mesma interface. Portanto, também importamos `Int64`. Em seguida, podemos criar o assinante:
+Como queremos criar um assinante para receber o que enviamos com o publicador, precisamos usar a mesma interface. Portanto, também importamos `Int64`.
+
+Em seguida, podemos criar o assinante:
 
 ```python
 class NumberCounterNode(Node):
@@ -859,6 +860,46 @@ A mensagem que recebemos no *callback* também é um ponteiro compartilhado (con
 
 Neste *callback*, adicionamos o número recebido ao contador e o imprimimos.
 
+Aqui está o código completo para o assinante em C++ *(também disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_cpp_pkg/src/number_counter.cpp))*:
+
+```cpp
+#include "rclcpp/rclcpp.hpp"
+#include "example_interfaces/msg/int64.hpp"
+
+using namespace std::placeholders;
+
+class NumberCounterNode : public rclcpp::Node
+{
+public:
+    NumberCounterNode() : Node("number_counter"), counter_(0)
+    {
+        number_subscriber_ = this->create_subscription<example_interfaces::msg::Int64>(
+                "number", 10, std::bind(&NumberCounterNode::callbackNumber, this, _1));
+            
+        RCLCPP_INFO(this->get_logger(), "Number Counter has been started.");
+    }
+
+private:
+    void callbackNumber(const example_interfaces::msg::Int64::SharedPtr msg)
+    {
+        counter_ += msg->data;
+        RCLCPP_INFO(this->get_logger(), "Counter: %d", counter_);
+    }
+
+    int counter_;
+    rclcpp::Subscription<example_interfaces::msg::Int64>::SharedPtr number_subscriber_;
+};
+
+int main(int argc, char **argv)
+{
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<NumberCounterNode>();
+    rclcpp::spin(node);
+    rclcpp::shutdown();
+    return 0;
+}
+``` 
+
 **Executando o assinante em C++**
 
 Crie um novo executável para esse nó. Abra o `CMakeLists.txt` e adicione o seguinte código:
@@ -873,6 +914,40 @@ install(TARGETS
   number_counter
   DESTINATION lib/${PROJECT_NAME}/
 )
+```
+
+Aqui está o código fonte completo para o `CMakeLists.txt` *(também está disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_cpp_pkg/CMakeLists.txt))*:
+
+```cmake
+cmake_minimum_required(VERSION 3.8)
+project(my_cpp_pkg)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(example_interfaces REQUIRED)
+
+add_executable(test_node src/my_first_node.cpp)
+ament_target_dependencies(test_node rclcpp)
+
+add_executable(number_publisher src/number_publisher.cpp)
+ament_target_dependencies(number_publisher rclcpp example_interfaces)
+
+add_executable(number_counter src/number_counter.cpp)
+ament_target_dependencies(number_counter rclcpp example_interfaces)
+
+install(TARGETS
+ test_node
+ number_publisher
+ number_counter
+ DESTINATION lib/${PROJECT_NAME}/
+)
+
+ament_package()
 ```
 
 Em seguida, compile o pacote `my_cpp_pkg`, carregue o *workspace* e execute tanto o nó publicador quanto o nó assinante em Terminais diferentes. Você deve ver uma saída semelhante à que tivemos com o Python.
