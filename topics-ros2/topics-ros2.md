@@ -836,7 +836,7 @@ number_subscriber_ = this->create_subscription<example_interfaces::msg::Int64>(
 Encontramos os mesmos componentes do Python (mas em uma ordem diferente): interface do tópico, nome do tópico, tamanho da fila e o *callback* para as mensagens recebidas. Para que o `_1` funcione, não se esqueça de adicionar `using namespace std::placeholders;` antes dele.
 
 **Observação**
-Mesmo que as bibliotecas `rclpy` e `rclcpp` devam ser baseadas no mesmo código subjacente, ainda pode haver algumas diferenças na API. Não se preocupe se o código às vezes não parecer o mesmo entre Python e C++.
+Mesmo que as bibliotecas `rclpy` e `rclcpp` devam ser baseadas no mesmo código , ainda pode haver algumas diferenças na API. Não se preocupe se o código às vezes não parecer o mesmo entre Python e C++.
 
 O objeto assinante é declarado como um atributo privado:
 
@@ -1097,50 +1097,6 @@ Dessa forma, você pode testar um assinante sem precisar escrever um publicador 
 Tanto o `ros2 topic echo` quanto o `ros2 topic pub` podem economizar muito tempo, e isso também é ótimo para colaborar com outras pessoas em um projeto. Você poderia ser responsável por escrever um publicador, e outra pessoa escreveria um assinante. Com essas ferramentas de linha de comando, ambos podem garantir que a comunicação do tópico esteja funcionando. Assim, quando vocês executarem os dois nós juntos, saberão que os dados enviados ou recebidos estão corretos.
 
 
-### **Alterando o nome de um tópico em tempo de execução**
-
-Na Aula 2, você aprendeu como alterar o nome de um nó em tempo de execução — ou seja, adicionando `--ros-args -r __node:=<novo_nome>` após o comando `ros2 run`.
-
-Então, para qualquer argumento adicional que você passar após o `ros2 run`, adicione `--ros-args`, mas apenas uma vez.
-
-Logo, você também pode alterar o nome de um tópico em tempo de execução. Para fazer isso, adicione outro `-r`, seguido por `<nome_do_topico>:=<novo_nome_do_topico>`.
-
-Por exemplo, vamos renomear nosso tópico de `number` para `my_number`:
-
-```bash
-ros2 run my_py_pkg number_publisher --ros-args -r number:=my_number
-
-```
-
-Agora, se iniciarmos o nó `number_counter`, para podermos receber as mensagens, também precisamos modificar o nome do tópico dele:
-
-```bash
-ros2 run my_py_pkg number_counter --ros-args -r number:=my_number
-
-```
-
-Com isso, a comunicação funcionará, mas desta vez usando o tópico `my_number`.
-
-Para tornar as coisas um pouco mais interessantes, vamos manter esses dois nós rodando e vamos executar outro publicador para este tópico, usando o mesmo nó `number_publisher`. Como você sabe, não podemos ter dois nós rodando com o mesmo nome. Portanto, teremos que renomear tanto o nó quanto o tópico. Em um terceiro Terminal, execute o seguinte comando:
-
-```bash
-$ ros2 run my_py_pkg number_publisher --ros-args -r __node:=number_publisher_2 -r number:=my_number
-```
-
-Após executar isso, você verá que o `number_counter` recebe mensagens duas vezes mais rápido, já que há dois nós publicando uma mensagem a cada `1.0` segundo.
-
-Além disso, vamos iniciar o `rqt_graph`:
-
-
-![](https://github.com/fabiobento/cont-int-2026-1/raw/main/topics-ros2/imagens/topics-renamed-nodes.png)
-**Dois publicadores e um assinante, com um tópico renomeado** ([Fonte](https://www.packtpub.com/en-us/product/ros-2-from-scratch-9781835881415))
-
-
-Veremos que temos dois nós contendo um publicador no tópico `my_number` e um nó contendo um assinante.
-
-A alteração de nomes de tópicos em tempo de execução será bastante útil para você, especialmente quando quiser executar vários nós existentes que você não pode modificar (por exemplo, os nós dos drivers das câmeras no Raspberry Pi do nosso projeto). Mesmo que você não possa reescrever o código, você pode modificar os nomes na hora de rodar.
-
-
 ### **Reproduzindo dados de tópicos com bags**
 
 Imagine este cenário: você está trabalhando em um robô móvel que deve ter um determinado desempenho ao navegar do lado de fora enquanto está chovendo.
@@ -1158,9 +1114,9 @@ Primeiro, pare todos os nós e execute apenas o nó `number_publisher`.
 Já sabemos que o nome do tópico é `/number`. Você pode recuperar isso com `ros2 topic list` se necessário. Em seguida, em outro Terminal, grave o bag com `ros2 bag record <lista_de_topicos> -o <nome_do_bag>`. Para deixar as coisas mais organizadas, sugiro que você crie uma pasta `bags` e grave de dentro dessa pasta:
 
 ```bash
-$ mkdir ~/bags
-$ cd ~/bags/
-$ ros2 bag record /number -o bag1
+mkdir ~/bags
+cd ~/bags/
+ros2 bag record /number -o bag1
 ...
 [INFO] [1711602240.190476880] [rosbag2_recorder]: Subscribed to topic '/number'
 [INFO] [1711602240.190542569] [rosbag2_recorder]: Recording...
@@ -1184,7 +1140,7 @@ Agora, você pode reproduzir o bag, o que significa que ele publicará no tópic
 Pare o nó `number_publisher` (pois não queremos dados falsos se misturando com a gravação) e reproduza o bag com `ros2 bag play <caminho_para_o_bag>`:
 
 ```bash
-$ ros2 bag play ~/bags/bag1/
+ros2 bag play ~/bags/bag1/
 ```
 
 Isso publicará todas as mensagens gravadas, com a mesma duração da gravação. Então, se você gravou por 3 minutos e 14 segundos, o bag reproduzirá o tópico por 3 minutos e 14 segundos. Depois disso, o bag será encerrado, e você poderá reproduzi-lo novamente se quiser.
@@ -1323,6 +1279,34 @@ Agora, abra o arquivo `package.xml` deste pacote. Após `<buildtool_depend>ament
 
 Com isso, o arquivo `package.xml` está completo e você não precisará fazer mais nada com ele por enquanto.
 
+Aqui o arquivo `package.xml` completo *(também disponível **[nesse link](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_robot_interfaces/package.xml)**)*:
+```xml
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>my_robot_interfaces</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="todo.todo@todo.com">ed</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>rosidl_default_generators</build_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+```
+
+
+
 Abra o arquivo `CMakeLists.txt`. Após `find_package(ament_cmake REQUIRED)` e antes de `ament_package()`, adicione as seguintes linhas (você também pode remover o bloco `if(BUILD_TESTING)`):
 
 ```cmake
@@ -1338,11 +1322,33 @@ ament_export_dependencies(rosidl_default_runtime)
 
 Não há muito o que entender sobre essas linhas que você está adicionando. Elas encontrarão algumas dependências (pacotes `rosidl`) e prepararão seu pacote para que ele possa construir interfaces.
 
+O código fonte completo desse `CMakeLists.txt` *(também disponível **[nesse link](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_robot_interfaces/CMakeLists.txt)**)*:
+```cmake
+cmake_minimum_required(VERSION 3.8)
+project(my_robot_interfaces)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/HardwareStatus.msg"
+)
+
+ament_export_dependencies(rosidl_default_runtime)
+
+ament_package()
+```
+
 Neste ponto, seu pacote está pronto e você pode adicionar novas interfaces. Você só precisará fazer esta fase de configuração uma vez. Daqui para frente, adicionar uma nova interface será muito rápido.
 
 
 
-### **Criando e construindo uma nova interface de tópico**
+### **Criando e construindo uma nova interface para um tópico**
 
 Digamos que queremos criar um publicador para enviar algum tipo de status de hardware do nosso robô, incluindo a versão do robô, a temperatura interna, um sinalizador (flag) para saber se os motores estão prontos e uma mensagem de depuração.
 
@@ -1410,8 +1416,8 @@ O sistema de build pegará a definição de interface que você escreveu e a usa
 Depois de compilar o pacote, certifique-se de carregar as variáveis do ambiente (*source*). Você deverá ser capaz de ver sua interface pelo Terminal (não se esqueça de usar o preenchimento automático com a tecla *Tab* para construir o comando mais rápido e ter certeza de que tem o nome correto):
 
 ```bash
-$ source ~/.bashrc
-$ ros2 interface show my_robot_interfaces/msg/HardwareStatus
+source ~/.bashrc
+ros2 interface show my_robot_interfaces/msg/HardwareStatus
 int64 version
 float64 temperature
 bool are_motors_ready
@@ -1454,6 +1460,52 @@ msg.are_motors_ready = True
 msg.debug_message = "All systems go!"
 
 ```
+
+O script `number_publisher.py` ficaria assim:
+```python
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from example_interfaces.msg import Int64
+
+
+class NumberCounterNode(Node):
+    def __init__(self):
+        super().__init__("number_counter")
+        self.counter_ = 0
+        self.number_subscriber_ = self.create_subscription(Int64, "number", self.callback_number, 10)
+        self.get_logger().info("Contagem de números iniciada.")
+
+    def callback_number(self, msg: Int64):
+        self.counter_ += msg.data
+        self.get_logger().info("Contador:  " + str(self.counter_))
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = NumberCounterNode()
+    rclpy.spin(node)
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Você pode rodar o nó assim:
+```bash
+ros2 run my_py_pkg number_publisher 
+```
+
+E monitorar o tópico assim:
+```bash
+ros2 topic echo /hardware_status 
+version: 1
+temperature: 34.5
+are_motors_ready: true
+debug_message: All systems go!
+---
+
 
 **Observação para VS Code em Python:**
 Se você estiver usando o VS Code, a mensagem pode não ser reconhecida e ficar sublinhada em vermelho após a importação. Feche o VS Code e abra-o novamente em um Terminal onde você já tenha feito o `source ~/.bashrc`.
