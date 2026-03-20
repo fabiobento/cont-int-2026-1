@@ -4,18 +4,8 @@
 
 Desenvolver um controlador de malha fechada que utiliza a posição real da tartaruga (`/turtle1/pose`) para decidir as ações de controle, eliminando o erro acumulado do *Dead Reckoning*. Além disso, criaremos uma interface personalizada para monitorar o status do sistema.
 
-### 2. Preparação e Atualização do Repositório
 
-Antes de iniciar, certifique-se de que seu ambiente está sincronizado com a versão oficial do professor para evitar conflitos de código.
-
-```bash
-cd ~/cont-int-2026-1
-git fetch
-git reset --hard origin/master
-
-```
-
-### 3. Parte A: Criando a Interface Personalizada `RobotStatus`
+### 2. Parte A: Criando a Interface Personalizada `RobotStatus`
 
 Para monitorar o robô de forma mais profissional, não usaremos apenas textos genéricos. Vamos criar um pacote dedicado a interfaces.
 
@@ -40,7 +30,7 @@ string current_state
 
 *(Nota: Adicione as configurações necessárias no `package.xml` e `CMakeLists.txt` conforme visto em aula e compile o pacote)*.
 
-### 4. Parte B: O Controlador de Malha Fechada (`turtle_closed_loop`)
+### 3. Parte B: O Controlador de Malha Fechada (`turtle_closed_loop`)
 
 Agora, vamos evoluir o nó da Atividade Prática 2. Em vez de contar "ticks" de um Timer, o robô vai agir com base na posição lida do tópico `/turtle1/pose`.
 
@@ -57,11 +47,11 @@ Agora, vamos evoluir o nó da Atividade Prática 2. Em vez de contar "ticks" de 
 3. **Publicação de Status**: Além do comando de movimento, o nó deve publicar no novo tópico `/robot_status` usando a interface que você criou na Parte A.
 
 
-### 5. Parte C: Integração com o Supervisor (C++)
+### 4. Parte C: Integração com o Supervisor (C++)
 
 O nó **Supervisor** criado na Atividade Prática 1 deve ser mantido. Ele continuará monitorando o sistema, mas agora você deve verificar no `rqt_graph` como o fluxo de dados mudou: a tartaruga agora "fala" com o seu controlador, que por sua vez "fala" com os motores.
 
-### 6. Validação e Inspeção
+### 5. Validação e Inspeção
 
 Após compilar seu workspace com `colcon build --symlink-install`, execute os testes:
 
