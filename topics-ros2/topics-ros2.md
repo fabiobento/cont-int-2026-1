@@ -181,7 +181,7 @@ Para a interface, você tem duas escolhas: usar uma interface existente ou criar
 Vamos usar `example_interfaces/msg/Int64`. Para obter mais detalhes sobre o que há na interface, podemos rodar `ros2 interface show <nome_da_interface>` no Terminal:
 
 ```bash
-$ ros2 interface show example_interfaces/msg/Int64
+ros2 interface show example_interfaces/msg/Int64
 # Alguns comentários
 int64 data
 ```
@@ -359,8 +359,7 @@ setup(
     entry_points={
         'console_scripts': [
             "test_node = my_py_pkg.my_first_node:main",
-            "number_publisher = my_py_pkg.number_publisher:main",
-            "number_counter = my_py_pkg.number_counter:main"
+            "number_publisher = my_py_pkg.number_publisher:main",      
         ],
     },
 )
@@ -391,7 +390,7 @@ Como sabemos que o publicador está funcionando? Poderíamos escrever um nó ass
 Abra uma nova janela de Terminal e liste todos os tópicos:
 
 ```bash
-$ ros2 topic list
+ros2 topic list
 /number
 /parameter_events
 /rosout
@@ -406,7 +405,7 @@ Aqui, você pode encontrar o tópico `/number`.
 Com o comando `ros2 topic echo <nome_do_topico>`, você pode assinar o tópico diretamente pelo Terminal e ver o que está sendo publicado. Aprenderemos mais sobre este comando mais adiante:
 
 ```bash
-$ ros2 topic echo /number
+ros2 topic echo /number
 data: 2
 ---
 data: 2
@@ -961,10 +960,10 @@ Se o tópico é o mesmo, isso significa que você poderia iniciar o nó `number_
 Vamos verificar isso:
 
 ```bash
-$ ros2 run my_py_pkg number_publisher
+ros2 run my_py_pkg number_publisher
 [INFO] [1711597703.615546913] [number_publisher]: Number publisher has been started.
 
-$ ros2 run my_cpp_pkg number_counter
+ros2 run my_cpp_pkg number_counter
 [INFO] [1711597740.879160448] [number_counter]: Number Counter has been started.
 [INFO] [1711597741.607444197] [number_counter]: Counter: 2
 [INFO] [1711597742.607408224] [number_counter]: Counter: 4
@@ -1031,7 +1030,7 @@ Se você executar `ros2 topic -h`, verá que há muitos comandos. Você já conh
 Primeiro, para listar todos os tópicos, use `ros2 topic list`:
 
 ```bash
-$ ros2 topic list
+ros2 topic list
 /number
 /parameter_events
 /rosout
@@ -1043,7 +1042,7 @@ Como você pode ver, obtemos o tópico `/number`. Você também sempre obterá `
 Com `ros2 topic info <nome_do_topico>`, você pode obter a interface do tópico, bem como o número de publicadores e assinantes para aquele tópico:
 
 ```bash
-$ ros2 topic info /number
+ros2 topic info /number
 Type: example_interfaces/msg/Int64
 Publisher count: 1
 Subscription count: 1
@@ -1053,7 +1052,7 @@ Subscription count: 1
 Então, para ir mais longe e ver os detalhes da interface, você pode executar o seguinte comando:
 
 ```bash
-$ ros2 interface show example_interfaces/msg/Int64
+ros2 interface show example_interfaces/msg/Int64
 # alguns comentários
 int64 data
 
@@ -1064,7 +1063,7 @@ Com isso, temos todas as informações de que precisamos para criar um publicado
 Além disso, também podemos assinar o tópico diretamente pelo Terminal com `ros2 topic echo <nome_do_topico>`. Foi o que fizemos logo após escrever o publicador para garantir que ele estivesse funcionando antes de escrevermos qualquer assinante:
 
 ```bash
-$ ros2 topic echo /number
+ros2 topic echo /number
 data: 2
 ---
 data: 2
