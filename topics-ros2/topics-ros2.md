@@ -1465,24 +1465,37 @@ O script `number_publisher.py` ficaria assim:
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-from example_interfaces.msg import Int64
+from my_robot_interfaces.msg import HardwareStatus
 
 
-class NumberCounterNode(Node):
+class NumberPublisherNode(Node):
     def __init__(self):
-        super().__init__("number_counter")
-        self.counter_ = 0
-        self.number_subscriber_ = self.create_subscription(Int64, "number", self.callback_number, 10)
-        self.get_logger().info("Contagem de números iniciada.")
+        # Mantive o nome do nó como "number_publisher" para evitar quebrar algo externo, 
+        # mas você também pode mudar para "hardware_status_publisher" futuramente.
+        super().__init__("number_publisher")
+        
+        # 1. Especificando a interface HardwareStatus ao criar o publicador
+        self.hardware_status_publisher_ = self.create_publisher(HardwareStatus, "hardware_status", 10)        
+        
+        # O timer chama a função abaixo a cada 1 segundo para publicar a mensagem
+        self.status_timer_ = self.create_timer(1.0, self.publish_hardware_status)
+        self.get_logger().info("O publicador de status do hardware foi iniciado.")      
 
-    def callback_number(self, msg: Int64):
-        self.counter_ += msg.data
-        self.get_logger().info("Contador:  " + str(self.counter_))
+    def publish_hardware_status(self):
+        # 2. Criando a mensagem e preenchendo os campos
+        msg = HardwareStatus()
+        msg.temperature = 34.5
+        msg.version = 1
+        msg.are_motors_ready = True
+        msg.debug_message = "All systems go!"
+        
+        # 3. Publicando a mensagem na rede ROS 2
+        self.hardware_status_publisher_.publish(msg)
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = NumberCounterNode()
+    node = NumberPublisherNode()
     rclpy.spin(node)
     rclpy.shutdown()
 
