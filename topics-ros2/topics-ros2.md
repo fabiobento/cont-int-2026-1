@@ -1854,11 +1854,9 @@ Observe através do comando `rqt_graph` a relação entre os nós:
 ros2 run rqt_graph rqt_graph
 ```
 
-Agora você tem um sistema em malha fechada, onde o nó controlador recebe informações do nó do ambiente virtual e publica comandos de velocidade para o mesmo.
+Agora você tem um sistema em malha fechada, onde o nó controlador (`turtle_controller`) recebe informações do nó    (topico `/turtle1/pose`) do ambiente virtual (`turtlesim_node`) e publica comandos de velocidade para o mesmo (topico `/turtle1/cmd_vel`). 
 
 ![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/rqtgraph-closed-loop.png)
 
 
 
-
-Para parar a execução, pressione `Ctrl+C` em cada terminal.
