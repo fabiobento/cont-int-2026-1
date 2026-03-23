@@ -1546,7 +1546,7 @@ Você agora pode criar e usar a sua interface personalizada para tópicos. Como 
 
 ## **Desafio de Tópicos – controle em malha fechada**
 
-Aqui está um desafio para você continuar praticando a criação de nós, publicadores e assinantes. Iniciaremos um novo projeto ROS 2 e o aprimoraremos ao longo dos próximos capítulos, à medida que descobrirmos mais conceitos.
+Aqui está um desafio para você continuar praticando a criação de nós, publicadores e assinantes. Iniciaremos um novo projeto ROS 2 e o aprimoraremos ao longo das próximas aulas, à medida que descobrirmos mais conceitos.
 
 Encorajo você a ler as instruções e reservar um tempo para tentar completar este desafio antes de verificar a solução. Praticar é a chave para um aprendizado eficaz.
 
@@ -1573,3 +1573,13 @@ Siga estas etapas para começar:
 > **Observação**
 >
 > O Passo 4 descreve a essência de um **Sistema de Controle em Malha Fechada**. A publicação constante do `turtlesim` no tópico `pose` age como o nosso sensor (realimentação). O nosso *callback* de assinatura atua como o **Controlador**, avaliando a posição atual ($X$) e calculando imediatamente a ação de controle (a nova velocidade em `cmd_vel`). Como não estamos usando um temporizador para ditar o ritmo, a frequência de amostragem do nosso controle é perfeitamente ditada pela frequência com que o sensor consegue nos enviar dados!"
+
+---
+---
+> **Atenção:**
+>
+>Pelo bem de seu aprendizado, tente realizar as etapas acima sem ler as informações adiante
+---
+---
+
+### Solução para o Desafio de Tópicos – controle em malha fechada
