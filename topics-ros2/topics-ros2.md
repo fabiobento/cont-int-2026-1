@@ -1857,7 +1857,7 @@ ros2 run rqt_graph rqt_graph
 Agora você tem um sistema em malha fechada, onde o nó controlador (`turtle_controller`) recebe informações do nó    (topico **`/turtle1/pose`**) do ambiente virtual (`turtlesim_node`) e publica comandos de velocidade para o mesmo (topico **`/turtle1/cmd_vel`**). 
 
 
-![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/turtlesim-pose.png)
+![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/topics-rqt.png)
 
 
 O tópico `/turtle1/pose` publica mensagens do tipo `turtlesim/msg/Pose`. Confira isso ao digitar a segunte linha de comando:
