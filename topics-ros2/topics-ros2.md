@@ -1835,10 +1835,16 @@ ros2 run turtlesim turtlesim_node
 ```
 Você verá a janela do ambiente virtual com o robô (tartaruga) na posição inicial
 
+
 ![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/turtlesim-node.png)
+
 
 Em seguida execute o nó controlador:
 ```bash
 ros2 run turtle_controller turtle_controller
 ```
+
+Agora o robê estará seguindo a trajetória conforme a lógica implementada no nó controlador.
+
+![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/turtlesim-node-move.png)
 
