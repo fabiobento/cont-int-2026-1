@@ -3,14 +3,14 @@ import rclpy
 from rclpy.node import Node
 
 
-class MyCustomNode(Node): # MODIFIQUE O NOME
+class MyCustomNode(Node): # MODIFY NAME
     def __init__(self):
-        super().__init__("node_name") # MODIFIQUE O NOME
+        super().__init__("node_name") # MODIFY NAME
 
 
 def main(args=None):
     rclpy.init(args=args)
-    node = MyCustomNode() # MODIFIQUE O NOME
+    node = MyCustomNode() # MODIFY NAME
     rclpy.spin(node)
     rclpy.shutdown()
 
