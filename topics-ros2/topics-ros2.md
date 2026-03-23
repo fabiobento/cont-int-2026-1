@@ -1844,7 +1844,21 @@ Em seguida execute o nó controlador:
 ros2 run turtle_controller turtle_controller
 ```
 
-Agora o robê estará seguindo a trajetória conforme a lógica implementada no nó controlador.
+Agora o robô estará seguindo a trajetória conforme a lógica implementada no nó controlador.
 
 ![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/turtlesim-node-move.png)
 
+
+Observe através do comando `rqt_graph` a relação entre os nós:
+```bash
+ros2 run rqt_graph rqt_graph
+```
+
+Agora você tem um sistema em malha fechada, onde o nó controlador recebe informações do nó do ambiente virtual e publica comandos de velocidade para o mesmo.
+
+![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/rqtgraph-closed-loop.png)
+
+
+
+
+Para parar a execução, pressione `Ctrl+C` em cada terminal.
