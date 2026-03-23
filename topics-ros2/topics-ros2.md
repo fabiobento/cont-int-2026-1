@@ -1854,9 +1854,75 @@ Observe através do comando `rqt_graph` a relação entre os nós:
 ros2 run rqt_graph rqt_graph
 ```
 
-Agora você tem um sistema em malha fechada, onde o nó controlador (`turtle_controller`) recebe informações do nó    (topico `/turtle1/pose`) do ambiente virtual (`turtlesim_node`) e publica comandos de velocidade para o mesmo (topico `/turtle1/cmd_vel`). 
+Agora você tem um sistema em malha fechada, onde o nó controlador (`turtle_controller`) recebe informações do nó    (topico **`/turtle1/pose`**) do ambiente virtual (`turtlesim_node`) e publica comandos de velocidade para o mesmo (topico **`/turtle1/cmd_vel`**). 
 
-![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/rqtgraph-closed-loop.png)
+
+![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/turtlesim-pose.png)
+
+
+O tópico `/turtle1/pose` publica mensagens do tipo `turtlesim/msg/Pose`. Confira isso ao digitar a segunte linha de comando:
+```bash
+ros2 topic info /turtle1/pose
+```
+A saída será:
+```bash
+Type: turtlesim/msg/Pose
+Publisher count: 1
+Subscription count: 1
+```
+
+Para inspecionar como é a interface da mensagem, digite a seguinte linha de comando:
+```bash
+ros2 interface show turtlesim/msg/Pose
+```
+A saída será:
+```bash
+msg
+  float64 x
+  float64 y
+  float64 theta
+  float64 linear_velocity
+  float64 angular_velocity
+```
+Onde cada campo representa:
+- **x**: Posição no eixo x
+- **y**: Posição no eixo y
+- **theta**: Orientação (ângulo) atual da tartaruga
+- **linear_velocity**: Velocidade linear atual
+- **angular_velocity**: Velocidade angular atual
+
+
+O tópico `/turtle1/cmd_vel`, por sua vez, publica mensagens do tipo `geometry_msgs/msg/Twist`. Confira isso ao digitar a segunte linha de comando:
+```bash
+ros2 topic info /turtle1/cmd_vel
+```
+A saída será:
+```bash
+Type: geometry_msgs/msg/Twist
+Publisher count: 1
+Subscription count: 1
+```
+
+Para inspecionar como é a interface da mensagem, digite a seguinte linha de comando:
+```bash
+ros2 interface show geometry_msgs/msg/Twist
+```
+A saída será:
+```bash
+msg
+  geometry_msgs/msg/Vector3 linear
+    float64 x
+    float64 y
+    float64 z
+  geometry_msgs/msg/Vector3 angular
+    float64 x
+    float64 y
+    float64 z
+```
+Onde cada campo representa:
+- **linear**: Componentes de velocidade linear (translação)
+- **angular**: Componentes de velocidade angular (rotação)
+
 
 
 
