@@ -12,10 +12,30 @@ Todas as explicações começarão com Python, seguidas por C++, que cobriremos 
 
 ## Requisitos Técnicos 
 
-Para acompanhar este roteiro, é recomendável ter um computador ou placa embarcada (por exemplo, Raspberry Pi, placa Jetson, etc.) com o Ubuntu 24.04 LTS instalado ou qualquer outra versão do Ubuntu.
+### **Passo 1: Isolamento de Rede no Laboratório (Obrigatório)**
 
+Como estamos todos conectados à mesma rede Wi-Fi, o ROS 2 tentará conectar os nós de todos os computadores automaticamente. Se não isolarmos a rede, o seu controlador tentará mover o robô do colega ao lado!
 
-### **Preparando o Ambiente: Obtendo o Código da Disciplina**
+Para evitar isso, cada aluno receberá um número de identificação (ID) único  correspondente a sua bancada.
+
+Abra o terminal e verifique se a variável de ambiente `ROS_DOMAIN_ID` está vazia:
+```bash
+echo $ROS_DOMAIN_ID
+```
+
+Caso esteja vazia ou não esteja com o número de sua bancada, abra o Terminal e exporte a variável ambiental `ROS_DOMAIN_ID` **antes** de rodar qualquer comando ROS 2 da seguinte forma:
+
+1. Adicione o comando ao final do arquivo `.bashrc` (substitua XX pelo número de sua bancada, ex: export ROS_DOMAIN_ID=7)
+    ```bash
+    echo "export ROS_DOMAIN_ID=XX" >> ~/.bashrc
+    ```
+
+2. Recarregue as configurações para aplicar no terminal atual
+    ```bash
+    source ~/.bashrc
+    ```
+
+###  **Passo 2: Preparando o Ambiente: Obtendo o Código da Disciplina**
 
 Para realizarmos as práticas de ROS 2, você precisará dos scripts, *packages* e arquivos de configuração mais recentes. Todo o material é atualizado constantemente no repositório da disciplina no GitHub.
 
@@ -25,6 +45,7 @@ Siga as instruções abaixo de acordo com a sua situação no laboratório de ho
 Se você está usando um computador novo no laboratório ou ainda não baixou o material deste semestre, abra o Terminal e execute o comando de clonagem para trazer o projeto para a sua máquina:
 
 ```bash
+cd 
 git clone https://github.com/fabiobento/cont-int-2026-1.git
 ```
 

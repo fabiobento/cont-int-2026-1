@@ -115,6 +115,65 @@ Há muitas possibilidades para o uso de tópicos, e você conhecerá mais sobre 
 > * Publicadores e assinantes são **anônimos**. Eles não têm conhecimento uns dos outros; apenas sabem que estão publicando ou assinando um tópico.
 > * Um nó pode conter vários publicadores e assinantes para **tópicos diferentes**.
 
+## Requisitos Técnicos 
+
+### **Passo 1: Isolamento de Rede no Laboratório (Obrigatório)**
+
+Como estamos todos conectados à mesma rede Wi-Fi, o ROS 2 tentará conectar os nós de todos os computadores automaticamente. Se não isolarmos a rede, o seu controlador tentará mover o robô do colega ao lado!
+
+Para evitar isso, cada aluno receberá um número de identificação (ID) único  correspondente a sua bancada.
+
+Abra o terminal e verifique se a variável de ambiente `ROS_DOMAIN_ID` está vazia:
+```bash
+echo $ROS_DOMAIN_ID
+```
+
+Caso esteja vazia ou não esteja com o número de sua bancada, abra o Terminal e exporte a variável ambiental `ROS_DOMAIN_ID` **antes** de rodar qualquer comando ROS 2 da seguinte forma:
+
+1. Adicione o comando ao final do arquivo `.bashrc` (substitua XX pelo número de sua bancada, ex: export ROS_DOMAIN_ID=7)
+    ```bash
+    echo "export ROS_DOMAIN_ID=XX" >> ~/.bashrc
+    ```
+
+2. Recarregue as configurações para aplicar no terminal atual
+    ```bash
+    source ~/.bashrc
+    ```
+
+###  **Passo 2: Preparando o Ambiente: Obtendo o Código da Disciplina**
+
+Para realizarmos as práticas de ROS 2, você precisará dos scripts, *packages* e arquivos de configuração mais recentes. Todo o material é atualizado constantemente no repositório da disciplina no GitHub.
+
+Siga as instruções abaixo de acordo com a sua situação no laboratório de hoje:
+
+**1. Primeira vez usando o repositório (Ainda não baixou)**
+Se você está usando um computador novo no laboratório ou ainda não baixou o material deste semestre, abra o Terminal e execute o comando de clonagem para trazer o projeto para a sua máquina:
+
+```bash
+cd
+git clone https://github.com/fabiobento/cont-int-2026-1.git
+```
+
+**2. Atualizando o repositório existente (Já baixou anteriormente)**
+Se você já tem a pasta do projeto no seu computador, precisaremos sincronizá-la com as atualizações da semana.
+
+> **Atenção:** Durante as aulas práticas, é esperado e recomendável que vocês editem os códigos para testar hipóteses. No entanto, para iniciar a aula de hoje sem erros de conflito, usaremos uma sequência de comandos que baixa as novidades e **sobrescreve** qualquer alteração local. Isso garante que o seu ambiente fique exatamente igual à versão oficial para o roteiro de hoje.
+
+Abra o Terminal e execute a seguinte sequência:
+
+```bash
+cd ~/cont-int-2026-1
+git fetch
+git reset --hard origin/main
+```
+
+**O que esses comandos fazem?**
+
+* **`cd cont-int-2026-1`**: Garante que você está dentro da pasta correta do projeto.
+* **`git fetch`**: Consulta o GitHub e baixa silenciosamente as informações mais recentes do servidor, mas ainda não altera os seus arquivos visíveis.
+* **`git reset --hard origin/master`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`master`) oficial, descartando testes e modificações residuais das aulas anteriores.
+
+
 ## **Escrevendo um publicador de tópico**
 
 Nesta seção, você escreverá seu primeiro publicador (*publisher*) no ROS 2. Para trabalhar nos conceitos centrais, criaremos uma nova aplicação ROS 2 e a expandiremos nas próximas aulas. Esta aplicação será super minimalista para que possamos focar apenas no conceito que queremos aprender, e em nada mais.
