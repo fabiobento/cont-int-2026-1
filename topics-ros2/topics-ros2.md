@@ -1641,4 +1641,204 @@ Siga estas etapas para começar:
 ---
 ---
 
-### Solução para o Desafio de Tópicos – controle em malha fechada
+## Solução para o Desafio de Tópicos – controle em malha fechada
+Os passos para a solução são os seguintes
+1. Criar um workspace
+2. Criar um pacote
+3. Criar um nó
+4. Compilar 
+5. Executar os nós
+
+
+
+### Criar um workspace
+Vou conderar que você já criou um workspace no diretório `~/master_ros2_ws`conforme descrito na seçção [**Criando e configurando um workspace do ROS 2**](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/nodes-ros2.md#criando-e-configurando-um-workspace-do-ros-2) da [**Aula 2: Escrevendo e Construindo um Nó ROS 2**](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/nodes-ros2.md).
+
+### Criar um pacote em Python
+Você criará seus pacotes dentro do diretório do `src` do seu workspace, ou seja em `~/master_ros2_ws/src`. Então digite a seguinte linha de comando:
+```bash
+cd ~/master_ros2_ws/src
+```
+Você pode criar o pacote em Python ou em C++. Para criar o pacote em Python, digite a seguinte linha de comando:
+
+```bash
+ros2 pkg create turtle_controller --build-type ament_python --dependencies rclpy
+```
+### Criar um nó em Python
+Para criar o nó, você deve criar um script Python dentro do diretório `~/master_ros2_ws/src/turtle_controller/turtle_controller`.
+```bash
+cd ~/master_ros2_ws/src/turtle_controller/turtle_controller
+touch turtle_controller.py
+```
+Cole o seguinte código fonte no arquivo `turtle_controller.py`:
+```python
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from geometry_msgs.msg import Twist
+from turtlesim.msg import Pose
+
+
+class TurtleControllerNode(Node):
+    """
+    Nó controlador para a tartaruga no ambiente turtlesim.
+    Publica no tópico de velocidade e recebe informações do tópico de posição (pose).
+    """
+
+    def __init__(self):
+        """
+        Inicializa o nó ROS 2 com o nome 'turtle_controller'.
+        Cria o publicador para '/turtle1/cmd_vel' e o assinante (subscriber) para '/turtle1/pose'.
+        """
+        super().__init__("turtle_controller")
+        self.cmd_vel_pub_ = self.create_publisher(Twist, "/turtle1/cmd_vel", 10)
+        self.pose_sub_ = self.create_subscription(Pose, "/turtle1/pose", self.callback_pose, 10)
+
+    def callback_pose(self, pose: Pose):
+        """
+        Função de callback chamada sempre que uma nova pose da tartaruga é recebida.
+        Define e publica as velocidades linear e angular da tartaruga dependendo da sua coordenada 'x'.
+        """
+        cmd = Twist()
+        if pose.x < 5.5:
+            # Se a posição em x for menor que 5.5
+            cmd.linear.x = 1.0
+            cmd.angular.z = 1.0
+        else:
+            # Se a posição em x for maior ou igual a 5.5
+            cmd.linear.x = 2.0
+            cmd.angular.z = 2.0
+        self.cmd_vel_pub_.publish(cmd)
+
+
+def main(args=None):
+    """
+    Ponto de entrada principal do programa.
+    Inicializa a comunicação ROS (rclpy), cria a instância do nó
+    e o mantém em execução (spin) até que seja interrompido.
+    """
+    rclpy.init(args=args)
+    node = TurtleControllerNode()
+    rclpy.spin(node)
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Em seguida você edita a variável `entry_points` no arquivo `~/master_ros2_ws/src/turtle_controller/setup.py` para que ela fique assim:
+```python
+    entry_points={
+        'console_scripts': [
+            'turtle_controller = turtle_controller.turtle_controller:main',
+        ],
+    },
+```
+Isso adicionará o executável `turtle_controller` ao seu pacote.
+O código fonte completo do `setup.py` fica assim *(também disponível [nesse link do repositório](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/turtle_controller/setup.py) )*:
+```python
+"""
+Arquivo de configuração de instalação do pacote ROS 2 (Python).
+Define as dependências, pontos de entrada (executáveis) e metadados do pacote.
+"""
+from setuptools import find_packages, setup
+
+package_name = 'turtle_controller'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    # Busca automaticamente os pacotes e submódulos, excluindo pastas de testes
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        # Registra o pacote no índice de recursos do ament para ser localizado pelo ROS 2
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        # Instala o manifesto (package.xml) no diretório 'share' do pacote
+        ('share/' + package_name, ['package.xml']),
+    ],
+    # Define os pacotes Python necessários para a instalação
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='ed',
+    maintainer_email='todo.todo@todo.com',
+    description='TODO: Package description',
+    license='TODO: License declaration',
+    # Define as dependências necessárias para rodar os testes
+    tests_require=['pytest'],
+    # Configuração dos executáveis do pacote (pontos de entrada)
+    entry_points={
+        'console_scripts': [
+            # Cria o comando 'turtle_controller' apontando para a função 'main' do nó criado
+            "turtle_controller = turtle_controller.turtle_controller:main"
+        ],
+    },
+)
+
+```
+
+Além disso as dependências, como você importou as bibliotecas `geometry_msgs` e `turtlesim` no seu código, elas devem ser adicionadas logo após `<depend>rclpy</depend>` no arquivo `~/master_ros2_ws/src/turtle_controller/package.xml` pois seu programa "**depende**" delas, e o trecho deve ficar assim:
+```xml
+  <depend>rclpy</depend>
+  <depend>geometry_msgs</depend>
+  <depend>turtlesim</depend>
+```
+O arquivo `package.xml` completo fica assim *(também disponível [nesse link do repositório](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/turtle_controller/package.xml) )*:
+```xml
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <!-- Nome do pacote -->
+  <name>turtle_controller</name>
+  <!-- Versão atual do pacote -->
+  <version>0.0.0</version>
+  <!-- Breve descrição sobre o que o pacote faz -->
+  <description>TODO: Package description</description>
+  <!-- Nome e email do mantenedor responsável pelo pacote -->
+  <maintainer email="todo.todo@todo.com">ed</maintainer>
+  <!-- Declaração da licença de uso do código (ex: MIT, Apache-2.0) -->
+  <license>TODO: License declaration</license>
+
+  <!-- Dependências principais necessárias para a execução do pacote -->
+  <depend>rclpy</depend>
+  <depend>geometry_msgs</depend>
+  <depend>turtlesim</depend>
+
+  <!-- Dependências usadas exclusivamente para validação e testes (linters) -->
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <!-- Exportações adicionais para o sistema de build do ROS 2 -->
+  <export>
+    <!-- Define que este pacote deve ser compilado como um pacote Python -->
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+
+```
+
+### Compilar
+Compile aplicação a partir do diretório raiz do workspace:
+```bash
+cd ~/master_ros2_ws
+colcon build --symlink-install
+```
+
+### Executar os nós
+Agora você pode executar os nós de sua aplicação em terminais separados. 
+Primeiro execute o nó do ambiente virtual:
+```bash
+ros2 run turtlesim turtlesim_node
+```
+Você verá a janela do ambiente virtual com o robô (tartaruga) na posição inicial
+
+![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/turtlesim-node.png)
+
+Em seguida execute o nó controlador:
+```bash
+ros2 run turtle_controller turtle_controller
+```
+

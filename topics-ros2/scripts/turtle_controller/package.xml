@@ -1,22 +1,31 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
+  <!-- Nome do pacote -->
   <name>turtle_controller</name>
+  <!-- Versão atual do pacote -->
   <version>0.0.0</version>
+  <!-- Breve descrição sobre o que o pacote faz -->
   <description>TODO: Package description</description>
+  <!-- Nome e email do mantenedor responsável pelo pacote -->
   <maintainer email="todo.todo@todo.com">ed</maintainer>
+  <!-- Declaração da licença de uso do código (ex: MIT, Apache-2.0) -->
   <license>TODO: License declaration</license>
 
+  <!-- Dependências principais necessárias para a execução do pacote -->
   <depend>rclpy</depend>
   <depend>geometry_msgs</depend>
   <depend>turtlesim</depend>
 
+  <!-- Dependências usadas exclusivamente para validação e testes (linters) -->
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
 
+  <!-- Exportações adicionais para o sistema de build do ROS 2 -->
   <export>
+    <!-- Define que este pacote deve ser compilado como um pacote Python -->
     <build_type>ament_python</build_type>
   </export>
 </package>
