@@ -27,7 +27,7 @@ float64 angular_velocity
 string current_state
 ```
 
-3. Adicione as configurações necessárias no `package.xml` e `CMakeLists.txt` conforme visto na seção [Criando uma nova interface de tópico](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/topics-ros2.md#criando-uma-nova-interface-de-t%C3%B3pico) da [Aula 3: Tópicos – Enviando e Recebendo Mensagens entre Nós](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/topics-ros2.md) e compile o pacote.
+3. Adicione as configurações necessárias no `package.xml` e `CMakeLists.txt` do pacote `my_robot_interfaces` conforme visto na seção [Criando uma nova interface de tópico](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/topics-ros2.md#criando-uma-nova-interface-de-t%C3%B3pico) da [Aula 3: Tópicos – Enviando e Recebendo Mensagens entre Nós](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/topics-ros2.md) e compile o pacote.
 
 ### 3. Parte B: O Controlador de Malha Fechada (`turtle_closed_loop`)
 
