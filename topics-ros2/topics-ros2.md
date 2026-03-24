@@ -1342,29 +1342,39 @@ Agora, abra o arquivo `package.xml` deste pacote. Após `<buildtool_depend>ament
 Com isso, o arquivo `package.xml` está completo e você não precisará fazer mais nada com ele por enquanto.
 
 Aqui o arquivo `package.xml` completo *(também disponível **[nesse link](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_robot_interfaces/package.xml)**)*:
-```xml
-<?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
-  <name>my_robot_interfaces</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="todo.todo@todo.com">ed</maintainer>
-  <license>TODO: License declaration</license>
+```cmake
+# Define a versão mínima exigida do sistema de compilação CMake
+cmake_minimum_required(VERSION 3.8)
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+# Define o nome do projeto (deve ser o mesmo nome contido no package.xml)
+project(my_robot_interfaces)
 
-  <build_depend>rosidl_default_generators</build_depend>
-  <exec_depend>rosidl_default_runtime</exec_depend>
-  <member_of_group>rosidl_interface_packages</member_of_group>
+# Adiciona flags de compilação rigorosas caso o compilador seja GCC ou Clang.
+# Isso ativa vários alertas para manter e melhorar a qualidade do código.
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
+# Busca os pacotes do ROS 2 dos quais este projeto depende
+# ament_cmake: Essencial para construir e gerografar pacotes no padrão do ROS 2
+find_package(ament_cmake REQUIRED)
+# rosidl_default_generators: Pacote contendo as ferramentas para ler arquivos .msg/.srv/.action
+# e gerar os respectivos códigos-fonte (em C++, Python, etc.) para sua utilização
+find_package(rosidl_default_generators REQUIRED)
 
-  <export>
-    <build_type>ament_cmake</build_type>
-  </export>
-</package>
+# Solicita ao sistema que processe as interfaces (mensagens) listadas e gere seus códigos
+# É fundamental que o caminho inclua a pasta "msg/" antes do nome do arquivo
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/HardwareStatus.msg"
+)
+
+# Exporta as dependências necessárias para a infraestrutura de mensagens funcionar em tempo de execução
+# Isso garante que quem importar suas mensagens de `my_robot_interfaces` terá acesso às dependências subjacentes
+ament_export_dependencies(rosidl_default_runtime)
+
+# Macro final obrigatória que processa todos os passos definidos e gera arquivos para os demais pacotes encontrarem este
+ament_package()
+
 ```
 
 
@@ -1456,6 +1466,44 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 ```
 
 Para cada nova interface que você construir neste pacote, você adicionará uma linha dentro da função `rosidl_generate_interfaces()`. **Não adicione vírgulas** entre as linhas.
+
+O código fonte para o `CMakeLists.txt` é (*[disponível aqui](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/my_robot_interfaces/CMakeLists.txt)*):
+```xml
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!-- Define a versão 3 do formato do pacote ROS 2 -->
+<package format="3">
+  <!-- Nome identificador do pacote no seu workspace -->
+  <name>my_robot_interfaces</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="todo.todo@todo.com">ed</maintainer>
+  <license>TODO: License declaration</license>
+
+  <!-- Declaração do sistema padrão de compilação do ROS 2 -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Dependência obrigatória na fase de compilação para processar e gerar o código a partir dos arquivos .msg/.srv -->
+  <build_depend>rosidl_default_generators</build_depend>
+  
+  <!-- Dependência obrigatória na fase execução para as mensagens fluírem entre os nós corretamente -->
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  
+  <!-- Tag fundamental: Ela notifica todo o ambiente ROS 2 de que este pacote contém definições de interfaces -->
+  <!-- Caso essa tag seja omitida, o ROS não conseguirá descobrir as suas mensagens -->
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+  <!-- Dependências automatizadas para garantir formatação e testes -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <!-- Define que outras ferramentas de compilação devem tratar este pacote como um pacote C++ gerenciado pelo ament -->
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+```
+
 
 Agora, salve todos os arquivos e compile o seu novo pacote:
 

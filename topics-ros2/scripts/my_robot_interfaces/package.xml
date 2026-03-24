@@ -1,21 +1,32 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!-- Define a versão 3 do formato do pacote ROS 2 -->
 <package format="3">
+  <!-- Nome identificador do pacote no seu workspace -->
   <name>my_robot_interfaces</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="todo.todo@todo.com">ed</maintainer>
   <license>TODO: License declaration</license>
 
+  <!-- Declaração do sistema padrão de compilação do ROS 2 -->
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <!-- Dependência obrigatória na fase de compilação para processar e gerar o código a partir dos arquivos .msg/.srv -->
   <build_depend>rosidl_default_generators</build_depend>
+  
+  <!-- Dependência obrigatória na fase execução para as mensagens fluírem entre os nós corretamente -->
   <exec_depend>rosidl_default_runtime</exec_depend>
+  
+  <!-- Tag fundamental: Ela notifica todo o ambiente ROS 2 de que este pacote contém definições de interfaces -->
+  <!-- Caso essa tag seja omitida, o ROS não conseguirá descobrir as suas mensagens -->
   <member_of_group>rosidl_interface_packages</member_of_group>
 
+  <!-- Dependências automatizadas para garantir formatação e testes -->
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
+  <!-- Define que outras ferramentas de compilação devem tratar este pacote como um pacote C++ gerenciado pelo ament -->
   <export>
     <build_type>ament_cmake</build_type>
   </export>

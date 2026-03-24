@@ -10,7 +10,7 @@ Desenvolver um controlador de malha fechada que utiliza a posição real do rob�
 Para monitorar o robô de forma mais profissional, não usaremos apenas textos genéricos. Vamos criar um pacote dedicado a interfaces.
 
 1. **Criar o pacote de interfaces**:
-
+Se você ainda não criou o pacote `my_robot_interfaces`, crie-o agora:
 
 ```bash
 cd ~/master_ros2_ws/src
@@ -19,8 +19,7 @@ ros2 pkg create my_robot_interfaces
 ```
 
 
-2. **Definir a mensagem**: Crie a pasta `msg` e o arquivo `RobotStatus.msg`:
-
+2. **Definir a mensagem**: Dentro da pasta `my_robot_interfaces`, crie a pasta `msg` e o arquivo `RobotStatus.msg` com o seguinte conteúdo:
 
 ```msg
 float64 linear_velocity
@@ -28,7 +27,7 @@ float64 angular_velocity
 string current_state
 ```
 
-*(Nota: Adicione as configurações necessárias no `package.xml` e `CMakeLists.txt` conforme visto em aula e compile o pacote)*.
+3. Adicione as configurações necessárias no `package.xml` e `CMakeLists.txt` conforme visto na seção [Criando uma nova interface de tópico](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/topics-ros2.md#criando-uma-nova-interface-de-t%C3%B3pico) da [Aula 3: Tópicos – Enviando e Recebendo Mensagens entre Nós](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/topics-ros2.md) e compile o pacote.
 
 ### 3. Parte B: O Controlador de Malha Fechada (`turtle_closed_loop`)
 
