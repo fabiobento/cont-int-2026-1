@@ -29,7 +29,7 @@ string current_state
 
 3. Adicione as configurações necessárias no `package.xml` e `CMakeLists.txt` do pacote `my_robot_interfaces` conforme visto na seção [Criando uma nova interface de tópico](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/topics-ros2.md#criando-uma-nova-interface-de-t%C3%B3pico) da [Aula 3: Tópicos – Enviando e Recebendo Mensagens entre Nós](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/topics-ros2.md) e compile o pacote.
 
-O arquivo `CMakeLists.txt` deve ser:
+O arquivo `CMakeLists.txt` do pacote de interface `my_robot_interfaces` deve ser:
 
 ```cmake
 # Define a versão mínima exigida do sistema de compilação CMake
@@ -54,7 +54,6 @@ find_package(rosidl_default_generators REQUIRED)
 # Solicita ao sistema que processe as interfaces (mensagens) listadas e gere seus códigos
 # É fundamental que o caminho inclua a pasta "msg/" antes do nome do arquivo
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/HardwareStatus.msg"
   "msg/RobotStatus.msg"
 )
 
@@ -118,13 +117,12 @@ ros2 interface list |grep my_robot_interfaces
 ```
 A saída esperada é:
 ```bash
-    my_robot_interfaces/msg/HardwareStatus
     my_robot_interfaces/msg/RobotStatus
 ```
 
 Em seguida confira os detalhes de sua interface:
 ```bash
-ros2 interface show my_robot_interfaces/msg/HardwareStatus 
+ros2 interface show my_robot_interfaces/msg/RobotStatus 
 ```
 A saída esperada é:
 ```bash
@@ -175,14 +173,6 @@ ros2 topic echo /turtle1/pose
 
 ```
 
-
----
-
-### Desafio Final da Aula 3
-
-Utilize o comando `ros2 bag record` para gravar 30 segundos da trajetória da sua tartaruga em malha fechada. Depois, feche o nó do controlador e use o `ros2 bag play` para ver se a tartaruga repete o movimento exatamente como gravado.
-
----
 ---
 > **Atenção:**
 >
@@ -280,6 +270,67 @@ if __name__ == "__main__":
 >
 > 3. Compile o workspace na raiz com `colcon build --symlink-install`.
 
+
+Com isso o `setup.py` do pacote `my_py_pkg` deve ser:
+```python
+from setuptools import find_packages, setup
+
+package_name = 'my_py_pkg'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='ed',
+    maintainer_email='todo.todo@todo.com',
+    description='TODO: Package description',
+    license='TODO: License declaration',
+    tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+            "turtle_closed_loop = my_py_pkg.turtle_closed_loop:main"
+        ],
+    },
+)
+```
+
+Enquanto o `package.xml` do pacote `my_py_pkg` deve ser:
+
+```xml
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>my_py_pkg</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="todo.todo@todo.com">ed</maintainer>
+  <license>TODO: License declaration</license>
+
+  <depend>rclpy</depend>
+  <depend>example_interfaces</depend>
+  <depend>turtlesim</depend>
+  <depend>my_robot_interfaces</depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+```
+
+
+
 ### Supervisor em C++
 
 Para garantir que o seu nó **Supervisor em C++** monitore corretamente o sistema utilizando a interface personalizada, aqui está o código-fonte sugerido.
@@ -351,8 +402,63 @@ int main(int argc, char **argv) {
 > ament_target_dependencies(supervisor rclcpp turtlesim my_robot_interfaces)
 >
 > install(TARGETS
->          ...
 >          supervisor
 >          DESTINATION lib/${PROJECT_NAME}/
 >)
 > ```
+
+Dessa forma, o arquivo `CMakeLists.txt` do pacote `my_cpp_pkg` será assim:
+```cmake
+cmake_minimum_required(VERSION 3.8)
+project(my_cpp_pkg)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(turtlesim REQUIRED)
+find_package(my_robot_interfaces REQUIRED)
+
+
+add_executable(supervisor src/supervisor_node.cpp)
+ament_target_dependencies(supervisor rclcpp turtlesim my_robot_interfaces)
+
+install(TARGETS
+  supervisor
+ DESTINATION lib/${PROJECT_NAME}/
+)
+
+ament_package()
+
+```
+
+E o `package.xml` do pacote `my_cpp_pkg` deve ser:
+```xml
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>my_cpp_pkg</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="todo.todo@todo.com">ed</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>example_interfaces</depend>
+  <depend>turtlesim</depend>
+  <depend>my_robot_interfaces</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+```
+
+
