@@ -348,6 +348,11 @@ int main(int argc, char **argv) {
 > 
 > ```cmake
 > add_executable(supervisor src/supervisor_node.cpp)
-> ament_target_dependencies(supervisor rclcpp turtlesim > my_robot_interfaces)
-> 
+> ament_target_dependencies(supervisor rclcpp turtlesim my_robot_interfaces)
+>
+> install(TARGETS
+>          ...
+>          supervisor
+>          DESTINATION lib/${PROJECT_NAME}/
+>)
 > ```
