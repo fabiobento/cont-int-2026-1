@@ -29,6 +29,111 @@ string current_state
 
 3. Adicione as configurações necessárias no `package.xml` e `CMakeLists.txt` do pacote `my_robot_interfaces` conforme visto na seção [Criando uma nova interface de tópico](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/topics-ros2.md#criando-uma-nova-interface-de-t%C3%B3pico) da [Aula 3: Tópicos – Enviando e Recebendo Mensagens entre Nós](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/topics-ros2.md) e compile o pacote.
 
+O arquivo `CMakeLists.txt` deve ser:
+
+```cmake
+# Define a versão mínima exigida do sistema de compilação CMake
+cmake_minimum_required(VERSION 3.8)
+
+# Define o nome do projeto (deve ser o mesmo nome contido no package.xml)
+project(my_robot_interfaces)
+
+# Adiciona flags de compilação rigorosas caso o compilador seja GCC ou Clang.
+# Isso ativa vários alertas para manter e melhorar a qualidade do código.
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# Busca os pacotes do ROS 2 dos quais este projeto depende
+# ament_cmake: Essencial para construir e gerografar pacotes no padrão do ROS 2
+find_package(ament_cmake REQUIRED)
+# rosidl_default_generators: Pacote contendo as ferramentas para ler arquivos .msg/.srv/.action
+# e gerar os respectivos códigos-fonte (em C++, Python, etc.) para sua utilização
+find_package(rosidl_default_generators REQUIRED)
+
+# Solicita ao sistema que processe as interfaces (mensagens) listadas e gere seus códigos
+# É fundamental que o caminho inclua a pasta "msg/" antes do nome do arquivo
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/HardwareStatus.msg"
+  "msg/RobotStatus.msg"
+)
+
+# Exporta as dependências necessárias para a infraestrutura de mensagens funcionar em tempo de execução
+# Isso garante que quem importar suas mensagens de `my_robot_interfaces` terá acesso às dependências subjacentes
+ament_export_dependencies(rosidl_default_runtime)
+
+# Macro final obrigatória que processa todos os passos definidos e gera arquivos para os demais pacotes encontrarem este
+ament_package()
+```
+
+Já o `package.xml` deve ser:
+```xml
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!-- Define a versão 3 do formato do pacote ROS 2 -->
+<package format="3">
+  <!-- Nome identificador do pacote no seu workspace -->
+  <name>my_robot_interfaces</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="todo.todo@todo.com">ed</maintainer>
+  <license>TODO: License declaration</license>
+
+  <!-- Declaração do sistema padrão de compilação do ROS 2 -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Dependência obrigatória na fase de compilação para processar e gerar o código a partir dos arquivos .msg/.srv -->
+  <build_depend>rosidl_default_generators</build_depend>
+  
+  <!-- Dependência obrigatória na fase execução para as mensagens fluírem entre os nós corretamente -->
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  
+  <!-- Tag fundamental: Ela notifica todo o ambiente ROS 2 de que este pacote contém definições de interfaces -->
+  <!-- Caso essa tag seja omitida, o ROS não conseguirá descobrir as suas mensagens -->
+  <member_of_group>rosidl_interface_packages</member_of_group>
+
+  <!-- Dependências automatizadas para garantir formatação e testes -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <!-- Define que outras ferramentas de compilação devem tratar este pacote como um pacote C++ gerenciado pelo ament -->
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+```
+
+4. Compile o workspace:
+
+```bash
+cd ~/master_ros2_ws
+colcon build --symlink-install
+```
+
+5. Verifique se a interface foi criada corretamente:
+
+Primeiro tente listar todas as interfaces filtrando por `my_robot_interfaces`:
+```bash
+ros2 interface list |grep my_robot_interfaces
+```
+A saída esperada é:
+```bash
+    my_robot_interfaces/msg/HardwareStatus
+    my_robot_interfaces/msg/RobotStatus
+```
+
+Em seguida confira os detalhes de sua interface:
+```bash
+ros2 interface show my_robot_interfaces/msg/HardwareStatus 
+```
+A saída esperada é:
+```bash
+int64 version
+float64 temperature
+bool are_motors_ready
+string debug_message
+```
+
 ### 3. Parte B: O Controlador de Malha Fechada (`turtle_closed_loop`)
 
 Agora, vamos evoluir o nó da [Atividade Prática 2: Controle de Trajetória em Malha Aberta (Dead Reckoning)](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/nodes-ros2-work2.md). Em vez de contar "ticks" de um Timer, o robô vai agir com base na posição lida do tópico `/turtle1/pose`.
