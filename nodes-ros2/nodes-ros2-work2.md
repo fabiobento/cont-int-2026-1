@@ -1,4 +1,4 @@
-## Trabalho Prático: Controle de Trajetória em Malha Aberta (Dead Reckoning)
+## Atividade Prática 2: Controle de Trajetória em Malha Aberta (Dead Reckoning)
 
 ### **Objetivo**
 

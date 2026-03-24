@@ -2,7 +2,7 @@
 
 ### 1. Objetivo
 
-Desenvolver um controlador de malha fechada que utiliza a posição real da tartaruga (`/turtle1/pose`) para decidir as ações de controle, eliminando o erro acumulado do *Dead Reckoning*. Além disso, criaremos uma interface personalizada para monitorar o status do sistema.
+Desenvolver um controlador de malha fechada que utiliza a posição real do robô (`/turtle1/pose`) para decidir as ações de controle, eliminando o erro acumulado do *Dead Reckoning*. Além disso, criaremos uma interface personalizada para monitorar o status do sistema.
 
 
 ### 2. Parte A: Criando a Interface Personalizada `RobotStatus`
@@ -32,7 +32,7 @@ string current_state
 
 ### 3. Parte B: O Controlador de Malha Fechada (`turtle_closed_loop`)
 
-Agora, vamos evoluir o nó da Atividade Prática 2. Em vez de contar "ticks" de um Timer, o robô vai agir com base na posição lida do tópico `/turtle1/pose`.
+Agora, vamos evoluir o nó da [Atividade Prática 2: Controle de Trajetória em Malha Aberta (Dead Reckoning)](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/nodes-ros2-work2.md). Em vez de contar "ticks" de um Timer, o robô vai agir com base na posição lida do tópico `/turtle1/pose`.
 
 **Instruções de Implementação:**
 

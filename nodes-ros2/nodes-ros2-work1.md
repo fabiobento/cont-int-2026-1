@@ -1,4 +1,4 @@
-# Trabalho Prático: A Patrulha Autônoma
+# Atividade Prática 1: A Patrulha Autônoma (Nós Multi-processo)
 
 ## 1. Objetivo
 
