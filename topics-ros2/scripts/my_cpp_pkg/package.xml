@@ -1,20 +1,28 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!-- Define qual a versão de infraestrutura do sistema ROS 2 está sendo usada no manifesto (versão 3) -->
 <package format="3">
+  <!-- Define o nome do pacote no formato texto para uso do compilador (colcon) e do ambiente (ros2 run) -->
   <name>my_cpp_pkg</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="todo.todo@todo.com">ed</maintainer>
   <license>TODO: License declaration</license>
 
+  <!-- Tipo do sistema de compilação da infraestrutura ROS 2. Neste caso usa ament_cmake -->
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <!-- Dependências em tempo de compilação E de execução do seu código -->
+  <!-- rclcpp: Essencial para rodar qualquer programa baseado em nós no ROS 2 com a linguagem C++ -->
   <depend>rclcpp</depend>
+  <!-- example_interfaces: Essencial em pacotes onde você vai utilizar mensagens genéricas -->
   <depend>example_interfaces</depend>
 
+  <!-- Pacotes utilizados automaticamente apenas em pipelines de teste/ci para validação e linting do código -->
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
+  <!-- Informação exportada por este pacote ao restante do ambiente (workspace) informando que sua base é "ament_cmake" -->
   <export>
     <build_type>ament_cmake</build_type>
   </export>
