@@ -1,20 +1,40 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!-- Define a versão do formato do manifesto do pacote ROS 2 (formato 3 é o padrão para ROS 2) -->
 <package format="3">
+  <!-- Nome do pacote, usado como identificador em todo o ecossistema ROS -->
   <name>my_cpp_pkg</name>
+  
+  <!-- Versão atual do pacote -->
   <version>0.0.0</version>
+  
+  <!-- Breve descrição do objetivo deste pacote -->
   <description>TODO: Package description</description>
+  
+  <!-- Informações de contato do mantenedor (responsável pelo pacote) -->
   <maintainer email="todo.todo@todo.com">ed</maintainer>
+  
+  <!-- Tipo de licença sob a qual o pacote é distribuído -->
   <license>TODO: License declaration</license>
 
+  <!-- Dependência da ferramenta de construção do ROS 2, necessária para compilar o código em C++ -->
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <!-- Dependências necessárias tanto para a fase de compilação quanto para a execução -->
+  <!-- rclcpp: A biblioteca cliente padrão da linguagem C++ para ROS 2 -->
   <depend>rclcpp</depend>
+  <!-- geometry_msgs: Fornece mensagens para dados geométricos -->
+  <depend>geometry_msgs</depend>
+  <!-- turtlesim: Dependência para integração com o simulador da tartaruga -->
+  <depend>turtlesim</depend>  
 
+  <!-- Dependências utilizadas apenas durante a fase de testes (foco em qualidade de código/linting) -->
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
+  <!-- Especifica comportamentos de exportação para outras ferramentas ROS 2 -->
   <export>
+    <!-- Informa ao sistema que este pacote usa o ament_cmake como sistema de construção -->
     <build_type>ament_cmake</build_type>
   </export>
 </package>
