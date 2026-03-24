@@ -1063,6 +1063,10 @@ Em seguida, inicie o `rqt_graph` em outro Terminal:
 ```bash
 rqt_graph
 ```
+> **Observação**
+>
+> Após executar o `rqt_graph` você possivelmente precisará clicar em `
+Refresh ROS Graph` para que o gráfico seja atualizado.
 
 Se necessário, atualize a visualização algumas vezes e selecione `Nodes/Topics (all)`. Você também pode desmarcar a caixa `Dead sinks` e a caixa `Leaf topics`. Isso permitirá que você veja os tópicos mesmo se houver apenas um assinante e nenhum publicador, ou um publicador e nenhum assinante:
 
@@ -1644,15 +1648,19 @@ Siga estas etapas para começar:
 ## Solução para o Desafio de Tópicos – controle em malha fechada
 Os passos para a solução são os seguintes
 1. Criar um workspace
-2. Criar um pacote
-3. Criar um nó
-4. Compilar 
-5. Executar os nós
+2. Criar um pacote (Python ou C++)
+3. Criar um nó (Python ou C++)
+4. Compilar (Python ou C++)
+5. Executar os nós (Python ou C++)
 
 
 
 ### Criar um workspace
 Vou conderar que você já criou um workspace no diretório `~/master_ros2_ws`conforme descrito na seçção [**Criando e configurando um workspace do ROS 2**](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/nodes-ros2.md#criando-e-configurando-um-workspace-do-ros-2) da [**Aula 2: Escrevendo e Construindo um Nó ROS 2**](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/nodes-ros2.md).
+
+Vamos criar a solução em Python e em C++.
+
+Começaremos com Python.
 
 ### Criar um pacote em Python
 Você criará seus pacotes dentro do diretório do `src` do seu workspace, ou seja em `~/master_ros2_ws/src`. Então digite a seguinte linha de comando:
@@ -1778,12 +1786,26 @@ setup(
 
 ```
 
-Além disso as dependências, como você importou as bibliotecas `geometry_msgs` e `turtlesim` no seu código, elas devem ser adicionadas logo após `<depend>rclpy</depend>` no arquivo `~/master_ros2_ws/src/turtle_controller/package.xml` pois seu programa "**depende**" delas, e o trecho deve ficar assim:
+Além dissoas dependências, lembre-se que você importou as bibliotecas `geometry_msgs` e `turtlesim` no script `turtle_controller.py` de seu nó da seguinte forma:
+
+```python
+from geometry_msgs.msg import Twist
+from turtlesim.msg import Pose
+```
+Portanto o seu nó "depende" delas, e elas devem ser adicionadas logo após `<depend>rclpy</depend>` no arquivo `~/master_ros2_ws/src/turtle_controller/package.xml`, e o trecho deve ficar assim:
 ```xml
   <depend>rclpy</depend>
   <depend>geometry_msgs</depend>
   <depend>turtlesim</depend>
 ```
+> **Observação**
+>
+> Essas dependências já poderiam ter sido adicionadas logo na criação do pacote com a seguinte linha de comando:
+> ```bash
+> ros2 pkg create turtle_controller --build-type ament_python --dependencies rclpy geometry_msgs turtlesim
+> ```
+> Note que as dependências **`geometry_msgs`** e **`turtlesim`** foram adicionadas com o parâmetro **`--dependencies`**.
+
 O arquivo `package.xml` completo fica assim *(também disponível [nesse link do repositório](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/turtle_controller/package.xml) )*:
 ```xml
 <?xml version="1.0"?>
@@ -1851,8 +1873,12 @@ Agora o robô estará seguindo a trajetória conforme a lógica implementada no 
 
 Observe através do comando `rqt_graph` a relação entre os nós:
 ```bash
-ros2 run rqt_graph rqt_graph
+rqt_graph
 ```
+> **Observação**
+>
+> Após executar o `rqt_graph` você possivelmente precisará clicar em `
+Refresh ROS Graph` para que o gráfico seja atualizado.
 
 Agora você tem um sistema em malha fechada, onde o nó controlador (`turtle_controller`) recebe informações do nó    (topico **`/turtle1/pose`**) do ambiente virtual (`turtlesim_node`) e publica comandos de velocidade para o mesmo (topico **`/turtle1/cmd_vel`**). 
 
@@ -1924,5 +1950,238 @@ Onde cada campo representa:
 - **angular**: Componentes de velocidade angular (rotação)
 
 
+### Criar um pacote em C++
+Você cria o pacote em C++ da mesma forma que criou o pacote em Python, apenas mudando o argumento **`--build-type`** para **`ament_cmake`** e adicionando a dependência **`rclcpp`**.
+
+```bash
+cd ~/master_ros2_ws/src
+ros2 pkg create turtle_controller_cpp --build-type ament_cmake --dependencies rclcpp geometry_msgs turtlesim
+```
+Note que, na linha acima, as dependências **`geometry_msgs`** e **`turtlesim`** foram adicionadas com o parâmetro **`--dependencies`**. Com isso, elas já foram adicionadas ao arquivo **`package.xml`** do pacote.
+
+Com isso o arquivo `package.xml` do pacote `turtle_controller_cpp` já estará com as dependências necessárias com as diretivas `<depend>geometry_msgs</depend>` e `<depend>turtlesim</depend>`. Confira abaixo *(também disponível [nesse link do repositório](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/turtle_controller_cpp/package.xml) )*:
+```xml
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<!-- Define a versão do formato do manifesto do pacote ROS 2 (formato 3 é o padrão para ROS 2) -->
+<package format="3">
+  <!-- Nome do pacote, usado como identificador em todo o ecossistema ROS -->
+  <name>turtle_controller_cpp</name>
+  
+  <!-- Versão atual do pacote -->
+  <version>0.0.0</version>
+  
+  <!-- Breve descrição do objetivo deste pacote -->
+  <description>TODO: Package description</description>
+  
+  <!-- Informações de contato do mantenedor (responsável pelo pacote) -->
+  <maintainer email="todo.todo@todo.com">ed</maintainer>
+  
+  <!-- Tipo de licença sob a qual o pacote é distribuído -->
+  <license>TODO: License declaration</license>
+
+  <!-- Dependência da ferramenta de construção do ROS 2, necessária para compilar o código em C++ -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Dependências necessárias tanto para a fase de compilação quanto para a execução -->
+  <!-- rclcpp: A biblioteca cliente padrão da linguagem C++ para ROS 2 -->
+  <depend>rclcpp</depend>
+  <!-- geometry_msgs: Fornece mensagens para dados geométricos (ex: Twist para velocidade linear/angular) -->
+  <depend>geometry_msgs</depend>
+  <!-- turtlesim: Pacote do simulador da tartaruga para acesso a interfaces como a de Pose -->
+  <depend>turtlesim</depend>
+
+  <!-- Dependências utilizadas apenas durante a fase de testes (são focadas em qualidade de código/linting) -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <!-- Especifica comportamentos de exportação para outras ferramentas ROS 2 -->
+  <export>
+    <!-- Informa ao sistema que este pacote usa o ament_cmake como sistema de construção -->
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+
+```
+
+### Criar um nó em C++
+Para criar o nó em C++ você deve criar um arquivo na pasta `~/master_ros2_ws/src/turtle_controller_cpp/turtle_controller_cpp/` com o nome `turtle_controller_cpp.cpp`
+```bash
+cd ~/master_ros2_ws/src/turtle_controller_cpp/src/
+touch turtle_controller.cpp
+```
+
+Em seguida, cole o código abaixo *(também disponível [nesse link do repositório](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/turtle_controller_cpp/src/turtle_controller.cpp) )*:
+```cpp
+#include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/twist.hpp"
+#include "turtlesim/msg/pose.hpp"
+
+// Usado para facilitar a vinculação do parâmetro no callback
+using namespace std::placeholders;
+
+// Classe que define o nó ROS 2 para controlar a tartaruga
+class TurtleControllerNode : public rclcpp::Node
+{
+public:
+    // Construtor do nó, define o nome do nó como "turtle_controller"
+    // Nota: usando rclcpp::Node para evitar o erro de namespace ocorrido anteriormente
+    TurtleControllerNode() : rclcpp::Node("turtle_controller")
+    {
+        // Cria um publicador (publisher) no tópico "/turtle1/cmd_vel" para enviar comandos de velocidade
+        cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>(
+            "/turtle1/cmd_vel", 10);
+            
+        // Cria um assinante (subscriber) no tópico "/turtle1/pose" para receber a posição atual da tartaruga
+        pose_sub_ = this->create_subscription<turtlesim::msg::Pose>(
+            "/turtle1/pose", 10, std::bind(&TurtleControllerNode::poseCallback, this, _1));
+    }
+
+    // Função de callback acionada sempre que uma nova mensagem de posição é recebida
+    void poseCallback(const turtlesim::msg::Pose::SharedPtr pose)
+    {
+        auto cmd = geometry_msgs::msg::Twist();
+        
+        // Verifica se a tartaruga está na metade esquerda (x < 5.5) ou direita (x >= 5.5) da tela
+        if (pose->x < 5.5) {
+            // Se estiver na parte esquerda, move-se mais devagar
+            cmd.linear.x = 1.0;
+            cmd.angular.z = 1.0;
+        }
+        else {
+            // Se estiver na parte direita, move-se mais rápido
+            cmd.linear.x = 2.0;
+            cmd.angular.z = 2.0;
+        }
+        
+        // Publica a mensagem de comando de velocidade
+        cmd_vel_pub_->publish(cmd);
+    }
+
+private:
+    // Ponteiros compartilhados para o publicador de velocidade e o assinante de posição
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
+    rclcpp::Subscription<turtlesim::msg::Pose>::SharedPtr pose_sub_;
+};
+
+int main(int argc, char **argv)
+{
+    // Inicializa a infraestrutura de comunicação do ROS 2
+    rclcpp::init(argc, argv);
+    
+    // Cria uma alocação de memória inteligente (smart pointer) para a instância do nó
+    auto node = std::make_shared<TurtleControllerNode>();
+    
+    // Mantém o nó em execução contínua, processando os callbacks de eventos
+    rclcpp::spin(node);
+    
+    // Finaliza adequadamente a execução do ROS 2 antes de encerrar o programa
+    rclcpp::shutdown();
+    return 0;
+}
+```
+
+Conforme você estudou na seção [**Compilando e executando o nó**](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/nodes-ros2.md#compilando-e-executando-o-n%C3%B3) da aula sobre nós ([Aula 2: Escrevendo e Construindo um Nó ROS 2](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/nodes-ros2.md)), não podemos simplesmente executar o arquivo C++. Primeiro precisamos editar o arquivo `CMakeLists.txt` e adicionar o seguinte:
+1. **Adicionar um novo executável** com a função `add_executable()`. Aqui, você deve escolher um nome para o executável (aquele que será usado com `ros2 run <nome_do_pacote> <nome_do_executavel>`) e também especificar o caminho relativo para o arquivo C++.
+2. **Vincular todas as dependências** para este executável com a função `ament_target_dependencies()`.
+3. **Instalar o executável** com a instrução `install()`, para que possamos encontrá-lo ao usar o `ros2 run`. Aqui, colocamos o executável em um diretório `lib/<nome_do_pacote>`.
+
+Com isso esse trecho do arquivo `CMakeLists.txt` ficará assim:
+```cmake
+add_executable(turtle_controller src/turtle_controller.cpp)
+
+ament_target_dependencies(turtle_controller rclcpp geometry_msgs turtlesim)
+
+install(TARGETS
+ turtle_controller
+ DESTINATION lib/${PROJECT_NAME}/
+)
+```
+O código e `CMakeLists.txt` é o seguinte *(também pode ser encontrado [nesse link do repositório](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/scripts/turtle_controller_cpp/CMakeLists.txt):
+```cmake
+# Define a versão mínima exigida do sistema de compilação CMake
+cmake_minimum_required(VERSION 3.8)
+
+# Define o nome do projeto (deve ser o mesmo nome contido no package.xml)
+project(turtle_controller_cpp)
+
+# Adiciona flags de compilação rigorosas caso o compilador seja GCC ou Clang.
+# Isso ativa vários alertas (ex: variáveis não utilizadas) para melhorar a qualidade do código.
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# Busca os pacotes do ROS 2 dos quais este projeto depende
+# ament_cmake: Macros e funções principais de build do ROS 2
+find_package(ament_cmake REQUIRED)
+# rclcpp: Acesso às bibliotecas cliente C++ (como criar o nó, publishers, etc)
+find_package(rclcpp REQUIRED)
+# geometry_msgs: Acesso às classes de mensagens como o Twist
+find_package(geometry_msgs REQUIRED)
+# turtlesim: Acesso às interfaces específicas do simulador, como Pose
+find_package(turtlesim REQUIRED)
+
+# Declara a criação de um executável chamado "turtle_controller"
+# Ele será compilado a partir do código-fonte localizado em "src/turtle_controller.cpp"
+add_executable(turtle_controller src/turtle_controller.cpp)
+
+# Vincula (link) as bibliotecas e diretórios de acesso (includes) dos pacotes ROS 2
+# a este executável específico para que ele seja compilado corretamente
+ament_target_dependencies(turtle_controller rclcpp geometry_msgs turtlesim)
+
+# Instala o executável recém-criado na pasta de binários específicos de projeto
+# Esta regra é o que permite o uso do comando `ros2 run turtle_controller_cpp turtle_controller`
+install(TARGETS
+ turtle_controller
+ DESTINATION lib/${PROJECT_NAME}/
+)
+
+# Esta função finaliza as configurações do pacote, e cria ganchos (hooks) necessários
+# para a correta instalação e exportação das bibliotecas/executáveis para outros pacotes
+ament_package()
+```
+
+Agora é só compilar e executar os nós em C++
+
+### Compilar os nós em C++
+Compile aplicação a partir do diretório raiz do workspace:
+```bash
+cd ~/master_ros2_ws
+colcon build --packages-select turtle_controller_cpp --symlink-install
+```
+
+### Executar os nós em C++
+Agora você pode executar os nós de sua aplicação em terminais separados. 
+Primeiro execute o nó do ambiente virtual(se ele já não estiver sendo executado):
+```bash
+ros2 run turtlesim turtlesim_node
+```
+Você verá a janela do ambiente virtual com o robô (tartaruga) na posição inicial
 
 
+![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/turtlesim-node.png)
+
+
+Em seguida execute o nó controlador:
+```bash
+ros2 run turtle_controller_cpp turtle_controller
+```
+
+Agora o robô estará seguindo a trajetória conforme a lógica implementada no nó controlador.
+
+![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/turtlesim-node-move.png)
+
+
+Observe através do comando `rqt_graph` a relação entre os nós:
+```bash
+rqt_graph
+```
+> **Observação**
+>
+> Após executar o `rqt_graph` você possivelmente precisará clicar em `
+Refresh ROS Graph` para que o gráfico seja atualizado.
+
+Agora você tem um sistema em malha fechada, onde o nó controlador (`turtle_controller`) recebe informações do nó    (topico **`/turtle1/pose`**) do ambiente virtual (`turtlesim_node`) e publica comandos de velocidade para o mesmo (topico **`/turtle1/cmd_vel`**). 
+
+
+![](https://github.com/fabiobento/cont-int-2026-1/blob/main/topics-ros2/imagens/rqtgraph-closed-loop.png)
