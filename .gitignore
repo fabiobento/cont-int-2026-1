@@ -1,4 +1,6 @@
 nodes-ros2/superados
+topics-ros2/scripts/gazebo_patrol_pkg
+.gitignore
 .vscode/*
 # ==========================================
 # Diretórios Autogerados do Workspace ROS 2
