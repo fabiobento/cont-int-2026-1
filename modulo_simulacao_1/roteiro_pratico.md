@@ -62,26 +62,16 @@ git reset --hard origin/main
 * **`cd cont-int-2026-1`**: Garante que você está dentro da pasta correta do projeto.
 * **`git fetch`**: Consulta o GitHub e baixa silenciosamente as informações mais recentes do servidor, mas ainda não altera os seus arquivos visíveis.
 * **`git reset --hard origin/master`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`master`) oficial, descartando testes e modificações residuais das aulas anteriores.
-## 4. Configuração do Ambiente
+## 4. Instalação do ambiente de simulação e do modelo do robô Turtlebot 3
 
-Antes de iniciar, precisamos garantir que as variáveis de ambiente e os pacotes necessários estejam instalados. Execute no terminal:
-
+Vamos executar um script que está no repositório da disciplina, que você acabou de baixar no item 3:
 ```bash
-# Instalação das dependências do TurtleBot3 para Jazzy
-sudo apt update
-sudo apt install ros-jazzy-turtlebot3 ros-jazzy-turtlebot3-gazebo
-sudo apt install ros-jazzy-turtlebot3-simulations ros-jazzy-turtlebot3-description
-
-# Definição do modelo do robô (adicione ao seu .bashrc para persistência)
-export TURTLEBOT3_MODEL=waffle
-export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/jazzy/share/turtlebot3_gazebo/models
-
-## Baixar e compilar o repositório do Turtlebot3
-cd ~/master_ros2_ws/src/
-git clone -b jazzy https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
-cd ~/master_ros2_ws && colcon build --symlink-install
-source install/setup.bash
+cd ~/cont-int-2026-1/modulo_simulacao_1/scripts
+chmod +x install_tb3_jazzy.sh
+./install_tb3_jazzy.sh
 ```
+Com esse script você garante toda a configuração necessária para ter seu ambiente de simulação com o Turtlebot 3.
+
 
 ---
 
