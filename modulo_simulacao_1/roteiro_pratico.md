@@ -79,7 +79,8 @@ Com esse script você garante toda a configuração necessária para ter seu amb
 Este comando inicializa o motor de física Gazebo, carrega o mundo de obstáculos e o nó `robot_state_publisher` que gerencia a árvore de transformadas (TF).
 
 ```bash
-ros2 launch turtlebot3_gazebo turtlebot3_empty.launch.py
+export TURTLEBOT3_MODEL=burger
+ros2 launch turtlebot3_gazebo empty_world.launch.py
 ```
 > **Dica:** O Gazebo pode demorar um pouco no primeiro carregamento para baixar os modelos. Aguarde até ver o robô posicionado no centro do mapa.
 
@@ -102,9 +103,15 @@ Abra um **novo terminal** e utilize as ferramentas de introspecção do ROS 2:
 ## 7. Visualização Avançada no RViz2
 O RViz2 é essencial para depurar o que o robô "vê". Ele inicia vazio, e você deve configurá-lo manualmente:
 
+Use o seguinte lançador:
+```bash
+ros2 launch turtlebot3_bringup rviz2.launch.py
+```
+
+
 1.  No terminal, digite: `rviz2`
 2.  No painel **Global Options**, altere o **Fixed Frame** para `odom`.
-3.  Clique em **Add** e na aba **By display type**$\rightarrow$**rviz_default_plugins** adicione os seguintes displays:
+3.  Antes de cada item abaixo clique em **Add**, depois na aba **By display type**$\rightarrow$**rviz_default_plugins** adicione os seguintes displays:
     * **RobotModel**: Renderiza o Waffle em 3D.
     * **TF**: Mostra os eixos coordenados. Na opção **TF**$\rightarrow$**Frames** habilite os frames `base_link` e `odom`.
     * **LaserScan**: Na aba **By topic** selecione o tópico  `/scan`$\rightarrow$`LaserScan`. (Sugestão: mude o *Style* para `Points` e *Size* para `0.03` pixels).
