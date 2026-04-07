@@ -34,12 +34,17 @@ As variáveis operacionais são:
 #### **Cinemática Direta (Forward Kinematics)**
 Estima as velocidades resultantes do chassi a partir da leitura dos *encoders* das rodas:
 
-$\begin{bmatrix} v \\ \omega \end{bmatrix} = \begin{bmatrix} \frac{r}{2} & \frac{r}{2} \\ \frac{r}{L} & -\frac{r}{L} \end{bmatrix} \begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix} \implies \begin{cases} v = \frac{r}{2}(\omega_R + \omega_L) \\ \omega = \frac{r}{L}(\omega_R - \omega_L) \end{cases}$
+$$\begin{bmatrix} v \\ \omega \end{bmatrix} = \begin{bmatrix} \frac{r}{2} & \frac{r}{2} \\ \frac{r}{L} & -\frac{r}{L} \end{bmatrix} \begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix} \implies \begin{cases} v = \frac{r}{2}(\omega_R + \omega_L) \\ \omega = \frac{r}{L}(\omega_R - \omega_L) \end{cases}$$
+
+$$
+\begin{bmatrix} v \\ \omega \end{bmatrix} = \begin{bmatrix} \frac{r}{2} & \frac{r}{2} \\ \frac{r}{L} & -\frac{r}{L} \end{bmatrix} \begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix} \implies \begin{cases} v = \frac{r}{2}(\omega_R + \omega_L) \\ \omega = \frac{r}{L}(\omega_R - \omega_L) \end{cases}
+$$
+
 
 #### **Cinemática Inversa (Inverse Kinematics)**
 Representa a lei de controle: traduz a trajetória desejada ($v, \omega$) nos comandos de velocidade que devem ser impostos aos motores:
 
-$\begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix} = \frac{1}{r} \begin{bmatrix} 1 & \frac{L}{2} \\ 1 & -\frac{L}{2} \end{bmatrix} \begin{bmatrix} v \\ \omega \end{bmatrix} \implies \begin{cases} \omega_R = \frac{1}{r}(v + \frac{\omega L}{2}) \\ \omega_L = \frac{1}{r}(v - \frac{\omega L}{2}) \end{cases}$
+$$\begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix} = \frac{1}{r} \begin{bmatrix} 1 & \frac{L}{2} \\ 1 & -\frac{L}{2} \end{bmatrix} \begin{bmatrix} v \\ \omega \end{bmatrix} \implies \begin{cases} \omega_R = \frac{1}{r}(v + \frac{\omega L}{2}) \\ \omega_L = \frac{1}{r}(v - \frac{\omega L}{2}) \end{cases}$$
 
 ## 3. Implementação em Python
 No ROS 2, a camada de abstração de hardware permite que enviemos comandos de alto nível. O nó de controle do TurtleBot3 recebe mensagens do tipo `geometry_msgs/msg/Twist` no tópico `/cmd_vel` e executa internamente as equações da cinemática inversa acima.
