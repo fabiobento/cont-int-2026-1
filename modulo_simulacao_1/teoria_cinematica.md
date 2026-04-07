@@ -41,6 +41,10 @@ $$\dot{x}\sin(\theta) - \dot{y}\cos(\theta) = 0$$
 
 Essa equação diz que o robô só pode se mover na direção em que suas rodas estão apontadas. Ele está "preso" à sua orientação atual para definir seu próximo movimento linear.
 
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/restricao-n-holo.png)
+
+**Figura 2: Representação esquemática de um robô móvel com tração diferencial, mostrando a restrição não holonômica de não deslizamento lateral.** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
+
 #### Implicações no Controle e Planejamento
 As restrições não holonômicas tornam o controle de robôs muito mais desafiador por dois motivos principais:
 
@@ -93,7 +97,7 @@ $$\omega_R = \frac{1}{0.033} \left( 0.15 + \frac{0.287 \cdot 0.4}{2} \right) \ap
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/pipeline-controle.png)
 
-**Figura 2: Fluxograma infográfico de um pipeline de controle de robô em ROS 2: Nó (script Python) $\rightarrow$ /cmd_vel (mensagem do tipo Twist) $\rightarrow$ Controlador do Robô $\rightarrow$ PWM do Motor/Rotação das Rodas $\rightarrow$ Simulação no Gazebo..** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
+**Figura 3: Fluxograma infográfico de um pipeline de controle de robô em ROS 2: Nó (script Python) $\rightarrow$ /cmd_vel (mensagem do tipo Twist) $\rightarrow$ Controlador do Robô $\rightarrow$ PWM do Motor/Rotação das Rodas $\rightarrow$ Simulação no Gazebo..** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
 
 
 
@@ -124,7 +128,7 @@ No RViz2, o **Fixed Frame** altera sua percepção do movimento:
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/fixed-frames.png)
 
-**Figura 3: Referenciais fixos no RViz: o lado esquerdo mostra o referencial fixo `odom` com o robô se movendo sobre uma grade; o lado direito mostra o referencial fixo `base_link` com o robô estático no centro e a `grid/laserscan` rotacionando ao seu redor.** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
+**Figura 4: Referenciais fixos no RViz: o lado esquerdo mostra o referencial fixo `odom` com o robô se movendo sobre uma grade; o lado direito mostra o referencial fixo `base_link` com o robô estático no centro e a `grid/laserscan` rotacionando ao seu redor.** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
 
 
 ## 6. Resumo do Pipeline de Dados
