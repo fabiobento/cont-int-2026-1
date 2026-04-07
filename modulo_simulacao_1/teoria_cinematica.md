@@ -19,8 +19,46 @@ Para descrever o estado do sistema, definimos:
 
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/parametros-fundamentais.png)
+
 **Figura 1: Diagrama técnico de um robô móvel com tração diferencial, vista superior, legendado com o raio da roda $r$, a distância entre as rodas $L$ e um sistema de coordenadas global mostrando $x$, $y$ e o ângulo de orientação (ou proa) $\theta$.** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
 
+### 2.2 Restrições Não Holonômicas
+
+Para entender o que são **restrições não holonômicas**, imagine a diferença entre o movimento de um **drone** e o de um **carro**.
+
+> Enquanto um drone pode se mover instantaneamente em qualquer direção (para frente, para o lado ou para cima), um carro não pode simplesmente "deslizar" para o lado para entrar em uma vaga de estacionamento; ele precisa manobrar, mudando sua orientação para conseguir um deslocamento lateral. Essa limitação é o que chamamos de restrição não holonômica.
+
+#### O Conceito Geométrico
+Na robótica e na mecânica clássica, o estado de um robô é definido pelo seu **espaço de configuração** (comumente chamado de *Pose*), que inclui sua posição $(x, y)$ e sua orientação $(\theta)$.
+
+* **Sistema Holonômico:** O número de graus de liberdade controláveis é igual ao número total de graus de liberdade do sistema. O robô pode se mover em qualquer direção do seu espaço de configuração instantaneamente.
+* **Sistema Não Holonômico:** O robô tem restrições que dependem da **velocidade** e não apenas da posição. Isso significa que, embora ele possa alcançar qualquer ponto no plano, ele não pode seguir qualquer *trajetória* infinitesimal.
+
+#### A Restrição de "Não Deslizamento"
+No caso de robôs com rodas (como o TurtleBot3 ou um carro), a restrição não holonômica surge do contato da roda com o chão. Matematicamente, a velocidade lateral no referencial do robô deve ser sempre zero:
+
+$$\dot{x}\sin(\theta) - \dot{y}\cos(\theta) = 0$$
+
+Essa equação diz que o robô só pode se mover na direção em que suas rodas estão apontadas. Ele está "preso" à sua orientação atual para definir seu próximo movimento linear.
+
+#### Implicações no Controle e Planejamento
+As restrições não holonômicas tornam o controle de robôs muito mais desafiador por dois motivos principais:
+
+1.  **Dependência da Trajetória:** Para chegar a uma posição lateral, o robô deve descrever uma curva (combinação de $v$ e $\omega$). O caminho importa tanto quanto o destino.
+2.  **Estacionamento e Manobras:** É por causa dessa restrição que precisamos fazer a "baliza". Se um carro fosse holonômico, ele apenas se moveria lateralmente para dentro da vaga. Como não é, ele precisa de uma sequência de movimentos curvos para compensar a impossibilidade de translação lateral pura.
+
+#### Comparação Prática
+
+| Característica | Sistema Holonômico | Sistema Não Holonômico |
+| :--- | :--- | :--- |
+| **Exemplo** | Drone, Robô com rodas Mecanum | Carro, Bicicleta, TurtleBot3 |
+| **Movimento lateral** | Instantâneo | Requer manobra/mudança de $\theta$ |
+| **Complexidade** | Simples de planejar trajetória | Complexo (requer cinemática inversa) |
+| **Graus de Liberdade** | Controláveis = Totais | Controláveis < Totais |
+
+
+### Resumo para Engenharia
+Em termos de cálculo, uma restrição é **não holonômica** quando ela é expressa como uma equação diferencial (envolvendo velocidades) que **não pode ser integrada** para se tornar uma restrição apenas de posição. Ou seja, ela é uma restrição de "caminho" que não reduz a dimensão do espaço que o robô pode eventualmente alcançar, apenas limita como ele pode navegar por esse espaço a cada instante.
 
 
 ### 2.2. O Jacobiano: Acoplamento de Velocidades
@@ -54,6 +92,7 @@ $$\omega_R = \frac{1}{0.033} \left( 0.15 + \frac{0.287 \cdot 0.4}{2} \right) \ap
 
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/pipeline-controle.png)
+
 **Figura 2: Fluxograma infográfico de um pipeline de controle de robô em ROS 2: Nó (script Python) $\rightarrow$ /cmd_vel (mensagem do tipo Twist) $\rightarrow$ Controlador do Robô $\rightarrow$ PWM do Motor/Rotação das Rodas $\rightarrow$ Simulação no Gazebo..** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
 
 
@@ -84,6 +123,7 @@ No RViz2, o **Fixed Frame** altera sua percepção do movimento:
 * **Frame `base_link` (Local):** Referencial fixo no centro do robô. O robô parece estático, e o mundo inteiro (incluindo as leituras de laser) gira e se move ao redor dele.
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/fixed-frames.png)
+
 **Figura 3: Referenciais fixos no RViz: o lado esquerdo mostra o referencial fixo `odom` com o robô se movendo sobre uma grade; o lado direito mostra o referencial fixo `base_link` com o robô estático no centro e a `grid/laserscan` rotacionando ao seu redor.** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
 
 
