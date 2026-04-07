@@ -1,73 +1,99 @@
-# Módulo 2: Simulação, Visualização e Cinemática Diferencial
+# Aula 4: Simulação, Inspeção e Cinemática de Robôs Móveis
 
-## 1. Introdução
-Neste módulo vamos trabalhar com a **modelagem de sistemas robóticos**. Como engenheiros eletricistas, trataremos o robô como um sistema dinâmico multivariável (MIMO) onde sinais de controle em malha aberta ou fechada operam sobre uma planta física simulada. Utilizaremos o **ROS 2 Jazzy** e o **Ubuntu 24.04** para validar essas teorias.
+## 1. Introdução: O Robô como Sistema Dinâmico
+Neste módulo, abordaremos o robô como um **sistema dinâmico multivariável (MIMO - Multiple Input, Multiple Output)**. Como engenheiros, nosso foco recai sobre a interação entre sinais de controle (entradas) e a resposta da planta física (saídas). Utilizaremos o **TurtleBot3 Waffle** no ambiente **Ubuntu 24.04** como plataforma de validação.
 
----
+O Waffle opera sob o princípio da **tração diferencial**: a locomoção e a taxa de giro dependem exclusivamente do diferencial de velocidades entre duas rodas motorizadas independentes, montadas em um eixo comum.
 
-## 2. Modelagem Cinemática: O Robô Uniciclo
-O **TurtleBot3 Waffle** utiliza tração diferencial. Sua manobrabilidade no plano $XY$ é restrita pelo acoplamento mecânico das rodas. Conforme detalhado na **Figura 1**, o movimento depende da decomposição de velocidades nos eixos locais.
+## 2. Modelagem Cinemática e Geometria
+A cinemática estuda o movimento do robô sem considerar as forças (massas e torques) que o causam. Para isso, precisamos de um modelo geométrico preciso.
 
-![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/cinematica-tração-diferencial.png)
-*Figura 1: Modelo cinemático de um robô uní-ciclóide de tração diferencial. Adaptado de Siegwart et al. (2011).*
+### 2.1. Parâmetros Fundamentais e Referenciais
+Para descrever o estado do sistema, definimos:
 
-### 2.1. Definição de Parâmetros
-* $r$: Raio nominal das rodas ($m$).
-* $L$: *Wheelbase* (distância entre os centros das rodas, em $m$).
-* $\vec{\xi} = [x, y, \theta]^T$: Vetor de estado (Pose) no referencial global.
-
-### 2.2. Jacobiano da Cinemática
-A relação entre as velocidades no referencial do robô ($v, \omega$) e as velocidades angulares das rodas ($\omega_R, \omega_L$) é definida pelas matrizes de transformação:
-
-**Cinemática Direta (Forward Kinematics):**
-Calcula a velocidade do chassi a partir dos encoders:
-$$\begin{bmatrix} v \\ \omega \end{bmatrix} = \begin{bmatrix} \frac{r}{2} & \frac{r}{2} \\ \frac{r}{L} & -\frac{r}{L} \end{bmatrix} \begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix}$$
-
-**Cinemática Inversa (Inverse Kinematics):**
-Mapeia comandos de trajetória para sinais de controle dos motores:
-$$\begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix} = \frac{1}{r} \begin{bmatrix} 1 & \frac{L}{2} \\ 1 & -\frac{L}{2} \end{bmatrix} \begin{bmatrix} v \\ \omega \end{bmatrix}$$
-
----
-
-## 3. O Ecossistema de Simulação
-Para uma simulação de alta fidelidade, o ROS 2 coordena três pilares fundamentais. A **Figura 2** ilustra como esses processos são distribuídos no Grafo de Computação.
+* **$r$ (Raio da roda):** Distância escalar entre o centro do eixo motor e o ponto de contato do pneu com o solo. No Waffle, **$r \approx 0.033$ m**.
+* **$L$ (Wheelbase / Bitola):** Distância transversal entre os centros das duas rodas motrizes. Este parâmetro define o "braço de alavanca" para o giro: quanto maior $L$, mais estável é o robô em linha reta, porém menos ágil em curvas. No Waffle, **$L \approx 0.287$ m**.
+* **$\vec{\xi} = [x, y, \theta]^T$ (Vetor de Pose):** Define o estado completo do robô em um plano bidimensional no referencial global (inercial):
+    * **$x, y$**: Coordenadas cartesianas do centro do eixo do robô em relação à origem do mundo ($m$).
+    * **$\theta$**: Orientação (*heading*) ou ângulo de guinada (*yaw*), medido entre o eixo longitudinal do robô e o eixo $X$ global ($rad$).
 
 
-*Figura 2: Arquitetura de software para simulação em ROS 2. O Gazebo atua como a planta física, enquanto o RViz2 serve como interface de telemetria de sensores.*
-
-| Componente | Papel no Sistema | Sinais Gerados |
-| :--- | :--- | :--- |
-| **Gazebo** | Motor de Física (ODE) | Dados brutos (`/scan`, `/imu`) |
-| **Robot State Publisher** | Gerenciador de Frames (TF) | Transformadas de coordenadas (`/tf`) |
-| **RViz2** | Interface de Diagnóstico | Renderização de telemetria |
-
-### Fluxo de Informação (Pipeline):
-1.  **Comando:** Nó Python $\rightarrow$ `/cmd_vel` (`geometry_msgs/msg/Twist`).
-2.  **Planta:** **Gazebo** processa a física e move o modelo URDF.
-3.  **Realimentação:** Gazebo publica a pose em `/odom` (`nav_msgs/msg/Odometry`).
-4.  **Visualização:** O **RViz2** subscreve aos tópicos para monitoramento em tempo real.
-
----
-
-## 4. Estimativa de Pose e Odometria
-A odometria é a integração numérica das velocidades para estimar a posição relativa. No referencial global, as equações diferenciais não-lineares projetam o movimento do robô conforme mostrado na **Figura 3**.
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/parametros-fundamentais.png)
+**Figura 1: Diagrama técnico de um robô móvel com tração diferencial, vista superior, legendado com o raio da roda $r$, a distância entre as rodas $L$ e um sistema de coordenadas global mostrando $x$, $y$ e o ângulo de orientação (ou proa) $\theta$.** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
 
 
-*Figura 3: Representação da integração de trajetória. O deslocamento instantâneo é projetado no plano XY com base na orientação $\theta$.*
 
-$$\dot{\vec{\xi}} = \begin{bmatrix} \dot{x} \\ \dot{y} \\ \dot{\theta} \end{bmatrix} = \begin{bmatrix} \cos\theta & 0 \\ \sin\theta & 0 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} v \\ \omega \end{bmatrix}$$
+### 2.2. O Jacobiano: Acoplamento de Velocidades
+Um robô diferencial possui **restrições não-holonômicas**: ele tem menos graus de liberdade controláveis do que o total de graus de liberdade do plano (ex: ele não pode "deslizar" lateralmente sem girar).
 
-### Integração Discreta (Método de Euler)
-Dado um tempo de amostragem $\Delta t$ (frequência do tópico `/odom`), a atualização da pose é:
+As variáveis operacionais são:
+* **$\omega_R, \omega_L$**: Velocidades angulares das rodas direita e esquerda, respectivamente ($rad/s$).
+* **$v$**: Velocidade escalar linear do chassi no sentido do seu eixo longitudinal ($m/s$).
+* **$\omega$**: Velocidade escalar angular do chassi em torno do seu centro de massa ($rad/s$).
+
+#### **Cinemática Direta (Forward Kinematics)**
+Estima as velocidades resultantes do chassi a partir da leitura dos *encoders* das rodas:
+$$\begin{bmatrix} v \\ \omega \end{bmatrix} = \begin{bmatrix} \frac{r}{2} & \frac{r}{2} \\ \frac{r}{L} & -\frac{r}{L} \end{bmatrix} \begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix} \implies \begin{cases} v = \frac{r}{2}(\omega_R + \omega_L) \\ \omega = \frac{r}{L}(\omega_R - \omega_L) \end{cases}$$
+
+#### **Cinemática Inversa (Inverse Kinematics)**
+Representa a lei de controle: traduz a trajetória desejada ($v, \omega$) nos comandos de velocidade que devem ser impostos aos motores:
+$$\begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix} = \frac{1}{r} \begin{bmatrix} 1 & \frac{L}{2} \\ 1 & -\frac{L}{2} \end{bmatrix} \begin{bmatrix} v \\ \omega \end{bmatrix} \implies \begin{cases} \omega_R = \frac{1}{r}(v + \frac{\omega L}{2}) \\ \omega_L = \frac{1}{r}(v - \frac{\omega L}{2}) \end{cases}$$
+
+## 3. Implementação: O Elo Perdido (Python)
+No ROS 2, a camada de abstração de hardware permite que enviemos comandos de alto nível. O nó de controle do TurtleBot3 recebe mensagens do tipo `geometry_msgs/msg/Twist` no tópico `/cmd_vel` e executa internamente as equações da cinemática inversa acima.
+
+### **Exemplo Numérico de Projeto: Trajetória Circular**
+Para projetar um círculo de raio **$R = 0.375$ m**, arbitramos uma velocidade linear **$v = 0.15$ m/s**.
+A velocidade angular alvo será:
+$$\omega = \frac{v}{R} = \frac{0.15}{0.375} = 0.4 \text{ rad/s}$$
+
+Ao publicar este comando, o firmware do robô converterá esses valores para a rotação das rodas. Para a roda direita ($\omega_R$), o cálculo será:
+$$\omega_R = \frac{1}{0.033} \left( 0.15 + \frac{0.287 \cdot 0.4}{2} \right) \approx 6.28 \text{ rad/s}$$
+
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/pipeline-controle.png)
+**Figura 2: Fluxograma infográfico de um pipeline de controle de robô em ROS 2: Nó (script Python) $\rightarrow$ /cmd_vel (mensagem do tipo Twist) $\rightarrow$ Controlador do Robô $\rightarrow$ PWM do Motor/Rotação das Rodas $\rightarrow$ Simulação no Gazebo..** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
+
+
+
+## 4. Odometria e Discretização do Tempo
+A odometria é a estimativa da pose $\vec{\xi}$ baseada na integração das velocidades. Como sistemas computacionais são discretos, trabalhamos com um intervalo de amostragem **$\Delta t$** (definido pelo *timer* do script Python, ex: $0.1$ s).
+
+### 4.1. Integração pelo Método de Euler
+A cada passo de tempo $k$, o estado é atualizado:
 * $x_{k+1} = x_k + v_k \cos(\theta_k) \Delta t$
 * $y_{k+1} = y_k + v_k \sin(\theta_k) \Delta t$
 * $\theta_{k+1} = \theta_k + \omega_k \Delta t$
 
-> **Desafio de Controle:** Em sistemas reais (e simulações complexas), o erro acumulado (**Drift**) é inevitável. Sensores exteroceptivos (LiDAR/Câmeras) são necessários para corrigir a odometria em missões de longa duração.
+> **Nota Crítica sobre Deriva (*Drift*):** Na teoria, a integração é perfeita. Na prática, erros de arredondamento numérico, frequência de amostragem limitada e micro-escorregamentos simulados no Gazebo fazem com que o erro se acumule. Por isso, após várias voltas, o rastro da odometria raramente fecha um círculo perfeito.
+
+## 5. Ecossistema de Simulação e Referenciais
+O ROS 2 Jazzy coordena três ferramentas fundamentais:
+
+| Componente | Papel no Sistema | Sinais Gerados |
+| :--- | :--- | :--- |
+| **Gazebo** | Motor de Física (**A Planta**) | Simula inércia, colisões e publica `/scan` |
+| **Robot State Publisher** | Gerenciador de Frames (**TF**) | Publica a relação espacial entre as partes do robô |
+| **RViz2** | Interface de Telemetria | Renderiza a percepção dos sensores |
+
+### Referenciais de Coordenadas (Frames)
+No RViz2, o **Fixed Frame** altera sua percepção do movimento:
+* **Frame `odom` (Global):** Referencial inercial fixo no mapa. Vemos o robô se deslocando sobre o grid.
+* **Frame `base_link` (Local):** Referencial fixo no centro do robô. O robô parece estático, e o mundo inteiro (incluindo as leituras de laser) gira e se move ao redor dele.
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/fixed-frames.png)
+**Figura 3: Referenciais fixos no RViz: o lado esquerdo mostra o referencial fixo `odom` com o robô se movendo sobre uma grade; o lado direito mostra o referencial fixo `base_link` com o robô estático no centro e a `grid/laserscan` rotacionando ao seu redor.** (Fonte: [Gerado por IA (Gemini, 2026)](https://gemini.google.com/))
+
+
+## 6. Resumo do Pipeline de Dados
+Para o sucesso do laboratório, visualize o fluxo:
+1.  **Algoritmo (Python):** Calcula $v$ e $\omega$ baseados na geometria desejada.
+2.  **Bridge:** Converte o sinal ROS para o ambiente Gazebo.
+3.  **Física (Gazebo):** Simula o movimento e a interação com o ambiente.
+4.  **Feedback (Odometria):** Calcula o deslocamento das rodas e publica a pose em `/odom`.
+5.  **Visualização (RViz2):** Renderiza o rastro histórico, permitindo comparar a teoria (raio projetado) com a prática (raio medido).
 
 ---
-
-## Referências Bibliográficas
-* **SIEGWART, R.; NOURBAKHSH, I. R.** *Introduction to Autonomous Mobile Robots*. MIT Press, 2011.
-* **CORKE, P.** *Robotics, Vision and Control*. Springer, 2017.
-* **ROS 2 Documentation.** *Jazzy Jalisco Tutorials*. [docs.ros.org](https://docs.ros.org).
+**Referências Bibliográficas**
+* SIEGWART, R.; NOURBAKHSH, I. R. *Introduction to Autonomous Mobile Robots*. MIT Press, 2011.
+* CORKE, P. *Robotics, Vision and Control*. Springer, 2017.
