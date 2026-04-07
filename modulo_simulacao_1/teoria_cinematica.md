@@ -36,10 +36,8 @@ Estima as velocidades resultantes do chassi a partir da leitura dos *encoders* d
 
 $$\begin{bmatrix} v \\ \omega \end{bmatrix} = \begin{bmatrix} \frac{r}{2} & \frac{r}{2} \\ \frac{r}{L} & -\frac{r}{L} \end{bmatrix} \begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix} \implies \begin{cases} v = \frac{r}{2}(\omega_R + \omega_L) \\ \omega = \frac{r}{L}(\omega_R - \omega_L) \end{cases}$$
 
-$$
-\begin{bmatrix} v \\ \omega \end{bmatrix} = \begin{bmatrix} \frac{r}{2} & \frac{r}{2} \\ \frac{r}{L} & -\frac{r}{L} \end{bmatrix} \begin{bmatrix} \omega_R \\ \omega_L \end{bmatrix} \implies \begin{cases} v = \frac{r}{2}(\omega_R + \omega_L) \\ \omega = \frac{r}{L}(\omega_R - \omega_L) \end{cases}
-$$
 
+<img src="https://latex.codecogs.com/svg.image?\begin{bmatrix}&space;v&space;\\&space;\omega&space;\end{bmatrix}&space;=&space;\begin{bmatrix}&space;\frac{r}{2}&space;&&space;\frac{r}{2}&space;\\&space;\frac{r}{L}&space;&&space;-\frac{r}{L}&space;\end{bmatrix}&space;\begin{bmatrix}&space;\omega_R&space;\\&space;\omega_L&space;\end{bmatrix}" title="Cinematica Inversa" />
 
 #### **Cinemática Inversa (Inverse Kinematics)**
 Representa a lei de controle: traduz a trajetória desejada ($v, \omega$) nos comandos de velocidade que devem ser impostos aos motores:
