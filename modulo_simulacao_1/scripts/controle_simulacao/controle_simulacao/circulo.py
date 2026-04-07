@@ -14,7 +14,7 @@ class CircularMotion(Node):
         msg = Twist()
         # v = 0.15 m/s | w = 0.4 rad/s
         msg.linear.x = 0.15
-        msg.angular.z = 0.4
+        msg.angular.z = 0.4 
         self.publisher_.publish(msg)
 
 def main(args=None):

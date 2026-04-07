@@ -147,7 +147,19 @@ ros2 launch turtlebot3_bringup rviz2.launch.py
     * **LaserScan**: Na aba **By topic** selecione o tópico  `/scan`$\rightarrow$`LaserScan`. (Sugestão: mude o *Style* para `Points` e *Size* para `0.03` pixels).
     * **Odometry**: Na aba **By topic** selecione o tópico selecione o tópico `/odom`$\rightarrow$`Odometry`. Isso mostrará o rastro do robô.
 
+Faça também os seguintes ajustes:
+* Ajuste Dimensional das Setas
+    * **Shaft Length (Comprimento do corpo):** Mude para **0.02**.
+    * **Shaft Radius (Raio do corpo):** Mude para **0.001** (ou menor).
+    * **Head Length (Comprimento da ponta):** Mude para **0.002**.
+    * **Head Radius (Raio da ponta):** Mude para **0.002**.
 
+Isso fará com que cada registro de odometria seja apenas uma pequena marcação, permitindo ver a trajetória sem cobrir o robô.
+
+* Configuração do Histórico (Rastro)
+Para que o rastro não desapareça e eles consigam ver o círculo completo (e as voltas subsequentes), ajuste:
+    * **Keep (ou Buffer):** Aumente para **500**.
+    * **Color:** Escolha uma cor contrastante (ex: Verde Limão ou Ciano) para destacar do fundo cinza.
 
 ---
 
