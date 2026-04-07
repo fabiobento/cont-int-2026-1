@@ -79,17 +79,49 @@ Com esse script você garante toda a configuração necessária para ter seu amb
 Este comando inicializa o motor de física Gazebo, carrega o mundo de obstáculos e o nó `robot_state_publisher` que gerencia a árvore de transformadas (TF).
 
 ```bash
-export TURTLEBOT3_MODEL=burger
-ros2 launch turtlebot3_gazebo empty_world.launch.py
+export TURTLEBOT3_MODEL=waffle
+ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
 ```
 > **Dica:** O Gazebo pode demorar um pouco no primeiro carregamento para baixar os modelos. Aguarde até ver o robô posicionado no centro do mapa.
 
 ---
 
-## 6. Inspeção do Grafo e Fluxo de Dados
+## 6. Habilitando a Comunicação (A PONTE)
+No ROS 2 Jazzy, o Gazebo Sim fala uma "língua" diferente do ROS. Precisamos de uma ponte (bridge) para traduzir as mensagens de velocidade. **Abra um novo terminal** e execute:
+
+```bash
+ros2 run ros_gz_bridge parameter_bridge /cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist
+```
+*Mantenha este terminal aberto durante toda a simulação.*
+
+---
+
+## 7. Controle Manual do Robô
+Agora vamos interagir com o robô. Abra um **novo terminal** e execute o seguinte comando:
+
+```bash
+export TURTLEBOT3_MODEL=waffle
+ros2 run turtlebot3_teleop teleop_keyboard
+```
+Clique na janela  em que você entrou com os comandos acima e utilize as teclas (w, a, s, d) e para controlar o robô.
+Aqui está a tradução dos comandos de teleoperação para o seu material:
+
+**Movimentação:**
+```text
+        w
+   a    s    d
+        x
+```
+
+* **w / x :** aumentar / diminuir velocidade linear (Burger: ~ 0.22, Waffle e Waffle Pi: ~ 0.26)
+* **a / d :** aumentar / diminuir velocidade angular (Burger: ~ 2.84, Waffle e Waffle Pi: ~ 1.82)
+* **barra de espaço, s :** parada forçada (parar imediatamente)
+---
+
+## 8. Inspeção do Grafo e Fluxo de Dados
 Abra um **novo terminal** e utilize as ferramentas de introspecção do ROS 2:
 
-1.  **Grafo de Nós:** `rqt_graph`
+1.  **Grafo de Nós:** `rqt_graph`(Selecione a opção *Nodes/Topics(all)* e clique no botão de atualizar)
     * Observe como o nó `/gazebo` se comunica com os demais.
 2.  **Lista de Tópicos:** `ros2 topic list`
     * Verifique a existência dos tópicos `/cmd_vel`, `/odom`, `/scan` e `/tf`.
@@ -100,18 +132,16 @@ Abra um **novo terminal** e utilize as ferramentas de introspecção do ROS 2:
 
 ---
 
-## 7. Visualização Avançada no RViz2
-O RViz2 é essencial para depurar o que o robô "vê". Ele inicia vazio, e você deve configurá-lo manualmente:
+## 9. Visualização Avançada no RViz2
+O RViz2 é essencial para depurar o que o robô "vê". Ele inicia pode iniciar vazio, e você deve configurá-lo:
 
 Use o seguinte lançador:
 ```bash
 ros2 launch turtlebot3_bringup rviz2.launch.py
 ```
 
-
-1.  No terminal, digite: `rviz2`
-2.  No painel **Global Options**, altere o **Fixed Frame** para `odom`.
-3.  Antes de cada item abaixo clique em **Add**, depois na aba **By display type**$\rightarrow$**rviz_default_plugins** adicione os seguintes displays:
+1.  No painel **Global Options**, altere o **Fixed Frame** para `odom`.
+2.  Antes de cada item abaixo clique em **Add**, depois na aba **By display type**$\rightarrow$**rviz_default_plugins** adicione os seguintes displays:
     * **RobotModel**: Renderiza o Waffle em 3D.
     * **TF**: Mostra os eixos coordenados. Na opção **TF**$\rightarrow$**Frames** habilite os frames `base_link` e `odom`.
     * **LaserScan**: Na aba **By topic** selecione o tópico  `/scan`$\rightarrow$`LaserScan`. (Sugestão: mude o *Style* para `Points` e *Size* para `0.03` pixels).
@@ -121,7 +151,7 @@ ros2 launch turtlebot3_bringup rviz2.launch.py
 
 ---
 
-## 8. Implementação: Controle de Malha Aberta (Python)
+## 10. Implementação: Controle de Malha Aberta (Python)
 **Crie um pacote** Python chamado `controle_simulacao` conforme você aprendeu na seção ["*Criando um pacote Python*" da "*Aula 2: Escrevendo e Construindo um Nó ROS 2*"](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/nodes-ros2.md#criando-um-pacote-python). 
 
 Em seguida, **crie o nó Python**, conforme você estudo em na seção [*Criando um nó em Python* da *"Aula 2: Escrevendo e Construindo um Nó ROS 2"*](https://github.com/fabiobento/cont-int-2026-1/blob/main/nodes-ros2/nodes-ros2.md#criando-um-n%C3%B3-em-python). Para implementar nó use o código abaixo e salve o arquivo como `circulo.py`. O objetivo é aplicar a **Cinemática Direta** para realizar uma trajetória circular.
@@ -224,14 +254,14 @@ Agora **adicione as dependências** do pacote `controle_simulacao` no arquivo `p
 
 Por fim, compile o pacote e rode o nó:
 ```bash
-cd ~/master_ros2_ws
+cd ~/pd_ros2_ws
 colcon build --packages-select controle_simulacao
 source install/setup.bash
 ros2 run controle_simulacao circulo
 ```
 ---
 
-## 9. Desafio Técnico
+## 11. Desafio Técnico
 Após rodar o script e observar o robô no Gazebo e no RViz2, responda:
 1.  **Análise de Desvio:** No RViz2, o rastro da odometria (`Odometry`) fecha um círculo perfeito após 5 voltas?
 2.  **Referencial:** Se alterarmos o **Fixed Frame** no RViz2 de `odom` para `base_link`, o que acontece com a visualização do robô e do laser? Por que isso ocorre?

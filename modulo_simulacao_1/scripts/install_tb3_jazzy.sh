@@ -2,6 +2,7 @@
 
 # =================================================================
 # Script de Instalação TurtleBot3 - ROS 2 Jazzy (Ubuntu 24.04)
+# Disciplina: Controle Inteligente - Prof. Fabio
 # =================================================================
 
 set -e # Interrompe o script se algum comando falhar
@@ -31,26 +32,29 @@ source /opt/ros/jazzy/setup.bash
 mkdir -p ~/turtlebot3_ws/src
 cd ~/turtlebot3_ws/src/
 
-# Clonando branches específicas para Jazzy
+# Clonando repositórios oficiais e de simulação para Jazzy
 git clone -b jazzy https://github.com/ROBOTIS-GIT/DynamixelSDK.git
 git clone -b jazzy https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
 git clone -b jazzy https://github.com/ROBOTIS-GIT/turtlebot3.git
+git clone -b jazzy https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git
 
-echo "[4/5] Compilando o Workspace com Colcon..."
+echo "[4/5] Compilando o Workspace com Colcon (isso pode levar alguns minutos)..."
 cd ~/turtlebot3_ws
 colcon build --symlink-install
 
 echo "[5/5] Configurando variáveis de ambiente no .bashrc..."
-# Evitar duplicatas no .bashrc se o script for rodado duas vezes
+# Adiciona as linhas ao .bashrc apenas se ainda não existirem
 if ! grep -q "turtlebot3_ws/install/setup.bash" ~/.bashrc; then
+    echo "" >> ~/.bashrc
+    echo "# Configurações TurtleBot3 - ROS 2 Jazzy" >> ~/.bashrc
     echo 'source /opt/ros/jazzy/setup.bash' >> ~/.bashrc
     echo 'source ~/turtlebot3_ws/install/setup.bash' >> ~/.bashrc
-    echo 'export ROS_DOMAIN_ID=30' >> ~/.bashrc
     echo 'export TURTLEBOT3_MODEL=waffle' >> ~/.bashrc
 fi
 
 echo "========================================================="
 echo " INSTALAÇÃO CONCLUÍDA COM SUCESSO!"
-echo " Por favor, feche este terminal e abra um novo ou execute:"
+echo " Para aplicar as mudanças, feche este terminal e abra um novo,"
+echo " ou execute o comando abaixo agora:"
 echo " source ~/.bashrc"
 echo "========================================================="
