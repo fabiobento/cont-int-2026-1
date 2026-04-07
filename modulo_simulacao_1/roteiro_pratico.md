@@ -271,9 +271,3 @@ colcon build --packages-select controle_simulacao
 source install/setup.bash
 ros2 run controle_simulacao circulo
 ```
----
-
-## 11. Desafio Técnico
-Após rodar o script e observar o robô no Gazebo e no RViz2, responda:
-1.  **Análise de Desvio:** No RViz2, o rastro da odometria (`Odometry`) fecha um círculo perfeito após 5 voltas?
-2.  **Referencial:** Se alterarmos o **Fixed Frame** no RViz2 de `odom` para `base_link`, o que acontece com a visualização do robô e do laser? Por que isso ocorre?

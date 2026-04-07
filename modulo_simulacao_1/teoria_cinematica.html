@@ -7530,8 +7530,59 @@ a.anchor-link {
 </ul>
 </li>
 </ul>
-<p><img alt="" src="https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/parametros-fundamentais.png"/>
-<strong>Figura 1: Diagrama técnico de um robô móvel com tração diferencial, vista superior, legendado com o raio da roda $r$, a distância entre as rodas $L$ e um sistema de coordenadas global mostrando $x$, $y$ e o ângulo de orientação (ou proa) $\theta$.</strong> (Fonte: <a href="https://gemini.google.com/">Gerado por IA (Gemini, 2026)</a>)</p>
+<p><img alt="" src="https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/parametros-fundamentais.png"/></p>
+<p><strong>Figura 1: Diagrama técnico de um robô móvel com tração diferencial, vista superior, legendado com o raio da roda $r$, a distância entre as rodas $L$ e um sistema de coordenadas global mostrando $x$, $y$ e o ângulo de orientação (ou proa) $\theta$.</strong> (Fonte: <a href="https://gemini.google.com/">Gerado por IA (Gemini, 2026)</a>)</p>
+<h3 id="2.2-Restri%C3%A7%C3%B5es-N%C3%A3o-Holon%C3%B4micas">2.2 Restrições Não Holonômicas<a class="anchor-link" href="#2.2-Restri%C3%A7%C3%B5es-N%C3%A3o-Holon%C3%B4micas">¶</a></h3><p>Para entender o que são <strong>restrições não holonômicas</strong>, imagine a diferença entre o movimento de um <strong>drone</strong> e o de um <strong>carro</strong>.</p>
+<blockquote>
+<p>Enquanto um drone pode se mover instantaneamente em qualquer direção (para frente, para o lado ou para cima), um carro não pode simplesmente "deslizar" para o lado para entrar em uma vaga de estacionamento; ele precisa manobrar, mudando sua orientação para conseguir um deslocamento lateral. Essa limitação é o que chamamos de restrição não holonômica.</p>
+</blockquote>
+<h4 id="O-Conceito-Geom%C3%A9trico">O Conceito Geométrico<a class="anchor-link" href="#O-Conceito-Geom%C3%A9trico">¶</a></h4><p>Na robótica e na mecânica clássica, o estado de um robô é definido pelo seu <strong>espaço de configuração</strong> (comumente chamado de <em>Pose</em>), que inclui sua posição $(x, y)$ e sua orientação $(\theta)$.</p>
+<ul>
+<li><strong>Sistema Holonômico:</strong> O número de graus de liberdade controláveis é igual ao número total de graus de liberdade do sistema. O robô pode se mover em qualquer direção do seu espaço de configuração instantaneamente.</li>
+<li><strong>Sistema Não Holonômico:</strong> O robô tem restrições que dependem da <strong>velocidade</strong> e não apenas da posição. Isso significa que, embora ele possa alcançar qualquer ponto no plano, ele não pode seguir qualquer <em>trajetória</em> infinitesimal.</li>
+</ul>
+<h4 id="A-Restri%C3%A7%C3%A3o-de-%22N%C3%A3o-Deslizamento%22">A Restrição de "Não Deslizamento"<a class="anchor-link" href="#A-Restri%C3%A7%C3%A3o-de-%22N%C3%A3o-Deslizamento%22">¶</a></h4><p>No caso de robôs com rodas (como o TurtleBot3 ou um carro), a restrição não holonômica surge do contato da roda com o chão. Matematicamente, a velocidade lateral no referencial do robô deve ser sempre zero:</p>
+<p>$$\dot{x}\sin(\theta) - \dot{y}\cos(\theta) = 0$$</p>
+<p>Essa equação diz que o robô só pode se mover na direção em que suas rodas estão apontadas. Ele está "preso" à sua orientação atual para definir seu próximo movimento linear.</p>
+<p><img alt="" src="https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/restricao-n-holo.png"/></p>
+<p><strong>Figura 2: Representação esquemática de um robô móvel com tração diferencial, mostrando a restrição não holonômica de não deslizamento lateral.</strong> (Fonte: <a href="https://gemini.google.com/">Gerado por IA (Gemini, 2026)</a>)</p>
+<h4 id="Implica%C3%A7%C3%B5es-no-Controle-e-Planejamento">Implicações no Controle e Planejamento<a class="anchor-link" href="#Implica%C3%A7%C3%B5es-no-Controle-e-Planejamento">¶</a></h4><p>As restrições não holonômicas tornam o controle de robôs muito mais desafiador por dois motivos principais:</p>
+<ol>
+<li><strong>Dependência da Trajetória:</strong> Para chegar a uma posição lateral, o robô deve descrever uma curva (combinação de $v$ e $\omega$). O caminho importa tanto quanto o destino.</li>
+<li><strong>Estacionamento e Manobras:</strong> É por causa dessa restrição que precisamos fazer a "baliza". Se um carro fosse holonômico, ele apenas se moveria lateralmente para dentro da vaga. Como não é, ele precisa de uma sequência de movimentos curvos para compensar a impossibilidade de translação lateral pura.</li>
+</ol>
+<h4 id="Compara%C3%A7%C3%A3o-Pr%C3%A1tica">Comparação Prática<a class="anchor-link" href="#Compara%C3%A7%C3%A3o-Pr%C3%A1tica">¶</a></h4><table>
+<thead>
+<tr>
+<th style="text-align:left">Característica</th>
+<th style="text-align:left">Sistema Holonômico</th>
+<th style="text-align:left">Sistema Não Holonômico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Exemplo</strong></td>
+<td style="text-align:left">Drone, Robô com rodas Mecanum</td>
+<td style="text-align:left">Carro, Bicicleta, TurtleBot3</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Movimento lateral</strong></td>
+<td style="text-align:left">Instantâneo</td>
+<td style="text-align:left">Requer manobra/mudança de $\theta$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Complexidade</strong></td>
+<td style="text-align:left">Simples de planejar trajetória</td>
+<td style="text-align:left">Complexo (requer cinemática inversa)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Graus de Liberdade</strong></td>
+<td style="text-align:left">Controláveis = Totais</td>
+<td style="text-align:left">Controláveis &lt; Totais</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Resumo-para-Engenharia">Resumo para Engenharia<a class="anchor-link" href="#Resumo-para-Engenharia">¶</a></h3><p>Em termos de cálculo, uma restrição é <strong>não holonômica</strong> quando ela é expressa como uma equação diferencial (envolvendo velocidades) que <strong>não pode ser integrada</strong> para se tornar uma restrição apenas de posição. Ou seja, ela é uma restrição de "caminho" que não reduz a dimensão do espaço que o robô pode eventualmente alcançar, apenas limita como ele pode navegar por esse espaço a cada instante.</p>
 <h3 id="2.2.-O-Jacobiano:-Acoplamento-de-Velocidades">2.2. O Jacobiano: Acoplamento de Velocidades<a class="anchor-link" href="#2.2.-O-Jacobiano:-Acoplamento-de-Velocidades">¶</a></h3><p>Um robô diferencial possui <strong>restrições não-holonômicas</strong>: ele tem menos graus de liberdade controláveis do que o total de graus de liberdade do plano (ex: ele não pode "deslizar" lateralmente sem girar).</p>
 <p>As variáveis operacionais são:</p>
 <ul>
@@ -7549,8 +7600,8 @@ A velocidade angular alvo será:
 $$\omega = \frac{v}{R} = \frac{0.15}{0.375} = 0.4 \text{ rad/s}$$</p>
 <p>Ao publicar este comando, o firmware do robô converterá esses valores para a rotação das rodas. Para a roda direita ($\omega_R$), o cálculo será:
 $$\omega_R = \frac{1}{0.033} \left( 0.15 + \frac{0.287 \cdot 0.4}{2} \right) \approx 6.28 \text{ rad/s}$$</p>
-<p><img alt="" src="https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/pipeline-controle.png"/>
-<strong>Figura 2: Fluxograma infográfico de um pipeline de controle de robô em ROS 2: Nó (script Python) $\rightarrow$ /cmd_vel (mensagem do tipo Twist) $\rightarrow$ Controlador do Robô $\rightarrow$ PWM do Motor/Rotação das Rodas $\rightarrow$ Simulação no Gazebo..</strong> (Fonte: <a href="https://gemini.google.com/">Gerado por IA (Gemini, 2026)</a>)</p>
+<p><img alt="" src="https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/pipeline-controle.png"/></p>
+<p><strong>Figura 3: Fluxograma infográfico de um pipeline de controle de robô em ROS 2: Nó (script Python) $\rightarrow$ /cmd_vel (mensagem do tipo Twist) $\rightarrow$ Controlador do Robô $\rightarrow$ PWM do Motor/Rotação das Rodas $\rightarrow$ Simulação no Gazebo..</strong> (Fonte: <a href="https://gemini.google.com/">Gerado por IA (Gemini, 2026)</a>)</p>
 <h2 id="4.-Odometria-e-Discretiza%C3%A7%C3%A3o-do-Tempo">4. Odometria e Discretização do Tempo<a class="anchor-link" href="#4.-Odometria-e-Discretiza%C3%A7%C3%A3o-do-Tempo">¶</a></h2><p>A odometria é a estimativa da pose $\vec{\xi}$ baseada na integração das velocidades. Como sistemas computacionais são discretos, trabalhamos com um intervalo de amostragem <strong>$\Delta t$</strong> (definido pelo <em>timer</em> do script Python, ex: $0.1$ s).</p>
 <h3 id="4.1.-Integra%C3%A7%C3%A3o-pelo-M%C3%A9todo-de-Euler">4.1. Integração pelo Método de Euler<a class="anchor-link" href="#4.1.-Integra%C3%A7%C3%A3o-pelo-M%C3%A9todo-de-Euler">¶</a></h3><p>A cada passo de tempo $k$, o estado é atualizado:</p>
 <ul>
@@ -7593,8 +7644,8 @@ $$\omega_R = \frac{1}{0.033} \left( 0.15 + \frac{0.287 \cdot 0.4}{2} \right) \ap
 <li><strong>Frame <code>odom</code> (Global):</strong> Referencial inercial fixo no mapa. Vemos o robô se deslocando sobre o grid.</li>
 <li><strong>Frame <code>base_link</code> (Local):</strong> Referencial fixo no centro do robô. O robô parece estático, e o mundo inteiro (incluindo as leituras de laser) gira e se move ao redor dele.</li>
 </ul>
-<p><img alt="" src="https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/fixed-frames.png"/>
-<strong>Figura 3: Referenciais fixos no RViz: o lado esquerdo mostra o referencial fixo <code>odom</code> com o robô se movendo sobre uma grade; o lado direito mostra o referencial fixo <code>base_link</code> com o robô estático no centro e a <code>grid/laserscan</code> rotacionando ao seu redor.</strong> (Fonte: <a href="https://gemini.google.com/">Gerado por IA (Gemini, 2026)</a>)</p>
+<p><img alt="" src="https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/fixed-frames.png"/></p>
+<p><strong>Figura 4: Referenciais fixos no RViz: o lado esquerdo mostra o referencial fixo <code>odom</code> com o robô se movendo sobre uma grade; o lado direito mostra o referencial fixo <code>base_link</code> com o robô estático no centro e a <code>grid/laserscan</code> rotacionando ao seu redor.</strong> (Fonte: <a href="https://gemini.google.com/">Gerado por IA (Gemini, 2026)</a>)</p>
 <h2 id="6.-Resumo-do-Pipeline-de-Dados">6. Resumo do Pipeline de Dados<a class="anchor-link" href="#6.-Resumo-do-Pipeline-de-Dados">¶</a></h2><p>Para o sucesso do laboratório, visualize o fluxo:</p>
 <ol>
 <li><strong>Algoritmo (Python):</strong> Calcula $v$ e $\omega$ baseados na geometria desejada.</li>
