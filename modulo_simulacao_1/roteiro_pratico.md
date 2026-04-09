@@ -122,7 +122,7 @@ Aqui está a tradução dos comandos de teleoperação para o seu material:
 Abra um **novo terminal** e utilize as ferramentas de introspecção do ROS 2:
 
 1.  **Grafo de Nós:** `rqt_graph`(Selecione a opção *Nodes/Topics(all)* e clique no botão de atualizar)
-    * Observe como o nó `/gazebo` se comunica com os demais.
+    * Observe como o nó `/ros_gz_bridge` se comunica com os demais.
 2.  **Lista de Tópicos:** `ros2 topic list`
     * Verifique a existência dos tópicos `/cmd_vel`, `/odom`, `/scan` e `/tf`.
 3.  **Frequência de Atualização:** Escolha o tópico do laser e verifique a taxa de publicação:
@@ -141,13 +141,15 @@ ros2 launch turtlebot3_bringup rviz2.launch.py
 ```
 
 1.  No painel **Global Options**, altere o **Fixed Frame** para `odom`.
-2.  Antes de cada item abaixo clique em **Add**, depois na aba **By display type**$\rightarrow$**rviz_default_plugins** adicione os seguintes displays:
+2.  Antes de cada item abaixo clique em **Add**na aba **By display type**$\rightarrow$**rviz_default_plugins** adicione os seguintes displays:
     * **RobotModel**: Renderiza o Waffle em 3D.
     * **TF**: Mostra os eixos coordenados. Na opção **TF**$\rightarrow$**Frames** habilite os frames `base_link` e `odom`.
-    * **LaserScan**: Na aba **By topic** selecione o tópico  `/scan`$\rightarrow$`LaserScan`. (Sugestão: mude o *Style* para `Points` e *Size* para `0.03` pixels).
-    * **Odometry**: Na aba **By topic** selecione o tópico selecione o tópico `/odom`$\rightarrow$`Odometry`. Isso mostrará o rastro do robô.
+3.  Antes de cada item abaixo clique em **Add**na aba **By topic**:
+    * **LaserScan**: selecione o tópico  `/scan`$\rightarrow$`LaserScan`. (Sugestão: mude o *Style* para `Points` e *Size* para `0.03` pixels).
+    * **Odometry**: selecione o tópico `/odom`$\rightarrow$`Odometry`. Isso mostrará o rastro do robô.
+    * **Camera**: selecione o tópico `/camera/image_raw`$\rightarrow$`Camera`.
 
-Faça também os seguintes ajustes:
+Faça também os seguintes ajustes em **Odometry**:
 * Ajuste Dimensional das Setas
     * **Shaft Length (Comprimento do corpo):** Mude para **0.02**.
     * **Shaft Radius (Raio do corpo):** Mude para **0.001** (ou menor).
@@ -264,9 +266,12 @@ Agora **adicione as dependências** do pacote `controle_simulacao` no arquivo `p
 </package>
 ```
 
+Interrompa a execução do terminal(`CTRL+C`) em que você usou o `teleop_keyboard` para o controle manual. 
+
+
 Por fim, compile o pacote e rode o nó:
 ```bash
-cd ~/pd_ros2_ws
+cd ~/master_ros2_ws
 colcon build --packages-select controle_simulacao
 source install/setup.bash
 ros2 run controle_simulacao circulo
