@@ -65,7 +65,7 @@ Portanto, a **velocidade lateral no referencial do robô** ($v_{lateral}$) deve 
 $$v_{lateral} = 0$$
 
 ##### 4. Isolando a Velocidade Lateral
-Para encontrar a equação que você apresentou, precisamos inverter a relação do passo 2 para isolar $v_{lateral}$. Multiplicamos ambos os lados pela transposta da matriz de rotação ($R(\theta)^T$):
+Para encontrar a equação $\dot{x}\sin(\theta) - \dot{y}\cos(\theta) = 0$, precisamos inverter a relação do passo 2 para isolar $v_{lateral}$. Multiplicamos ambos os lados pela transposta da matriz de rotação ($R(\theta)^T$):
 
 $$\begin{bmatrix} v_{longitudinal} \\ v_{lateral} \\ \omega \end{bmatrix} = \begin{bmatrix} \cos\theta & \sin\theta & 0 \\ -\sin\theta & \cos\theta & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} \dot{x} \\ \dot{y} \\ \dot{\theta} \end{bmatrix}$$
 
