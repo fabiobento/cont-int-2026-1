@@ -59,7 +59,7 @@ Para relacionar o que acontece no referencial global com o que o robô "sente" n
 $$\dot{\xi} = R(\theta) \cdot V_R \implies \begin{bmatrix} \dot{x} \\ \dot{y} \\ \dot{\theta} \end{bmatrix} = \begin{bmatrix} \cos\theta & -\sin\theta & 0 \\ \sin\theta & \cos\theta & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} v_{longitudinal} \\ v_{lateral} \\ \omega \end{bmatrix}$$
 
 ##### 3. A Restrição Física de Não Deslizamento
-[cite_start]A restrição de "não deslizamento" (em inglês, *no-skidding*) assume que as rodas do robô (como as do TurtleBot3 Waffle [cite: 66]) têm atrito lateral infinito, o que impede que o robô deslize para os lados como um disco de hóquei no gelo.
+A restrição de "não deslizamento" (em inglês, *no-skidding*) assume que as rodas do robô (como as do TurtleBot3 Waffle) têm atrito lateral infinito, o que impede que o robô deslize para os lados como um disco de hóquei no gelo.
 
 Portanto, a **velocidade lateral no referencial do robô** ($v_{lateral}$) deve ser obrigatoriamente **zero**:
 $$v_{lateral} = 0$$
