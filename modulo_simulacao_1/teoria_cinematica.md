@@ -35,11 +35,55 @@ Na robótica e na mecânica clássica, o estado de um robô é definido pelo seu
 * **Sistema Não Holonômico:** O robô tem restrições que dependem da **velocidade** e não apenas da posição. Isso significa que, embora ele possa alcançar qualquer ponto no plano, ele não pode seguir qualquer *trajetória* infinitesimal.
 
 #### A Restrição de "Não Deslizamento"
+
 No caso de robôs com rodas (como o TurtleBot3 ou um carro), a restrição não holonômica surge do contato da roda com o chão. Matematicamente, a velocidade lateral no referencial do robô deve ser sempre zero:
 
 $$\dot{x}\sin(\theta) - \dot{y}\cos(\theta) = 0$$
 
 Essa equação diz que o robô só pode se mover na direção em que suas rodas estão apontadas. Ele está "preso" à sua orientação atual para definir seu próximo movimento linear.
+
+
+Para deduzir a equação da restrição não holonômica de "não deslizamento lateral", precisamos decompor as velocidades do robô em dois referenciais: o **Global** ($\{G\}$) e o **Local/Robô** ($\{R\}$).
+
+Aqui está o passo a passo matemático dessa dedução:
+
+##### 1. Definição dos Referenciais e do Vetor de Pose
+O estado do robô (pose) é definido no referencial global por $\vec{\xi} = [x, y, \theta]^T$. As derivadas temporais dessas coordenadas representam as velocidades no referencial global:
+* $\dot{x}$: Velocidade no eixo $X$ global.
+* $\dot{y}$: Velocidade no eixo $Y$ global.
+* $\dot{\theta}$: Velocidade angular (rotação).
+
+##### 2. A Matriz de Rotação
+Para relacionar o que acontece no referencial global com o que o robô "sente" no seu referencial local (fixo no chassi), utilizamos a matriz de rotação $R(\theta)$. A relação entre a velocidade no referencial do robô ($V_R$) e a velocidade no referencial global ($\dot{\xi}$) é:
+
+$$\dot{\xi} = R(\theta) \cdot V_R \implies \begin{bmatrix} \dot{x} \\ \dot{y} \\ \dot{\theta} \end{bmatrix} = \begin{bmatrix} \cos\theta & -\sin\theta & 0 \\ \sin\theta & \cos\theta & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} v_{longitudinal} \\ v_{lateral} \\ \omega \end{bmatrix}$$
+
+##### 3. A Restrição Física de Não Deslizamento
+[cite_start]A restrição de "não deslizamento" (em inglês, *no-skidding*) assume que as rodas do robô (como as do TurtleBot3 Waffle [cite: 66]) têm atrito lateral infinito, o que impede que o robô deslize para os lados como um disco de hóquei no gelo.
+
+Portanto, a **velocidade lateral no referencial do robô** ($v_{lateral}$) deve ser obrigatoriamente **zero**:
+$$v_{lateral} = 0$$
+
+##### 4. Isolando a Velocidade Lateral
+Para encontrar a equação que você apresentou, precisamos inverter a relação do passo 2 para isolar $v_{lateral}$. Multiplicamos ambos os lados pela transposta da matriz de rotação ($R(\theta)^T$):
+
+$$\begin{bmatrix} v_{longitudinal} \\ v_{lateral} \\ \omega \end{bmatrix} = \begin{bmatrix} \cos\theta & \sin\theta & 0 \\ -\sin\theta & \cos\theta & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} \dot{x} \\ \dot{y} \\ \dot{\theta} \end{bmatrix}$$
+
+Focando apenas na segunda linha da matriz resultante (que define $v_{lateral}$):
+$$v_{lateral} = (-\sin\theta) \cdot \dot{x} + (\cos\theta) \cdot \dot{y}$$
+
+
+##### 5. Finalização da Equação
+Como estabelecemos no passo 3 que $v_{lateral} = 0$, temos:
+$$-\dot{x}\sin(\theta) + \dot{y}\cos(\theta) = 0$$
+
+Multiplicando a equação inteira por $-1$ para ajustar ao formato padrão:
+$$\dot{x}\sin(\theta) - \dot{y}\cos(\theta) = 0$$
+
+##### O que essa equação nos diz?
+Essa é uma restrição **não holonômica** porque ela impõe um limite às velocidades instantâneas do robô ($\dot{x}, \dot{y}$) com base na sua posição atual ($\theta$). Note que ela não impede o robô de chegar a qualquer ponto $(x,y)$ no laboratório, mas diz que ele não pode chegar lá "andando de lado"; ele precisa manobrar sua orientação $\theta$ para que sua velocidade linear aponte na direção desejada.
+
+
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/modulo_simulacao_1/imagens/restricao-n-holo.png)
 
