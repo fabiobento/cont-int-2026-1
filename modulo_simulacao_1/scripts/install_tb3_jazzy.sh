@@ -23,6 +23,9 @@ sudo apt install -y ros-jazzy-cartographer \
                     ros-jazzy-cartographer-ros \
                     ros-jazzy-navigation2 \
                     ros-jazzy-nav2-bringup \
+                    ros-jazzy-turtlebot3-teleop \
+                    ros-jazzy-turtlebot3-description \
+                    ros-jazzy-turtlebot3-gazebo \
                     python3-colcon-common-extensions
 
 echo "[3/5] Criando Workspace e clonando repositórios do TurtleBot3..."
