@@ -136,15 +136,3 @@ Encerre (Ctrl+C) o nó de SLAM e o seu nó `explorador`. Mantenha apenas o simul
 3. **Envie um Destino:**
    * Clique em **Nav2 Goal** no RViz2, selecione um destino no mapa e indique a orientação final desejada. 
    * O Nav2 calculará a rota desviando de paredes e obstáculos autônomamente.
-
----
-
-##  5. Desafio Analítico para o Relatório
-
-Com base no que foi visto nas últimas aulas e nesta prática, responda no seu relatório:
-
-1. **Observação de Frames:** Durante a navegação (Etapa C), o *Fixed Frame* no RViz2 geralmente está configurado para `map`. Como o referencial `map` se diferencia do referencial `odom` (visto na Aula 4) em termos de estabilidade a longo prazo? O que o algoritmo AMCL faz com essa relação?
-2. **Obstáculos Dinâmicos:** Observe o rastro colorido (Global Path e Local Path) que aparece no mapa durante o movimento. Explique como a pilha do Nav2 utiliza o mapa salvo (estático) e os dados em tempo real do LiDAR (dinâmicos) simultaneamente para evitar colisões com objetos que não existiam durante a Etapa B.
-3. **O Problema do Beco sem Saída:** Imagine que o robô seja colocado dentro de um corredor em formato de "U". Descreva como o seu script Python `explorador.py` se comportaria nessa situação em comparação à inteligência da pilha do Nav2. Use os conceitos de "controle reativo" (sem memória) e "planejamento global" para justificar sua resposta.
-
----
