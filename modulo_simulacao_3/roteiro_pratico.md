@@ -156,6 +156,7 @@ def main(args=None):
 if __name__ == '__main__':
     main()
 ```
+Adicione `'patrulheiro = controle_simulacao.patrulheiro:main',` no `entry_points` do arquivo `setup.py`.
 
 Compile o pacote (`colcon build`) e execute o script:
 ```bash
