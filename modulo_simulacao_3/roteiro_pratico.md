@@ -188,7 +188,7 @@ Em vez de alterarmos nosso script para desviar do caminho (o que poderia arruina
 5. Do lado direito, você verá os parâmetros de segurança:
    * **`inflation_radius`**: (Padrão geralmente é $0.55$). Diminua este valor para algo como **$0.30$**.
    * **`cost_scaling_factor`**: Aumente este valor para algo como **$8.0$**. (Isso fará o custo decair mais rápido, deixando as bordas menos borradas).
-6. **Magia em Tempo Real:** Olhe para a tela do seu RViz2. As zonas ciano e roxas ao redor dos pilares encolheram instantaneamente!
+6. **Em Tempo Real:** Olhe para a tela do seu RViz2. As zonas ciano e roxas ao redor dos pilares encolheram instantaneamente!
 7. **Repita para o Mapa Local:** Expanda `/local_costmap` -> `/local_costmap` -> `inflation_layer` na árvore da esquerda e aplique os mesmos valores.
 
 Como a coordenada `(2.0, 2.0)` agora está fora da zona letal, o Nav2 aceitará o destino e o robô **voltará a se mover imediatamente**!
