@@ -1,24 +1,30 @@
-# Aula 6: Navegação Programática e Patrulha de Waypoints (Nav2)
+Aqui está a versão do roteiro totalmente reestruturada. 
+
+Nesta versão, aprofundei consideravelmente a teoria dos **Mapas de Custo (Costmaps)**. O fluxo pedagógico agora induz o aluno a bater de frente com a falha do código, compreender a matemática por trás da recusa do robô e, em seguida, utilizar a interface **RQT** para alterar os parâmetros do mapa em tempo real como solução oficial para o problema geográfico, antes de finalmente refatorar o código para remover o *spam* de comandos.
+
+---
+
+# Aula 6: Navegação Programática, Costmaps e Sintonia Fina (Tuning)
 
 ## 1. Objetivos
-* Transitar da navegação manual via interface (RViz2) para a navegação programática.
+* Transitar da navegação manual via interface (RViz2) para a navegação programática usando Python.
 * Compreender a estrutura da mensagem `geometry_msgs/msg/PoseStamped`.
-* Desenvolver um nó em Python que publica uma sequência de coordenadas no tópico `/goal_pose`, atuando como um despachante de missões.
-* Observar na prática os efeitos das Zonas de Inflação (Costmaps) e a importância de evitar concorrência de comandos no planejamento local.
+* Aprofundar a teoria de **Mapas de Custo (Costmaps)** e suas camadas de inflação.
+* Utilizar a ferramenta **RQT** para realizar a sintonia fina (*tuning*) de parâmetros dinâmicos em tempo de execução para resolver impasses de navegação.
 
 ---
 
 ## 2. Fundamentação Teórica Breve
 
-Na Aula 5, utilizamos a interface gráfica do RViz2 para mandar o robô andar. Nos bastidores, ao clicar no mapa, o sistema empacota os dados de $(x, y)$ em uma mensagem do tipo `PoseStamped` e publica no tópico `/goal_pose`. A pilha do Nav2 escuta esse tópico e inicia o planejamento.
+Na Aula 5, utilizamos a interface gráfica do RViz2 para mandar o robô andar. Ao clicar no mapa, o sistema empacota os dados de $(x, y)$ em uma mensagem do tipo `PoseStamped` e publica no tópico `/goal_pose`. 
 
-Nesta aula, o nosso script Python assumirá o papel do mouse. A grande diferença da navegação autônoma em relação à cinemática da Aula 4 é que não enviaremos mais velocidades diretas aos motores (`/cmd_vel`). Enviaremos **intenções geográficas** no referencial `map`. O Nav2 se encarregará de transformar essas intenções nas velocidades de roda corretas, desviando dos obstáculos.
+Nesta aula, nosso script Python assumirá o papel do mouse, enviando **intenções geográficas** no referencial `map`. O Nav2 se encarregará de transformar essas intenções nas velocidades de roda corretas, desviando dos obstáculos. No entanto, veremos que o robô não obedece a ordens cegamente: ele avalia rigorosamente a viabilidade matemática de cada coordenada antes de se mover.
 
 ---
 
 ## 3. Isolamento e Preparação do Ambiente
 
-Para garantir que os robôs do laboratório operem sem interferências mútuas durante o teste das patrulhas, ative o isolamento de rede em cada terminal que for abrir:
+Ative o isolamento de rede em cada terminal que for abrir:
 ```bash
 export ROS_DOMAIN_ID=XX  # Substitua XX pelo número da sua bancada
 export TURTLEBOT3_MODEL=waffle
@@ -34,32 +40,19 @@ Precisaremos do ecossistema completo rodando antes de iniciar nosso código:
     ```bash
     ros2 run ros_gz_bridge parameter_bridge /cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist
     ```
-3.  **Terminal 3 (Navegação):** Utilize o mapa gerado e salvo na Aula 5 (`mapa_lab.yaml`).
+3.  **Terminal 3 (Navegação):** Utilize o mapa gerado na Aula 5 (`mapa_lab.yaml`).
     ```bash
     ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=True map:=$HOME/mapa_lab.yaml
     ```
-4.  **Estimativa de Pose (AMCL):** No RViz2, utilize o botão **2D Pose Estimate** para localizar o robô no mapa inicial. Se o robô não souber onde está no referencial `map`, ele rejeitará qualquer coordenada de destino.
+4.  **Estimativa de Pose (AMCL):** No RViz2, utilize o botão **2D Pose Estimate** para localizar o robô no mapa inicial. Se o robô não souber onde está no referencial `map`, ele rejeitará qualquer coordenada.
 
 ---
 
-## 4. Obtendo as Coordenadas de Patrulha (Método Visual)
+## 4. Implementação Prática: A Primeira Versão (Ingênua)
 
-Para que o robô patrulhe, precisamos fornecer pontos (x, y) que existam no espaço livre do seu mapa. A forma mais rápida e prática de descobrir essas coordenadas é utilizando a própria grade (grid) do RViz2 para fazer uma estimativa visual.
+Nossa primeira tentativa de criar um patrulheiro utilizará uma lógica simples baseada em um Temporizador (Timer). Vamos tentar forçar o robô a passar bem perto de um dos pilares do labirinto (coordenada `2.0, 2.0`).
 
-1. Observe o chão quadriculado (Grid) no RViz2. Por padrão, cada quadrado cinza tem a medida exata de **1 metro por 1 metro**.
-2. O ponto de origem **x: 0.0, y: 0.0** é o local exato onde o robô "nasceu" no mapa inicial.
-3. Para escolher um ponto de patrulha, basta contar os quadrados a partir do centro do robô:
-   * **Eixo X (Seta Vermelha):** Quadrados para a frente são positivos.
-   * **Eixo Y (Seta Verde):** Quadrados para a esquerda são positivos.
-4. Anotaremos as estimativas visuais para utilizar no nosso código.
-
----
-
-## 5. Implementação Prática: A Primeira Versão (Ingênua)
-
-Nossa primeira tentativa de criar um patrulheiro utilizará uma lógica simples baseada em um Temporizador (Timer) e nas coordenadas estimadas visualmente.
-
-No seu pacote `controle_simulacao`, crie o arquivo `patrulheiro.py` e insira o código abaixo. Preste atenção nas coordenadas definidas na lista `self.waypoints`.
+No seu pacote `controle_simulacao`, crie o arquivo `patrulheiro.py` e insira o código abaixo:
 
 ```python
 import rclpy
@@ -74,10 +67,10 @@ class PatrulheiroNav2(Node):
         self.publisher_ = self.create_publisher(PoseStamped, '/goal_pose', 10)
         self.subscription = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.pose_callback, 10)
 
-        # Pontos da primeira tentativa (Coordenadas "Ingênuas")
+        # Coordenadas que passam rente aos obstáculos do labirinto
         self.waypoints = [
             (2.0, 0.0, 0.0),    
-            (2.0, 2.0, 1.57),   
+            (2.0, 2.0, 1.57),   # <- ATENÇÃO A ESTA COORDENADA
             (0.0, 2.0, 3.14),   
             (0.0, 0.0, -1.57)   
         ]
@@ -116,10 +109,10 @@ class PatrulheiroNav2(Node):
             msg.pose.orientation.w = qw
 
             self.publisher_.publish(msg)
-            self.get_logger().info(f'Patrulhando Waypoint {self.indice_atual + 1}: x={x:.2f}, y={y:.2f}')
+            self.get_logger().info(f'Patrulhando Waypoint {self.indice_atual + 1}: alvo em x={x:.2f}, y={y:.2f}')
             self.objetivo_ativo = True
         else:
-            self.get_logger().info('Circuito concluído! Reiniciando...')
+            self.get_logger().info('Circuito concluído! Reiniciando a patrulha...')
             self.indice_atual = 0 
 
     def timer_callback(self):
@@ -138,7 +131,7 @@ class PatrulheiroNav2(Node):
         distancia = math.sqrt((alvo_x - atual_x)**2 + (alvo_y - atual_y)**2)
 
         if distancia < self.tolerancia_chegada:
-            self.get_logger().info(f'>>> Destino alcançado!')
+            self.get_logger().info(f'>>> Chegamos no destino {self.indice_atual + 1}')
             self.indice_atual += 1
             self.objetivo_ativo = False 
 
@@ -148,7 +141,7 @@ def main(args=None):
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        pass
+        node.get_logger().info('Patrulha interrompida.')
     finally:
         node.destroy_node()
         rclpy.shutdown()
@@ -156,43 +149,65 @@ def main(args=None):
 if __name__ == '__main__':
     main()
 ```
-Adicione `'patrulheiro = controle_simulacao.patrulheiro:main',` no `entry_points` do arquivo `setup.py`.
+*(Lembre-se de adicionar o nó no `setup.py` e executar `colcon build`).*
 
-Compile o pacote (`colcon build`) e execute o script:
+Abra um Terminal 4 e execute o script:
 ```bash
 ros2 run controle_simulacao patrulheiro
 ```
-**Atenção:** Dê o comando de *2D Pose Estimate* no RViz2 para iniciar. 
+Dê o comando de *2D Pose Estimate* no RViz2 para iniciar. 
 
-**O que aconteceu?**
-Você notará que o robô provavelmente percorrerá apenas a primeira reta e depois **travará completamente**, recusando-se a ir para a coordenada `(2.0, 2.0)`, mesmo com o script rodando.
-
----
-
-## 6. Estudo de Caso de Engenharia: Por que o Robô Falhou?
-
-O robô não travou por causa de um "bug" de compilação, mas sim por uma violação conceitual das regras de navegação. Nosso script inicial cometeu dois erros clássicos de controle autônomo:
-
-
-
-### Falha 1: Ignorando o Mapa de Custo (Costmap Inflation)
-Observe o mapa no seu RViz2. Ao redor dos pilares (obstáculos brancos), o Nav2 desenha "auréolas" coloridas:
-* **Ciano/Azul Escuro:** Custo Letal (É o espaço físico ocupado pelo objeto e pela largura do chassi do robô).
-* **Roxo/Vermelho:** Zona de Inflação (A margem de segurança extra).
-
-**A Regra de Ouro do Nav2:** O planejador global se recusa estritamente a traçar uma rota cujo destino final caia dentro das zonas de inflação (Ciano/Roxo). Ao chutarmos a coordenada `(2.0, 2.0)`, nós acidentalmente mandamos o robô estacionar "dentro" do campo de força do pilar. Como a matemática prova que isso resultaria em colisão, o Nav2 simplesmente aborta a missão por segurança.
-
-### Falha 2: Concorrência e Sobrecarga de Comandos ("Spamming")
-Na nossa lógica, criamos um `timer_callback` que republicava a mesma coordenada a cada 2 segundos. No ROS 2, toda vez que o tópico `/goal_pose` recebe uma mensagem, o Nav2 assume que é uma **nova ordem**, cancelando imediatamente os cálculos atuais da trajetória para refazer a matemática do zero. 
-Ao "bombardear" o tópico com mensagens repetidas, induzimos um "Stuttering" (gagueira) no planejador local (DWA), fazendo o robô ficar congelado pensando em vez de andar.
+**Ocorrência do Problema:** Você notará que o robô percorrerá a primeira reta sem problemas, mas **travará completamente** ao tentar ir para o Waypoint 2 `(2.0, 2.0)`, recusando-se a mover as rodas, mesmo com o terminal Python afirmando que o comando está sendo enviado.
 
 ---
 
-## 7. Refatoração: O Script Robusto
+## 5. Estudo de Caso Teórico: Costmaps e Zonas de Inflação
 
-Para construir um sistema confiável, precisamos remover o temporizador (enviando a ordem apenas uma vez) e escolher rotas que passem estritamente pelo "corredor branco" seguro (espaço livre). 
+O robô não travou por causa de um "bug" no código Python, mas sim porque o planejador do Nav2 é programado para priorizar a sobrevivência do hardware. 
 
-Edite o seu `patrulheiro.py` substituindo-o por esta versão otimizada:
+Observe o mapa no seu RViz2. Ao redor de cada obstáculo branco (paredes e pilares), o Nav2 desenha auréolas coloridas. Isso é chamado de **Camada de Inflação (Inflation Layer)**. O Nav2 atribui um "custo de travessia" de 0 a 255 para cada pixel do mapa:
+
+1. **Obstáculo Físico (Branco/Preto):** Custo 254. Colisão real.
+2. **Zona Ciano (Inscribed/Lethal Cost):** Custo 253. É o tamanho do obstáculo somado à largura do chassi do robô (`robot_radius`). Se o *centro* do robô pisar nessa área ciano, a borda física do robô baterá na parede. 
+3. **Zona Roxa (Inflation Cost):** Um gradiente de custo que vai diminuindo de 252 a 1. É uma margem de segurança. O robô *pode* andar aqui, mas o algoritmo tentará evitar.
+
+**O Paradoxo do Waypoint 2:** O Nav2 se recusa estritamente a traçar uma rota cujo destino final caia dentro das zonas Letais (Ciano). A coordenada `(2.0, 2.0)` exigida pelo nosso script cai milimetricamente sobre a zona ciano/roxa escura do pilar central. A matemática do Nav2 prevê uma colisão e, por segurança, aborta a missão.
+
+```json?chameleon
+{"component":"LlmGeneratedComponent","props":{"height":"750px","prompt":"Crie um simulador interativo de Costmap Inflation (Mapa de Custos) da robótica.\n\nObjetivo: Demonstrar visualmente como os parâmetros de inflação afetam a navegabilidade ao redor de um obstáculo.\n\nContexto (Data State):\n- Obstáculo central (representando um pilar do labirinto).\n- O ambiente ao redor deve mostrar um grid cartesiano.\n\nLayout e Interação:\n- Painel de Controles com sliders para:\n  1. Raio do Robô (robot_radius): 0.05m a 0.5m. Aumentar isso expande a zona letal (ciano).\n  2. Raio de Inflação (inflation_radius): 0.1m a 2.0m. Controla a extensão total da aura roxa de segurança.\n  3. Fator de Escala de Custo (cost_scaling_factor): 1.0 a 20.0. Controla o quão rápido a aura roxa se dissipa (decaimento exponencial do custo).\n\nVisualização (O Mapa):\n- Desenhe o obstáculo sólido no centro.\n- Renderize a 'Zona Letal' (Inscribed Radius = raio obstáculo + raio robô) em uma cor sólida marcante (ex: ciano claro).\n- Renderize a 'Zona de Inflação' ao redor da Zona Letal usando um gradiente que simule o decaimento do custo (tons de roxo/magenta desvanecendo para transparente).\n- Crie um 'Marcador de Destino' (Waypoint) que o usuário possa arrastar com o mouse pelo mapa.\n\nFeedback Dinâmico:\n- Exiba o Custo exato (0 a 254) no ponto onde o marcador está localizado.\n- Mostre um status claro baseado no marcador: 'Destino Válido (Livre)' ou 'Destino Inválido (Colisão Iminente)'. O destino torna-se inválido se entrar na zona Letal/Ciano.\n- O idioma de toda a interface deve ser Português Brasileiro.","id":"im_6185ddb7218afdf3"}}
+```
+
+---
+
+## 6. A Solução: Sintonia Fina (Tuning) com o RQT
+
+Em vez de alterarmos nosso script para desviar do caminho (o que poderia arruinar a missão industrial), vamos reconfigurar o "medo" do robô. Vamos usar a ferramenta **RQT** para alterar os parâmetros do mapa de custo em tempo real, reduzindo a zona de inflação até que a coordenada `(2.0, 2.0)` torne-se um espaço livre.
+
+1. **Abra um Terminal 5** (não esqueça do `export ROS_DOMAIN_ID=XX`).
+2. **Inicie o RQT:**
+   ```bash
+   rqt
+   ```
+3. No RQT, vá no menu superior e clique em **Plugins** -> **Configuration** -> **Parameter Reconfigure**.
+4. Uma lista de nós aparecerá à esquerda. Localize o Costmap Global:
+   * Expanda: `/global_costmap` -> `/global_costmap` -> `inflation_layer`.
+5. Do lado direito, você verá os parâmetros de segurança:
+   * **`inflation_radius`**: (Padrão geralmente é $0.55$). Diminua este valor para algo como **$0.30$**.
+   * **`cost_scaling_factor`**: Aumente este valor para algo como **$8.0$**. (Isso fará o custo decair mais rápido, deixando as bordas menos borradas).
+6. **Magia em Tempo Real:** Olhe para a tela do seu RViz2. As zonas ciano e roxas ao redor dos pilares encolheram instantaneamente!
+7. **Repita para o Mapa Local:** Expanda `/local_costmap` -> `/local_costmap` -> `inflation_layer` na árvore da esquerda e aplique os mesmos valores.
+
+Como a coordenada `(2.0, 2.0)` agora está fora da zona letal, o Nav2 aceitará o destino e o robô **voltará a se mover imediatamente**!
+
+---
+
+## 7. Refatoração: Removendo o "Spam" de Comandos
+
+O robô voltou a andar, mas seu movimento provavelmente está "gaguejando". Esse é o nosso **segundo problema**: a concorrência de comandos. 
+
+No script atual, o `timer_callback` republica a mesma coordenada a cada 2 segundos. No ROS 2, toda vez que o tópico `/goal_pose` recebe uma mensagem, o Nav2 cancela imediatamente a trajetória atual e refaz a matemática do zero. Ao "bombardear" o tópico, forçamos o robô a parar de andar para pensar.
+
+Pare o script atual (`Ctrl+C`) e substitua o código do `patrulheiro.py` por esta versão refatorada, que envia a ordem estritamente uma única vez por etapa:
 
 ```python
 import rclpy
@@ -207,19 +222,19 @@ class PatrulheiroNav2(Node):
         self.publisher_ = self.create_publisher(PoseStamped, '/goal_pose', 10)
         self.subscription = self.create_subscription(PoseWithCovarianceStamped, '/amcl_pose', self.pose_callback, 10)
 
-        # WAYPOINTS SEGUROS: Coordenadas precisas que caem nas áreas brancas do Costmap
+        # As mesmas coordenadas (Agora viáveis graças ao tuning do RQT)
         self.waypoints = [
-            (1.0, 0.0, 0.0),    # Corredor seguro à frente
-            (1.0, 1.0, 1.57),   # Vira e sobe para o próximo corredor
-            (0.0, 1.0, 3.14),   # Move para a esquerda em área limpa
-            (0.0, 0.0, -1.57)   # Retorna à origem
+            (2.0, 0.0, 0.0),    
+            (2.0, 2.0, 1.57),   
+            (0.0, 2.0, 3.14),   
+            (0.0, 0.0, -1.57)   
         ]
         
         self.indice_atual = 0
-        self.objetivo_ativo = False
+        self.objetivo_ativo = False # Trava Lógica de Estado
         self.tolerancia_chegada = 0.35  
 
-        self.get_logger().info('Script iniciado! Dê o "2D Pose Estimate" no RViz2 para dar o gatilho...')
+        self.get_logger().info('Script robusto iniciado. Dê o "2D Pose Estimate"...')
 
     def euler_to_quaternion(self, yaw):
         qx = 0.0
@@ -246,17 +261,17 @@ class PatrulheiroNav2(Node):
             msg.pose.orientation.w = qw
 
             self.publisher_.publish(msg)
-            self.get_logger().info(f'Enviando objetivo único para Waypoint {self.indice_atual + 1}: x={x:.2f}, y={y:.2f}')
+            self.get_logger().info(f'Enviando ordem ÚNICA para Waypoint {self.indice_atual + 1}')
             
-            # Marca que a ordem foi dada, impedindo que seja enviada novamente
+            # ATIVA A TRAVA: Impede o envio repetido da mesma coordenada
             self.objetivo_ativo = True
         else:
-            self.get_logger().info('Circuito concluído! Reiniciando a patrulha...')
+            self.get_logger().info('Circuito concluído! Missão finalizada.')
             self.indice_atual = 0 
             self.objetivo_ativo = False
 
     def pose_callback(self, msg):
-        # Transição de Estado: Só envia se estiver ocioso
+        # Controle de Estado: Só aciona a função de envio se o robô estiver ocioso
         if not self.objetivo_ativo:
             self.enviar_objetivo()
             return
@@ -267,11 +282,12 @@ class PatrulheiroNav2(Node):
 
         distancia = math.sqrt((alvo_x - atual_x)**2 + (alvo_y - atual_y)**2)
 
+        # Checagem de chegada
         if distancia < self.tolerancia_chegada:
-            self.get_logger().info(f'>>> Sucesso! Destino {self.indice_atual + 1} alcançado (Erro: {distancia:.2f}m)')
+            self.get_logger().info(f'>>> Sucesso! Destino {self.indice_atual + 1} alcançado.')
             self.indice_atual += 1
             
-            # Libera a trava lógica para que o próximo ponto seja enviado
+            # DESATIVA A TRAVA: Permite o envio do próximo ponto no próximo ciclo
             self.objetivo_ativo = False 
 
 def main(args=None):
@@ -288,13 +304,5 @@ def main(args=None):
 if __name__ == '__main__':
     main()
 ```
+Recompile com `colcon build` e rode. O robô agora navegará suavemente pelas zonas ajustadas pelo RQT, garantindo uma patrulha autônoma profissional!
 
-Após rodar o comando `colcon build` novamente, execute o script e ative o *2D Pose Estimate*. O robô agora navegará com fluidez pelas zonas livres, demonstrando a robustez de um controle que respeita o mapa de custo e não sobrecarrega a rede.
-
----
-
-## 8. Desafio Analítico para o Relatório
-
-1.  **Quaternions na Prática:** Analise a função `euler_to_quaternion` do código. Se o objetivo fosse posicionar o robô virado 90 graus positivos em relação ao referencial `map`, quais seriam os valores finais exatos das variáveis `qz` e `qw`? Demonstre o cálculo.
-2.  **Agressividade do Planejamento:** Na nossa primeira versão com falha, o Nav2 abortou o trajeto inteiro porque a última coordenada era inválida. Se em um projeto de indústria você precisasse forçar o robô a ir o *mais perto possível* daquela coordenada `(2.0, 2.0)` proibida, como você configuraria os parâmetros do Nav2 para aceitar uma aproximação parcial em vez de desistir da missão?
-3.  **Comparação de Malhas:** Qual é a diferença fundamental entre a leitura de *feedback* feita na Aula 5 (onde assinamos `/scan`) e a feita hoje (onde assinamos `/amcl_pose`) em termos de referencial espacial (Local vs. Global)?
