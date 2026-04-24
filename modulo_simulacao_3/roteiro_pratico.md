@@ -1,9 +1,3 @@
-Aqui está a versão do roteiro totalmente reestruturada. 
-
-Nesta versão, aprofundei consideravelmente a teoria dos **Mapas de Custo (Costmaps)**. O fluxo pedagógico agora induz o aluno a bater de frente com a falha do código, compreender a matemática por trás da recusa do robô e, em seguida, utilizar a interface **RQT** para alterar os parâmetros do mapa em tempo real como solução oficial para o problema geográfico, antes de finalmente refatorar o código para remover o *spam* de comandos.
-
----
-
 # Aula 6: Navegação Programática, Costmaps e Sintonia Fina (Tuning)
 
 ## 1. Objetivos
