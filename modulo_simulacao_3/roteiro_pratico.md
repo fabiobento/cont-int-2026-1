@@ -167,12 +167,6 @@ Observe o mapa no seu RViz2. Ao redor de cada obstáculo branco (paredes e pilar
 
 **O Paradoxo do Waypoint 2:** O Nav2 se recusa estritamente a traçar uma rota cujo destino final caia dentro das zonas Letais (Ciano). A coordenada `(2.0, 2.0)` exigida pelo nosso script cai milimetricamente sobre a zona ciano/roxa escura do pilar central. A matemática do Nav2 prevê uma colisão e, por segurança, aborta a missão.
 
-```json?chameleon
-{"component":"LlmGeneratedComponent","props":{"height":"750px","prompt":"Crie um simulador interativo de Costmap Inflation (Mapa de Custos) da robótica.\n\nObjetivo: Demonstrar visualmente como os parâmetros de inflação afetam a navegabilidade ao redor de um obstáculo.\n\nContexto (Data State):\n- Obstáculo central (representando um pilar do labirinto).\n- O ambiente ao redor deve mostrar um grid cartesiano.\n\nLayout e Interação:\n- Painel de Controles com sliders para:\n  1. Raio do Robô (robot_radius): 0.05m a 0.5m. Aumentar isso expande a zona letal (ciano).\n  2. Raio de Inflação (inflation_radius): 0.1m a 2.0m. Controla a extensão total da aura roxa de segurança.\n  3. Fator de Escala de Custo (cost_scaling_factor): 1.0 a 20.0. Controla o quão rápido a aura roxa se dissipa (decaimento exponencial do custo).\n\nVisualização (O Mapa):\n- Desenhe o obstáculo sólido no centro.\n- Renderize a 'Zona Letal' (Inscribed Radius = raio obstáculo + raio robô) em uma cor sólida marcante (ex: ciano claro).\n- Renderize a 'Zona de Inflação' ao redor da Zona Letal usando um gradiente que simule o decaimento do custo (tons de roxo/magenta desvanecendo para transparente).\n- Crie um 'Marcador de Destino' (Waypoint) que o usuário possa arrastar com o mouse pelo mapa.\n\nFeedback Dinâmico:\n- Exiba o Custo exato (0 a 254) no ponto onde o marcador está localizado.\n- Mostre um status claro baseado no marcador: 'Destino Válido (Livre)' ou 'Destino Inválido (Colisão Iminente)'. O destino torna-se inválido se entrar na zona Letal/Ciano.\n- O idioma de toda a interface deve ser Português Brasileiro.","id":"im_6185ddb7218afdf3"}}
-```
-
----
-
 ## 6. A Solução: Sintonia Fina (Tuning) com o RQT
 
 Em vez de alterarmos nosso script para desviar do caminho (o que poderia arruinar a missão industrial), vamos reconfigurar o "medo" do robô. Vamos usar a ferramenta **RQT** para alterar os parâmetros do mapa de custo em tempo real, reduzindo a zona de inflação até que a coordenada `(2.0, 2.0)` torne-se um espaço livre.
