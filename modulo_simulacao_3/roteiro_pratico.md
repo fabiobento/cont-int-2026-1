@@ -171,7 +171,8 @@ Observe o mapa no seu RViz2. Ao redor de cada obstáculo branco (paredes e pilar
 
 Em vez de alterarmos nosso script para desviar do caminho (o que poderia arruinar a missão industrial), vamos reconfigurar o "medo" do robô. Vamos usar a ferramenta **RQT** para alterar os parâmetros do mapa de custo em tempo real, reduzindo a zona de inflação até que a coordenada `(2.0, 2.0)` torne-se um espaço livre.
 
-1. **Abra um Terminal 5** (não esqueça do `export ROS_DOMAIN_ID=XX`).
+
+1. **Abra um Terminal 5** (não se esqueça do `export ROS_DOMAIN_ID=XX`).
 2. **Inicie o RQT:**
    ```bash
    rqt
