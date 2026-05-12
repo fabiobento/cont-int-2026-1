@@ -1,204 +1,201 @@
+# Aula 7: Deep Reinforcement Learning no ROS 2
 
-# Aula 7: Treinando o lab_bot com PPO
+### 1. Crie o arquivo Dockerfile
 
+No seu terminal físico, crie uma pasta para guardar as configurações do Docker e crie o arquivo:
 
-## 1. Instalação de Dependências
-Garanta que a bancada possui as bibliotecas de Inteligência Artificial instaladas:
 ```bash
-pip install -qU gymnasium stable_baselines3
+mkdir -p ~/docker_ros2
+cd ~/docker_ros2
+nano Dockerfile
 ```
 
-## 2. O Ambiente Customizado Gym-ROS (`lab_bot_env.py`)
+Cole o conteúdo abaixo dentro do arquivo:
 
-No seu pacote `lab_bot`, crie o ficheiro que fará a tradução entre a simulação do Gazebo e a Rede Neural. Este é o coração da integração.
+```dockerfile
+# Usa a imagem oficial do ROS 2 Humble
+FROM osrf/ros:humble-desktop
 
-```python
-import gymnasium as gym
-from gymnasium import spaces
-import numpy as np
-import rclpy
-from rclpy.node import Node
-from geometry_msgs.msg import Twist
-from sensor_msgs.msg import LaserScan
-from nav_msgs.msg import Odometry
-import math
+ENV DEBIAN_FRONTEND=noninteractive
 
-class LabBotRLEnv(gym.Env, Node):
-    """Ambiente Customizado que segue a interface OpenAI Gym, encapsulando um Nó ROS 2."""
-    
-    def __init__(self):
-        Node.__init__(self, 'lab_bot_rl_env')
-        gym.Env.__init__(self)
+# Instala ferramentas essenciais, 'sudo' e todas as dependências do ROS/Gazebo
+RUN apt-get update && apt-get install -y \
+    nano \
+    git \
+    wget \
+    curl \
+    python3-pip \
+    python3-rosdep \
+    mesa-utils \
+    libgl1-mesa-glx \
+    x11-apps \
+    sudo \
+    python3-colcon-common-extensions \
+    ros-humble-gazebo-* \
+    ros-humble-cartographer \
+    ros-humble-cartographer-ros \
+    ros-humble-navigation2 \
+    ros-humble-nav2-bringup \
+    ros-humble-turtlebot3-teleop \
+    ros-humble-turtlebot3-description \
+    ros-humble-turtlebot3-gazebo \
+    ros-humble-ros-gz \
+    ros-humble-ign-ros2-control \
+    && rm -rf /var/lib/apt/lists/*
 
-        # Configurações do Robô e Alvo
-        self.goal_x = 2.0
-        self.goal_y = 2.0
-        self.max_steps = 500
-        self.current_step = 0
-        
-        # Variáveis de Estado
-        self.laser_ranges = np.ones(20) * 10.0 # 20 raios resumidos
-        self.robot_x = 0.0
-        self.robot_y = 0.0
-        self.robot_theta = 0.0
-        
-        # ROS 2 Pub/Sub
-        self.cmd_pub = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, 10)
-        self.odom_sub = self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
+# ====================================================================
+# INSTALAÇÃO DE BIBLIOTECAS DE INTELIGÊNCIA ARTIFICIAL (DRL)
+# ====================================================================
+# Instalado globalmente na imagem. O numpy<2 garante estabilidade com ROS/Gym.
+RUN pip3 install 'numpy<2' gymnasium stable-baselines3[extra]
 
-        # Espaços do Gym
-        # Ações: 0=Frente, 1=Esquerda, 2=Direita
-        self.action_space = spaces.Discrete(3)
-        
-        # Observações: 20 raios laser + dist_alvo + angulo_alvo = 22 valores
-        high = np.inf * np.ones(22, dtype=np.float32)
-        self.observation_space = spaces.Box(-high, high, dtype=np.float32)
+# ====================================================================
+# CONFIGURAÇÃO DE USUÁRIO NÃO-ROOT
+# ====================================================================
+# Argumentos que receberão os IDs da sua máquina host durante o build
+ARG USERNAME=robot
+ARG USER_UID=1000
+ARG USER_GID=1000
 
-    def scan_callback(self, msg):
-        # Reduz os 360 raios para 20 raios representativos (subamostragem)
-        ranges = np.array(msg.ranges)
-        ranges[np.isinf(ranges)] = 10.0
-        ranges[np.isnan(ranges)] = 10.0
-        indices = np.linspace(0, len(ranges)-1, 20, dtype=int)
-        self.laser_ranges = ranges[indices]
+# Cria o grupo e o utilizador com os IDs exatos da máquina física
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME -s /bin/bash \
+    # Adiciona o utilizador ao grupo sudo e permite o uso sem palavra-passe
+    && usermod -aG sudo $USERNAME \
+    && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-    def odom_callback(self, msg):
-        self.robot_x = msg.pose.pose.position.x
-        self.robot_y = msg.pose.pose.position.y
-        # Conversão simplificada de quaternion para Euler (Z)
-        q = msg.pose.pose.orientation
-        self.robot_theta = math.atan2(2.0*(q.w*q.z + q.x*q.y), 1.0 - 2.0*(q.y*q.y + q.z*q.z))
+# ====================================================================
+# SUPORTE A GPU (NVIDIA) E INTERFACE GRÁFICA
+# ====================================================================
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,display,video,utility
+ENV QT_X11_NO_MITSHM=1
 
-    def get_observation(self):
-        # Lê a fila de mensagens do ROS 2 para atualizar as variáveis
-        rclpy.spin_once(self, timeout_sec=0.01)
-        
-        dist_alvo = math.sqrt((self.goal_x - self.robot_x)**2 + (self.goal_y - self.robot_y)**2)
-        angulo_alvo = math.atan2(self.goal_y - self.robot_y, self.goal_x - self.robot_x) - self.robot_theta
-        
-        # Normaliza o ângulo entre -pi e pi
-        angulo_alvo = (angulo_alvo + math.pi) % (2 * math.pi) - math.pi
-        
-        obs = np.concatenate([self.laser_ranges, [dist_alvo, angulo_alvo]]).astype(np.float32)
-        return obs, dist_alvo
+# Variável de domínio da rede do laboratório
+ENV ROS_DOMAIN_ID=30
 
-    def reset(self, seed=None, options=None):
-        super().reset(seed=seed)
-        self.current_step = 0
-        
-        # Num ambiente real, enviaríamos um serviço ao Gazebo para teletransportar o robô para a origem.
-        # Aqui assumimos que o robô está na posição inicial.
-        
-        # Para o robô
-        msg = Twist()
-        self.cmd_pub.publish(msg)
-        
-        obs, _ = self.get_observation()
-        return obs, {}
+# ====================================================================
+# CONFIGURAÇÃO DO WORKSPACE
+# ====================================================================
+WORKDIR /workspace
 
-    def step(self, action):
-        self.current_step += 1
-        
-        # 1. Executa a Ação
-        msg = Twist()
-        msg.linear.x = 0.2 # Sempre avança ligeiramente
-        if action == 1:
-            msg.angular.z = 0.5  # Esquerda
-        elif action == 2:
-            msg.angular.z = -0.5 # Direita
-            
-        self.cmd_pub.publish(msg)
-        
-        # 2. Aguarda um momento para a física atuar e lê as observações
-        obs, dist_alvo = self.get_observation()
-        
-        # 3. Calcula a Recompensa
-        reward = 0.0
-        done = False
-        truncated = False
-        
-        min_laser = np.min(self.laser_ranges)
-        
-        if min_laser < 0.15: # Bateu na parede
-            reward = -50.0
-            done = True
-        elif dist_alvo < 0.3: # Chegou ao alvo
-            reward = 100.0
-            done = True
-        else:
-            # Recompensa por se aproximar (baseada na distância inversa)
-            reward = 1.0 / (dist_alvo + 0.1)
-            
-        if self.current_step >= self.max_steps:
-            truncated = True
+# Muda o dono da pasta inicial para o novo utilizador
+RUN chown -R $USER_UID:$USER_GID /workspace
 
-        return obs, reward, done, truncated, {}
+# Muda efetivamente do 'root' para o utilizador definido
+USER $USERNAME
 
+# Adiciona os 'sources' base no terminal do novo utilizador
+RUN echo "source /opt/ros/humble/setup.bash" >> /home/$USERNAME/.bashrc \
+    && echo "source /usr/share/gazebo/setup.sh" >> /home/$USERNAME/.bashrc
+
+CMD ["bash"]
 ```
 
-## 3. O Script de Treino (`treinar_rl.py`)
+*(Salve apertando `Ctrl+O`, `Enter`, e saia com `Ctrl+X`).*
 
-Agora que temos o ambiente, aplicar o algoritmo PPO é extremamente simples graças à `Stable-Baselines3`.
+---
 
-```python
-import rclpy
-from stable_baselines3 import PPO
-from lab_bot_env import LabBotRLEnv # Importa a classe que criamos
+### 2. Construindo a Imagem (Build)
 
-def main():
-    rclpy.init()
-    
-    # 1. Instancia o ambiente ROS-Gym
-    env = LabBotRLEnv()
-    
-    # 2. Configura a Rede Neural (MlpPolicy para dados numéricos em vetor)
-    print("A iniciar o Cérebro do Robô (PPO)...")
-    modelo = PPO("MlpPolicy", env, verbose=1, tensorboard_log="./ppo_nav_tensorboard/")
-    
-    # 3. Inicia o treino
-    # Num laboratório real, isto seria na ordem dos 100.000 a 1.000.000 de passos.
-    try:
-        modelo.learn(total_timesteps=10000, progress_bar=True)
-        modelo.save("cerebro_lab_bot")
-        print("Treino concluído e modelo guardado!")
-    except KeyboardInterrupt:
-        print("Treino interrompido pelo utilizador. A guardar progresso...")
-        modelo.save("cerebro_lab_bot_interrompido")
-    finally:
-        env.destroy_node()
-        rclpy.shutdown()
+Agora, vamos transformar esse `Dockerfile` em uma imagem real na sua máquina. Execute o comando abaixo na mesma pasta onde você salvou o arquivo `Dockerfile`. Vamos usar comandos do próprio Ubuntu `(id -u e id -g)` para ler qual é a sua numeração exata no sistema e passar isso para dentro do Docker: 
 
-if __name__ == '__main__':
-    main()
-```
-
-## 4. Executando o Laboratório
-
-Para rodar este treino de forma impecável, execute os comandos isolando o domínio de rede da sua bancada:
-
-1. **Terminal 1 (Física):** Inicie o Gazebo com o robô num labirinto com paredes.
 ```bash
-export ROS_DOMAIN_ID=30
-ros2 launch lab_bot simulacao.launch.py
+docker build \
+  --build-arg USER_UID=$(id -u) \
+  --build-arg USER_GID=$(id -g) \
+  -t lab_ros2_humble .
+
 ```
 
+*O ponto (`.`) no final é obrigatório, ele indica que o Dockerfile está na pasta atual.*
 
-2. **Terminal 2 (Sentidos):** Rode a ponte (Bridge) para traduzir o laser e os motores.
+---
+
+### 3. Executando o Container (Run)
+
+Para iniciar o seu novo container habilitando a Interface Gráfica, o Volume do seu workspace (`~/turtlebot3_ws`) e a **GPU (se presente)**, a estrutura do comando será a seguinte:
+
+Primeiro, libere a interface de vídeo na máquina host:
+
 ```bash
-export ROS_DOMAIN_ID=30
-ros2 run ros_gz_bridge parameter_bridge /cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist /scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan /odom@nav_msgs/msg/Odometry@gz.msgs.Odometry
+xhost +local:root
+
 ```
 
+Agora, inicie o container:
 
-3. **Terminal 3 (Cérebro):** Inicie o script de treino em Python.
 ```bash
-export ROS_DOMAIN_ID=30
-python3 treinar_rl.py
+docker run -it --rm \
+  --name humble_gpu_container \
+  --net=host \
+  --ipc=host \
+  --gpus all \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+  -e ROS_DOMAIN_ID=30 \
+  -v ~/turtlebot3_ws:/workspace \
+  lab_ros2_humble
+```
+### 4. Concluindo a Instalação(dentro do container)
+Para concluir a instalação, crie um arquivo para o script com os seguintes comandos:
+```bash
+cd /workspace
+touch install_tb3_humble.sh
+nano install_tb3_humble.sh
+```
+Cole o código abaixo dentro desse arquivo que acabou de criar:
+```bash
+#!/bin/bash
+
+# =================================================================
+# Script de Configuração TurtleBot3 - ROS 2 Humble
+# Disciplina: Controle Inteligente - Prof. Fabio
+# =================================================================
+
+set -e # Interrompe o script se algum comando falhar
+
+echo "[1/4] Preparando o Workspace..."
+# Garante que o ambiente base do ROS Humble está carregado para a compilação
+source /opt/ros/humble/setup.bash
+
+mkdir -p /workspace/src
+cd /workspace/src/
+
+echo "[2/4] Clonando repositórios do TurtleBot3 (Branch: humble-devel)..."
+# Utiliza a branch oficial da Robotis para a versão Humble
+git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git || true
+git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git || true
+git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git || true
+git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git || true
+
+echo "[3/4] Compilando o Workspace com Colcon..."
+cd /workspace
+colcon build --symlink-install
+
+echo "[4/4] Configurando variáveis de ambiente adicionais no .bashrc..."
+# Adiciona as variáveis do utilizador ao bashrc se ainda não existirem
+if ! grep -q "/workspace/install/setup.bash" ~/.bashrc; then
+    echo "" >> ~/.bashrc
+    echo "# ===================================================" >> ~/.bashrc
+    echo "# Configurações TurtleBot3 - ROS 2 Humble" >> ~/.bashrc
+    echo "# ===================================================" >> ~/.bashrc
+    echo 'source /workspace/install/setup.bash' >> ~/.bashrc
+    echo 'export TURTLEBOT3_MODEL=waffle' >> ~/.bashrc
+    echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc
+fi
+
+echo "========================================================="
+echo " WORKSPACE CONFIGURADO E COMPILADO COM SUCESSO!"
+echo " Para aplicar as mudanças no terminal atual, execute:"
+echo " source ~/.bashrc"
+echo "========================================================="
 ```
 
-
-
-## 5. Troubleshooting (Sintonia Fina do Reset)
-
-* **Atenção ao Reset:** No código acima, simplificamos a função `reset()`. Numa simulação contínua, quando o robô bate na parede, ele precisa de ser "teletransportado" de volta à origem. Para implementar isso de forma robusta no ROS 2 Jazzy, precisaria de adicionar um `Service Client` na função `reset()` que chame o serviço `/world/empty/set_pose` do Gazebo Harmonic. Caso contrário, os você precisaria reiniciar a simulação do Gazebo manualmente a cada colisão ou utilizar as paredes curtas para que o robô deslize e continue tentando navegar.
+Configure a permissão de execução do script e execute-o:
+```bash
+chmod +x install_tb3_humble.sh
+./install_tb3_humble.sh 
+```

@@ -1,0 +1,46 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    position_control:
+      type: forward_command_controller/ForwardCommandController
+
+    velocity_control:
+      type: forward_command_controller/ForwardCommandController
+
+    effort_control:
+      type: forward_command_controller/ForwardCommandController
+
+    stick_effort_control:
+      type: forward_command_controller/ForwardCommandController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+
+position_control:
+  ros__parameters:
+    joints:
+      - linear
+    interface_name: position
+
+
+velocity_control:
+  ros__parameters:
+    joints:
+      - linear
+    interface_name: velocity
+
+effort_control:
+  ros__parameters:
+    joints:
+      - linear
+    interface_name: effort
+
+
+stick_effort_control:
+  ros__parameters:
+    joints:
+      - pivot
+    interface_name: effort
+
