@@ -199,3 +199,5 @@ Configure a permissão de execução do script e execute-o:
 chmod +x install_tb3_humble.sh
 ./install_tb3_humble.sh 
 ```
+
+### 5. Treinando a RL   
