@@ -1,4 +1,4 @@
-# Aula 7: Deep Reinforcement Learning no ROS 2
+# Aula 7: Roteiro PráticoDeep Reinforcement Learning no ROS 2
 
 ### 1. Crie o arquivo Dockerfile
 
