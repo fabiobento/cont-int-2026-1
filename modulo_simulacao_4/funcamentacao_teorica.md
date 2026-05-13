@@ -34,7 +34,7 @@ Vamos começar introduzindo as diferentes abordagens do Aprendizado de Máquina 
 
 Este último tópico descreve o tema desta aula. Em particular, estudaremos uma aplicação típica do Aprendizado por Reforço Profundo (DRL). O Aprendizado por Reforço Profundo é uma combinação de aprendizado por reforço (RL) e aprendizado profundo (DL - *Deep Learning*). O objetivo do DRL é treinar um agente para tomar uma sequência de decisões aprendendo com as interações com um ambiente, onde as ações afetam estados futuros e recompensas. Esse processo é representado na Figura 1. 
 
-<a id="figure-19-2"></a>
+<a id="figure-1"></a>
 ![](https://github.com/fabiobento/dnn-course-2026-1/raw/main/images/figure-19-2.png)
 
 **Figura 1 - Aprendizado por reforço usando uma política de rede neural (*neural network policy*).** ([Fonte](https://ageron.github.io/))
@@ -103,9 +103,9 @@ Vamos começar definindo o modelo de simulação do *cart-pole*.
 
 ## **Configurando o Cenário de Simulação do Cart-Pole**
 
-Um sistema *cart-pole* (pêndulo invertido) é um exemplo clássico na teoria de controle e no aprendizado por reforço, usado para demonstrar tarefas de equilíbrio e controle. Ele consiste em um carrinho que pode se mover ao longo de um trilho e uma haste (pêndulo) presa ao carrinho por um pivô (veja a Figura 16.2). O objetivo é aplicar forças ao carrinho para manter a haste equilibrada na posição vertical. O sistema é comumente usado como um problema de referência (*benchmark*) em aprendizado por reforço para testar algoritmos de controle, onde o agente deve aprender a impedir que a haste caia movendo o carrinho para a esquerda ou para a direita. Como queremos integrar o Cart-Pole com o ROS 2, definiremos o modelo do robô configurando o *plugin* `ros2_control`.
+Um sistema *cart-pole* (pêndulo invertido) é um exemplo clássico na teoria de controle e no aprendizado por reforço, usado para demonstrar tarefas de equilíbrio e controle. Ele consiste em um carrinho que pode se mover ao longo de um trilho e uma haste (pêndulo) presa ao carrinho por um pivô (veja a Figura 2). O objetivo é aplicar forças ao carrinho para manter a haste equilibrada na posição vertical. O sistema é comumente usado como um problema de referência (*benchmark*) em aprendizado por reforço para testar algoritmos de controle, onde o agente deve aprender a impedir que a haste caia movendo o carrinho para a esquerda ou para a direita. Como queremos integrar o Cart-Pole com o ROS 2, definiremos o modelo do robô configurando o *plugin* `ros2_control`.
 
-<a id="figure-19-2"></a>
+<a id="figure-2"></a>
 ![](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/main/modulo_simulacao_4/imagens/cart-pole.png)
 **Figura 2 - O pêndulo invertido usado na aplicação de DRL.** 
 
@@ -141,7 +141,7 @@ A junta linear é comandada usando uma entrada de controle de esforço. No entan
 
 ```
 
-A mesma interface de controle é usada para a junta rotacional conectada ao pêndulo. Embora não precisemos de um controlador para esta junta (já que o objetivo é estabilizar o pêndulo indiretamente movendo o carrinho para a esquerda ou para a direita), o sistema deve iniciar com o pêndulo em uma posição estável, que é um ângulo de 0.0, conforme mostrado na Figura 16.2. Usando o controlador de esforço, o pêndulo ainda estará livre para se mover ao redor do carrinho durante a simulação.
+A mesma interface de controle é usada para a junta rotacional conectada ao pêndulo. Embora não precisemos de um controlador para esta junta (já que o objetivo é estabilizar o pêndulo indiretamente movendo o carrinho para a esquerda ou para a direita), o sistema deve iniciar com o pêndulo em uma posição estável, que é um ângulo de 0.0, conforme mostrado na Figura 2. Usando o controlador de esforço, o pêndulo ainda estará livre para se mover ao redor do carrinho durante a simulação.
 
 ```xml
 <joint name="pivot">
@@ -329,8 +329,6 @@ if __name__ == '__main__':
 Precisamos adicionar este nó ao arquivo de configuração `setup.py` e compilar o *workspace*. Embora não precisemos usar esse nó imediatamente, já que o Cart-Pole já está na sua posição inicial, vamos executá-lo mais tarde, quando os nós de treinamento e teste exigirem que o modelo simulado seja reiniciado.
 
 Agora temos todos os elementos para integrar o Gymnasium com o ROS 2 e criar nosso primeiro ambiente.
-
-Aqui está a tradução da seção solicitada do livro, formatada e adaptada para o português brasileiro:
 
 ## **Integrando o Gymnasium e o ROS 2**
 
@@ -560,4 +558,89 @@ Após modificar adequadamente o arquivo `setup.py`, compilar e carregar (*sourci
 `$ ros2 run cartpole_reset cartpole_reset`
 `$ ros2 run cartpole_drl_ppo cartpole_training`
 
-Neste ponto, o robô começa a realizar diferentes tentativas para melhorar sua experiência no ambiente Gymnasium. O tempo necessário para concluir o processo depende da velocidade com que o robô aprende e do número de passos de tempo que definimos na função de aprendizado. No entanto, no terminal onde iniciamos o processo de treinamento, você pode acompanhar o processo de aprendizado. Um exemplo dessa saída é mostrado na Figura 16.3, e é explicado a seguir.
+Neste ponto, o robô começa a realizar diferentes tentativas para melhorar sua experiência no ambiente Gymnasium. O tempo necessário para concluir o processo depende da velocidade com que o robô aprende e do número de passos de tempo que definimos na função de aprendizado. No entanto, no terminal onde iniciamos o processo de treinamento, você pode acompanhar o processo de aprendizado. Um exemplo dessa saída é mostrado na Figura 3, e é explicado a seguir.
+
+<a id="figure-3"></a>
+![](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/main/modulo_simulacao_4/imagens/learning.png)
+**Figura 3 - Atualização do processo de aprendizado.** 
+
+A saída mostrada na Figura 3 fornece estatísticas-chave do processo de treinamento do PPO em um ponto específico. Em particular:
+
+1. **Seção rollout/ (Desdobramento):**
+* **`ep_len_mean` (169):** O comprimento médio do episódio, o que significa que os episódios do agente (do início ao fim) duram em média 169 passos.
+* **`ep_rew_mean` (169):** A recompensa média por episódio, mostrando o desempenho do agente, sendo 169 a recompensa total média obtida em cada episódio.
+
+
+2. **Seção time/ (Tempo):**
+* **`fps` (28):** O número de quadros por segundo sendo processados durante o treinamento, indicando a velocidade de interação com o ambiente.
+* **`iterations` (1):** O número de vezes que o modelo PPO foi atualizado até agora. Aqui, apenas uma iteração foi concluída.
+* **`time_elapsed` (71):** O tempo total decorrido desde o início do treinamento, em segundos (71 segundos aqui).
+* **`total_timesteps` (2048):** O número cumulativo de passos de tempo (*timesteps* - ações tomadas no ambiente) até agora no treinamento, que é 2048 neste ponto.
+
+
+Após completar todos os passos de tempo, o modelo é salvo no diretório do pacote de instalação. Obviamente, ele só tem um bom desempenho se o processo de treinamento for concluído com sucesso. Vamos tentar usar este modelo no exemplo discutido na próxima seção.
+
+**Controlando um Robô Usando Aprendizado por Reforço Profundo**
+
+Agora estamos prontos para usar o modelo para controlar o robô. Podemos adicionar um novo *script* Python chamado `cartpole_prediction.py`. O conteúdo é descrito a seguir:
+
+1. As mesmas bibliotecas usadas no treinamento são usadas na fase de predição. Da mesma forma, carregamos o modelo considerando o que foi gerado no exemplo anterior.
+
+```python
+import time
+from stable_baselines3 import PPO
+from cartpole_drl_ppo.cartpole_env import CartPoleROS2Env
+from ament_index_python.packages import get_package_share_directory
+
+def main(args=None):
+    package_name = 'cartpole_drl_ppo' # Substitua pelo nome do seu pacote
+    model_pkg_path = get_package_share_directory(package_name) + "/"
+    model = PPO.load(model_pkg_path + "ppo_cartpole_ros2.zip")
+    env = CartPoleROS2Env()
+    obs, _ = env.reset()
+    time.sleep(1)
+
+```
+
+2. Começamos a execução e continuamos até que o sistema atenda à condição desejada: a haste (pêndulo) permanece equilibrada e o carrinho continua próximo ao centro do trilho. As ações geradas e executadas estão alinhadas com o que o agente aprendeu durante o treinamento.
+
+```python
+    done = False
+    while not done:
+        action, _ = model.predict(obs)
+        obs, _, done, _, info = env.step(action)
+        time.sleep(0.01)
+
+    env.close()
+
+if __name__ == '__main__':
+    main()
+
+```
+
+Se o treinamento for concluído com sucesso, ele pode rodar por várias horas sem desequilibrar a haste. Obviamente, antes de executá-lo, devemos modificar o arquivo `setup.py`. A lista final dos pontos de entrada (*entry points*) é a seguinte:
+
+```python
+entry_points={
+    'console_scripts': [
+        'cartpole_training = cartpole_drl_ppo.cartpole_training:main',
+        'cartpole_prediction = cartpole_drl_ppo.cartpole_prediction:main'
+    ],
+},
+
+```
+
+Compile o *workspace*, carregue-o (*source*) e execute a predição usando os seguintes comandos:
+
+```bash
+$ ros2 launch cartpole_description cartpole.launch.py
+$ ros2 run cartpole_reset cartpole_reset
+$ ros2 run cartpole_drl_ppo cartpole_prediction
+
+```
+
+Os resultados da tarefa são mostrados na Figura 4, que exibe a posição e a velocidade do carrinho, bem como o ângulo e a velocidade angular da haste. A partir desses gráficos, fica claro que a tarefa foi concluída com sucesso. Você poderia tentar implementar a mesma tarefa usando uma abordagem baseada em modelo (*model-based*) para comparar o desempenho?
+
+<a id="figure-4"></a>
+![Velocidade e posições do carrinho e da haste.](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/main/modulo_simulacao_4/imagens/rl-plot.png)
+**Figura 4 - Velocidade e posições do carrinho e da haste.** 
