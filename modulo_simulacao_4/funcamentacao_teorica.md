@@ -580,7 +580,7 @@ A saída mostrada na Figura 3 fornece estatísticas-chave do processo de treinam
 
 Após completar todos os passos de tempo, o modelo é salvo no diretório do pacote de instalação. Obviamente, ele só tem um bom desempenho se o processo de treinamento for concluído com sucesso. Vamos tentar usar este modelo no exemplo discutido na próxima seção.
 
-**Controlando um Robô Usando Aprendizado por Reforço Profundo**
+### **Controlando um Robô Usando Aprendizado por Reforço Profundo**
 
 Agora estamos prontos para usar o modelo para controlar o robô. Podemos adicionar um novo *script* Python chamado `cartpole_prediction.py`. O conteúdo é descrito a seguir:
 
@@ -644,3 +644,22 @@ Os resultados da tarefa são mostrados na Figura 4, que exibe a posição e a ve
 <a id="figure-4"></a>
 ![Velocidade e posições do carrinho e da haste.](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/main/modulo_simulacao_4/imagens/rl-plot.png)
 **Figura 4 - Velocidade e posições do carrinho e da haste.** 
+
+Como o nó de predição é um *script* Python usando o modelo treinado, ele pode ser integrado a qualquer arquitetura de controle de robô de alto nível. Por exemplo, podemos ativar o controlador apenas em situações específicas ou combinar abordagens baseadas em modelo (*model-based*) e DRL dentro do mesmo *script* de controle.
+
+### Conclusão
+
+Este capítulo conclui o livro, onde exploramos uma nova técnica de controle, ou seja, o Aprendizado por Reforço Profundo (DRL - *Deep Reinforcement Learning*). Usando o DRL, os desenvolvedores podem programar indiretamente um robô, permitindo que ele aprenda a executar tarefas de forma independente. Este método é particularmente útil para robôs complexos, como humanoides ou quadrúpedes, que possuem muitas juntas e operam em ambientes desafiadores. Neste capítulo, empregamos duas ferramentas fundamentais para essa abordagem de controle, que são o Gymnasium, para criar um ambiente de observação do robô durante várias tentativas, e a Stable-Baselines3, para implementar o processo de treinamento usando algoritmos de DRL bem conhecidos.
+
+O aprendizado por reforço profundo ainda é um campo emergente na robótica, com espaço significativo para melhorias. Os pesquisadores estão trabalhando em novos simuladores e técnicas para refinar e acelerar o treinamento. O objetivo final do DRL é fechar a lacuna entre o desempenho de um robô em configurações controladas de laboratório e em cenários do mundo real.
+
+### Pontos a Lembrar
+
+* O **Gymnasium** é um *framework* que fornece ambientes padronizados para treinar agentes de aprendizado por reforço, facilitando a avaliação comparativa (*benchmarking*) e a comparação de algoritmos.
+* A **Stable-Baselines3** é uma biblioteca que oferece implementações de algoritmos de DRL populares (como PPO, DQN e A2C) construídos sobre o PyTorch, simplificando o processo de treinamento de agentes.
+* O **Aprendizado por Reforço Profundo (DRL)** combina o aprendizado por reforço com redes neurais profundas, permitindo que os agentes lidem com ambientes complexos e de alta dimensão, como robótica ou videogames.
+* Os ambientes do Gymnasium são frequentemente usados para tarefas simuladas, mas também podem ser estendidos para interagir com sistemas do mundo real através do ROS 2, tornando possível treinar e implantar agentes DRL em robôs físicos.
+* A **Otimização de Política Proximal (PPO - *Proximal Policy Optimization*)**, disponível na Stable-Baselines3, é um algoritmo de DRL amplamente utilizado devido ao seu equilíbrio entre desempenho e estabilidade, especialmente em tarefas de controle contínuo.
+* O DRL permite que os robôs aprendam tarefas de forma autônoma interagindo com o ambiente, em vez de seguir regras criadas manualmente, o que é particularmente útil em ambientes dinâmicos ou não estruturados.
+* A combinação de DRL com abordagens baseadas em modelo pode melhorar o desempenho, aproveitando tanto as políticas aprendidas quanto a dinâmica do sistema para otimizar o controle.
+* Ao usar a Stable-Baselines3 em ambientes ROS 2, a integração cuidadosa entre o agente e o *feedback* (retorno) do mundo real do robô é fundamental para garantir uma operação segura e confiável.
