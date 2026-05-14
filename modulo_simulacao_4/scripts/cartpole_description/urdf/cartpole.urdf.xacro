@@ -2,29 +2,34 @@
 
 <robot name="cartpole" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-
+    <!-- Propriedades do trilho (rail) -->
     <xacro:property name="rail_height" value="1.2"/>
     <xacro:property name="rail_length" value="50"/>
     <xacro:property name="rail_radius" value="0.005"/>
     <xacro:property name="rail_mass" value="15"/>
 
+    <!-- Propriedades do carrinho (cart) -->
     <xacro:property name="cart_size_x" value="0.1"/>
     <xacro:property name="cart_size_y" value="0.2"/>
     <xacro:property name="cart_size_z" value="0.05"/>
     <xacro:property name="cart_mass" value="2.0"/>
 
+    <!-- Propriedades do pêndulo (pole) -->
     <xacro:property name="pole_length" value="0.35"/>
     <xacro:property name="pole_radius" value="0.005"/>
     <xacro:property name="pole_mass" value="0.1"/>
     <xacro:property name="theta_0" value="0.0"/>
 
+    <!-- Constante para evitar divisões por zero -->
     <xacro:property name="epsilon" value="1e-09"/>
 
+    <!-- Definição de cores RGBA -->
     <xacro:property name="rgba_black" value="0 0 0 1"/>
     <xacro:property name="rgba_white" value="1 1 1 1"/>
     <xacro:property name="rgba_grey" value="0.2 0.2 0.2 1"/>
     <xacro:property name="rgba_red" value="1 0 0 1"/>
 
+    <!-- Macro para calcular a matriz de inércia de uma caixa (box) -->
     <xacro:macro name="box_inertia" params="mass dimx dimy dimz xyz rpy">
         <inertial>
             <origin xyz="${xyz}" rpy="${rpy}"/>
@@ -36,6 +41,7 @@
         </inertial>
     </xacro:macro>
 
+    <!-- Macro para calcular a matriz de inércia de um cilindro (cylinder) -->
     <xacro:macro name="cylinder_inertial_element"
                  params="mass length radius xyz rpy">
         <inertial>
@@ -50,12 +56,14 @@
         </inertial>
     </xacro:macro>
 
+    <!-- Macro para criar um material visual básico -->
     <xacro:macro name="mymaterial" params="name rgba">
         <material name="${name}">
             <color rgba="${rgba}"/>
         </material>
     </xacro:macro>
 
+    <!-- Macro para definir cor do material no Gazebo -->
     <xacro:macro name="gzmaterial" params="reference rgba">
         <gazebo reference="${reference}">
             <visual>
@@ -67,9 +75,10 @@
     </xacro:macro>
 
     <!-- ====== -->
-    <!-- COLORS -->
+    <!-- CORES (COLORS) -->
     <!-- ====== -->
 
+    <!-- Materiais padrão -->
     <material name="black">
         <color rgba="${rgba_black}"/>
     </material>
@@ -80,16 +89,19 @@
         <color rgba="${rgba_grey}"/>
     </material>
 
+    <!-- Atribuição de cores para exibição no Gazebo -->
     <xacro:gzmaterial reference="rail" rgba="${rgba_black}"/>
     <xacro:gzmaterial reference="cart" rgba="${rgba_grey}"/>
     <xacro:gzmaterial reference="pole" rgba="${rgba_red}"/>
 
     <!-- ===== -->
-    <!-- LINKS -->
+    <!-- ELOS (LINKS) -->
     <!-- ===== -->
 
+    <!-- Elo base do ambiente (Mundo) -->
     <link name="world"/>
 
+    <!-- Elo do trilho (rail) -->
     <link name="rail">
         <xacro:cylinder_inertial_element mass="${rail_mass}"
                                          length="${rail_length}"
@@ -105,6 +117,7 @@
         </visual>
     </link>
 
+    <!-- Elo do carrinho (cart) -->
     <link name="cart">
         <xacro:box_inertia mass="${cart_mass}"
                            dimx="${cart_size_x}"
@@ -127,6 +140,7 @@
         </collision>
     </link>
 
+    <!-- Elo do pêndulo (pole) -->
     <link name="pole">
         <xacro:cylinder_inertial_element mass="${pole_mass}"
                                          length="${pole_length}"
@@ -150,9 +164,10 @@
     </link>
 
     <!-- ====== -->
-    <!-- JOINTS -->
+    <!-- JUNTAS (JOINTS) -->
     <!-- ====== -->
 
+    <!-- Fixando o trilho rigidamente ao mundo -->
     <!-- http://gazebosim.org/tutorials/?tut=ros_urdf#RigidlyFixingAModeltotheWorld -->
     <joint name="world_to_rail" type="fixed">
         <parent link="world"/>
@@ -160,6 +175,7 @@
         <origin xyz="0 0 ${rail_height}" rpy="0 0 0"/>
     </joint>
 
+    <!-- Junta prismática para o movimento linear do carrinho sobre o trilho -->
     <joint name="linear" type="prismatic">
         <parent link="rail"/>
         <child link="cart"/>
@@ -169,6 +185,7 @@
                upper="${rail_length/2-cart_size_y/2}" effort="2" velocity="1"/>
     </joint>
 
+    <!-- Junta contínua (revolução sem limites) para a rotação do pêndulo no carrinho -->
     <joint name="pivot" type="continuous">
     <!--<joint name="pivot" type="revolute">-->
         <parent link="cart"/>
@@ -179,10 +196,13 @@
         <limit effort="50" velocity="15"/>
     </joint>
   
+    <!-- Configuração do ros2_control para o simulador Ignition (Gazebo) -->
     <ros2_control name="IgnitionSystem" type="system">
         <hardware>
             <plugin>ign_ros2_control/IgnitionSystem</plugin>
         </hardware>
+        
+        <!-- Interfaces da junta linear do carrinho -->
         <joint name="linear">
             <!--<command_interface name="position" />-->
             <command_interface name="effort" />
@@ -194,6 +214,7 @@
             <state_interface name="effort"/>
         </joint>
         
+        <!-- Interfaces da junta do pivô do pêndulo -->
         <joint name="pivot">
             <command_interface name="effort" />
             
@@ -205,6 +226,7 @@
         </joint>
     </ros2_control>
 
+    <!-- Plugin do Gazebo para conectar o ros2_control à simulação -->
     <gazebo>
         <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
         <parameters>$(find cartpole_description)/config/cartpole_controller.yaml</parameters>
