@@ -749,30 +749,28 @@ Concluímos agora nosso primeiro ambiente Gymnasium. Isso significa que podemos 
 
 ### **Treinando um Robô Usando o Gymnasium e stable_baselines3**
 
-Escrever um ambiente Gymnasium adequado é apenas um passo básico para treinar nosso robô. O próximo passo é fazer o robô interagir com o ambiente, selecionando adequadamente as ações a serem executadas, coletando as recompensas e treinando a rede neural profunda. Essa rede neural é quem direciona as ações do robô na fase de predição, quando o robô finalmente for capaz de realizar as ações por conta própria. Para simplificar a etapa de treinamento, usaremos outra biblioteca, tipicamente conectada com o Gymnasium, que é a [**Stable-Baselines3**](https://stable-baselines3.readthedocs.io/en/master/) (SB3). Trata-se de uma biblioteca Python que fornece implementações de algoritmos de aprendizado por reforço (RL) no estado da arte. Alguns dos algoritmos de DRL mais difundidos implementados na SB3 são a Otimização de Política Proximal (PPO), *Deep Q-Network* (DQN) e *Soft Actor-Critic* (SAC). A SB3 é construída sobre o PyTorch e pode ser usada diretamente em nossos nós Python do ROS 2.
+Escrever um ambiente Gymnasium adequado é apenas um passo básico para treinar nosso robô. O próximo passo é fazer o robô interagir com o ambiente, selecionando adequadamente as ações a serem executadas, coletando as recompensas e treinando a rede neural profunda. Essa rede neural é quem direciona as ações do robô na fase de predição, quando o robô finalmente for capaz de realizar as ações por conta própria. Para simplificar a etapa de treinamento, usaremos outra biblioteca, tipicamente conectada com o Gymnasium, que é a [**Stable-Baselines3**](https://stable-baselines3.readthedocs.io/en/master/) (SB3). Trata-se de uma biblioteca Python que fornece implementações de algoritmos de aprendizado por reforço (RL) no estado da arte. Alguns dos algoritmos de DRL mais difundidos implementados na SB3 são a Otimização de Política Proximal (PPO), *Deep Q-Network* (DQN) e *Soft Actor-Critic* (SAC). A SB3 é construída sobre o [PyTorch](https://pytorch.org/docs/stable/index.html) e pode ser usada diretamente em nossos nós Python do ROS 2.
 
 **Nota:** O PyTorch é um popular *framework* de aprendizado profundo de código aberto conhecido por sua flexibilidade, gráficos de computação dinâmica e forte suporte a GPU. É amplamente utilizado para treinamento e experimentação de redes neurais em tarefas de IA.
 
-Vamos instalar a SB3 em nosso sistema usando os seguintes comandos:
+Certifique-se de seu sistema tenha os seguinte resquisitos atendidos: `stable_baselines3`, `'numpy<2'` e `stable-baselines3[extra]`.
 
-```bash
-$ pip3 install stable_baselines3
-$ pip install 'numpy<2'
-$ pip install stable-baselines3[extra]
-```
-
-Podemos adicionar o nó para realizar a fase de treinamento no mesmo pacote do ambiente.
-
-```bash
-$ cd ros2_ws/src/cartpole_drl_ppo
-$ touch cartpole_drl_ppo/cartpole_training.py
-```
+Adicione o nó  [`cartpole_training`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_training.py)   para realizar a fase de treinamento no mesmo pacote do ambiente `cartpole_drl_ppo`.
 
 O conteúdo deste script é explicado a seguir:
 
 1. No início, importamos o ambiente criado até agora. Adicionalmente, incluímos o módulo para realizar o método de treinamento de DRL desejado, o PPO (isto também motiva o nome do pacote). PPO significa *Proximal Policy Optimization* (Otimização de Política Proximal) e melhora os métodos de gradiente de política equilibrando exploração e estabilidade. Além disso, permite especificar um espaço de ação contínuo, diferentemente do conhecido *Deep Q-Network* (DQN), que só permite um espaço discreto. Por fim, queremos salvar o modelo diretamente no diretório de instalação do pacote. Por esse motivo, usamos o módulo `get_package_share_directory` de `ament_index_python.packages`.
 
 ```python
+"""
+Script de Treinamento do Agente de DRL (Deep Reinforcement Learning).
+
+Este script inicializa o ambiente customizado CartPoleROS2Env e utiliza 
+o algoritmo PPO (Proximal Policy Optimization) da biblioteca Stable Baselines3 
+para treinar uma rede neural (MlpPolicy) a equilibrar o pêndulo.
+Após o treinamento, o modelo resultante é salvo no diretório de instalação do pacote.
+"""
+
 from cartpole_drl_ppo.cartpole_env import CartPoleROS2Env
 from stable_baselines3 import PPO
 from ament_index_python.packages import get_package_share_directory
@@ -783,28 +781,47 @@ from ament_index_python.packages import get_package_share_directory
 
 ```python
 def main(args=None):
-    model_pkg_path = get_package_share_directory('cartpole_drl_ppo') + "/"
+    """
+    Função principal que orquestra a criação do ambiente, configuração e 
+    execução do treinamento do modelo PPO.
+    """
+    package_name = 'cartpole_drl_ppo'
+    # Obtém o caminho de instalação do pacote (onde o modelo será salvo)
+    model_pkg_path = get_package_share_directory(package_name) + "/" 
 
 ```
 
 3. Este código inicializa um modelo PPO com uma política de rede neural (`MlpPolicy`) para interagir com o ambiente (`env`). A opção `verbose=1` fornece registro detalhado durante o treinamento. Ela prepara o agente para aprender usando o algoritmo PPO no ambiente determinado. Após a inicialização do modelo, nós o treinamos. Treinamos o modelo por 15.000 *timesteps* (passos de tempo), o que significa que o agente interagirá com o ambiente esse número de vezes. A opção `progress_bar=True` mostra uma barra de progresso para acompanhar o processo de treinamento.
 
 ```python
+    # Instancia o ambiente customizado do CartPole integrado com ROS 2
     env = CartPoleROS2Env()
-    model = PPO('MlpPolicy', env, verbose=1)
-    model.learn(total_timesteps=15000, progress_bar=True)
+    
+    # Inicializa o modelo PPO utilizando uma política Multi-Layer Perceptron (MlpPolicy).
+    # O device='cpu' é utilizado para remover o aviso do PyTorch e frequentemente melhora a 
+    # velocidade para redes pequenas em comparação à transferência de dados para a GPU.
+    model = PPO('MlpPolicy', env, verbose=1, device='cpu')
+
+    # Inicia o processo de aprendizado (treinamento) do agente interagindo com o ambiente.
+    # O total_timesteps define quantos passos (interações) o agente fará no total.
+    # Exemplo: 500.000 passos garantem um bom tempo de exploração e consolidação da política.
+    # A barra de progresso (progress_bar=True) facilita o acompanhamento no terminal.
+    model.learn(total_timesteps=500000, progress_bar=True)
 
 ```
 
 4. Finalmente, podemos salvar o modelo e fechar o ambiente.
 
 ```python
+    # Salva os pesos e configurações da rede neural treinada no caminho do pacote
     model.save(model_pkg_path + "ppo_cartpole_ros2")
+
+    # Encerra o ambiente corretamente após a conclusão do treinamento
     env.close()
 
 ```
 
-Após modificar adequadamente o arquivo `setup.py`, compilar e carregar (*sourcing*) o *workspace*, podemos agora iniciar o processo de treinamento. Obviamente, antes de iniciá-lo, devemos lançar a simulação, o nó de *reset* e, finalmente, o processo de treinamento.
+Após modificar adequadamente o arquivo [`setup.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/setup.py), compilar e carregar (*sourcing*) o *workspace*, podemos agora iniciar o processo de treinamento. Obviamente, antes de iniciá-lo, devemos lançar a simulação, o nó de *reset* e, finalmente, o processo de treinamento.
 
 ```bash
 $ ros2 launch cartpole_description cartpole.launch.py
@@ -836,43 +853,88 @@ Após completar todos os passos de tempo, o modelo é salvo no diretório do pac
 
 ### **Controlando um Robô Usando Aprendizado por Reforço Profundo**
 
-Agora estamos prontos para usar o modelo para controlar o robô. Podemos adicionar um novo *script* Python chamado `cartpole_prediction.py`. O conteúdo é descrito a seguir:
+Agora estamos prontos para usar o modelo para controlar o robô. Podemos adicionar um novo *script* Python chamado [`cartpole_prediction.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_prediction.py). O conteúdo é descrito a seguir:
 
 1. As mesmas bibliotecas usadas no treinamento são usadas na fase de predição. Da mesma forma, carregamos o modelo considerando o que foi gerado no exemplo anterior.
 
 ```python
+"""
+Script de Inferência/Predição do Agente de DRL.
+
+Este script carrega o modelo PPO previamente treinado e o utiliza para 
+controlar o ambiente CartPoleROS2Env em tempo real. O robô tenta 
+equilibrar o pêndulo infinitamente, reiniciando o episódio de forma 
+automática sempre que o pêndulo cair ou o carrinho sair dos limites.
+"""
+
 import time
 from stable_baselines3 import PPO
 from cartpole_drl_ppo.cartpole_env import CartPoleROS2Env
 from ament_index_python.packages import get_package_share_directory
 
 def main(args=None):
-    package_name = 'cartpole_drl_ppo' # Substitua pelo nome do seu pacote
-    model_pkg_path = get_package_share_directory(package_name) + "/"
-    model = PPO.load(model_pkg_path + "ppo_cartpole_ros2.zip")
+    """
+    Função principal que carrega o modelo treinado, inicializa o ambiente
+    e executa o laço de controle (inferência) de forma contínua.
+    """
+    package_name = 'cartpole_drl_ppo'
+    # Obtém o diretório de instalação do pacote onde o modelo foi salvo
+    model_pkg_path = get_package_share_directory(package_name) + "/" 
+
+    # Carrega a rede neural pré-treinada a partir do arquivo .zip.
+    # Utilizamos device='cpu' para carregar o modelo sem gerar gargalos ou avisos
+    # caso estejamos em uma máquina sem GPU ou com configurações PyTorch simples.
+    model = PPO.load(model_pkg_path + "ppo_cartpole_ros2.zip", device='cpu')
+    
+    # Instancia o ambiente customizado integrado com ROS 2
     env = CartPoleROS2Env()
-    obs, _ = env.reset()
-    time.sleep(1)
+    
+    print("Iniciando a Inteligência Artificial! Pressione Ctrl+C para parar.")
+
+    try:
+        # Laço infinito para o robô continuar tentando indefinidamente
+        while True:
+            # Reseta o ambiente para a posição inicial e obtém a primeira observação
+            obs, _ = env.reset()
+            # Tempo de espera para a física do simulador Gazebo estabilizar após o reset
+            time.sleep(1) 
 
 ```
 
 2. Começamos a execução e continuamos até que o sistema atenda à condição desejada: a haste (pêndulo) permanece equilibrada e o carrinho continua próximo ao centro do trilho. As ações geradas e executadas estão alinhadas com o que o agente aprendeu durante o treinamento.
 
 ```python
-    done = False
-    while not done:
-        action, _ = model.predict(obs)
-        obs, _, done, _, info = env.step(action)
-        time.sleep(0.01)
-
-    env.close()
+            done = False
+            truncated = False
+            
+            # Laço do episódio atual: executa ações continuamente enquanto a simulação for válida
+            # O laço para se o robô cair/sair da pista (done) ou o limite de tempo estourar (truncated)
+            while not (done or truncated):        
+                # A rede neural prevê a melhor ação a tomar com base na observação atual (obs)
+                action, _ = model.predict(obs)
+                
+                # O ambiente aplica a ação e devolve o novo estado, a recompensa e os status
+                obs, reward, done, truncated, info = env.step(action)
+                
+                # Pequena pausa para sincronizar os cálculos com o tempo de simulação
+                time.sleep(0.01)
+                
+            # Mensagem exibida no terminal quando a condição "done" ou "truncated" for atingida
+            print("O robô desequilibrou ou falhou! Reiniciando o episódio...")
+            
+    except KeyboardInterrupt:
+        # Tratamento seguro caso o usuário decida parar a execução usando Ctrl+C no terminal
+        print("Inferência encerrada pelo usuário (Ctrl+C).")
+    finally:
+        # Garante que as conexões do ROS 2 e threads sejam limpas antes de fechar o script
+        env.close()
 
 if __name__ == '__main__':
     main()
 
 ```
 
-Se o treinamento for concluído com sucesso, ele pode rodar por várias horas sem desequilibrar a haste. Obviamente, antes de executá-lo, devemos modificar o arquivo `setup.py`. A lista final dos pontos de entrada (*entry points*) é a seguinte:
+Se o treinamento for concluído com sucesso, ele pode rodar por várias horas sem desequilibrar a haste. Obviamente, antes de executá-lo, devemos modificar o arquivo ]`setup.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/setup.py). A lista final dos pontos de entrada (*entry points*) é a seguinte:
 
 ```python
 entry_points={
@@ -903,7 +965,7 @@ Como o nó de predição é um *script* Python usando o modelo treinado, ele pod
 
 ### Conclusão
 
-Este capítulo conclui o livro, onde exploramos uma nova técnica de controle, ou seja, o Aprendizado por Reforço Profundo (DRL - *Deep Reinforcement Learning*). Usando o DRL, os desenvolvedores podem programar indiretamente um robô, permitindo que ele aprenda a executar tarefas de forma independente. Este método é particularmente útil para robôs complexos, como humanoides ou quadrúpedes, que possuem muitas juntas e operam em ambientes desafiadores. Neste capítulo, empregamos duas ferramentas fundamentais para essa abordagem de controle, que são o Gymnasium, para criar um ambiente de observação do robô durante várias tentativas, e a Stable-Baselines3, para implementar o processo de treinamento usando algoritmos de DRL bem conhecidos.
+Nessa aula exploramos o Aprendizado por Reforço Profundo (DRL - *Deep Reinforcement Learning*). Usando o DRL, os desenvolvedores podem programar indiretamente um robô, permitindo que ele aprenda a executar tarefas de forma independente. Este método é particularmente útil para robôs complexos, como humanoides ou quadrúpedes, que possuem muitas juntas e operam em ambientes desafiadores. Neste capítulo, empregamos duas ferramentas fundamentais para essa abordagem de controle, que são o Gymnasium, para criar um ambiente de observação do robô durante várias tentativas, e a Stable-Baselines3, para implementar o processo de treinamento usando algoritmos de DRL bem conhecidos.
 
 O aprendizado por reforço profundo ainda é um campo emergente na robótica, com espaço significativo para melhorias. Os pesquisadores estão trabalhando em novos simuladores e técnicas para refinar e acelerar o treinamento. O objetivo final do DRL é fechar a lacuna entre o desempenho de um robô em configurações controladas de laboratório e em cenários do mundo real.
 
