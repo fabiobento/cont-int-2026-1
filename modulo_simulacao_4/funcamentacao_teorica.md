@@ -428,7 +428,7 @@ $$\tau = (k_{stick} \cdot e_{stick}) + (k2_{stick} \cdot \dot{e}_{stick})$$
 
     - **3. Derivada Numérica do Erro (Diferença Finita)**
     Para o termo derivativo do controlador PD ($K_d$), o nó precisa saber a taxa de variação do erro (velocidade). Como estamos operando em um sistema discreto controlado por software, calculamos isso usando a **Aproximação de Euler (Diferença Finita para trás)**:
-    
+
     $$\dot{e}_{cart}(t) \approx \frac{e_{cart}(t) - e_{cart}(t - \Delta t)}{\Delta t}$$
 
     - Onde:
