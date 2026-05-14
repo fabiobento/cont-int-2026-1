@@ -486,7 +486,7 @@ Neste pacote, implementaremos os seguintes *scripts*:
 * [`cartpole_training.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_training.py) : O nó que usa o ambiente para realizar o treinamento do sistema.
 * [`cartpole_prediction.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_prediction.py) : O nó que usa o modelo treinado para calcular a próxima ação para realizar a tarefa.
 
-Vamos começar discutindo o script [`cartpole_env.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_env.py). Para otimizar a discussão, mostraremos apenas algumas partes mais relevantes do *script*. Como de costume, verifique o repositório de código-fonte para a sua versão completa.
+Vamos começar discutindo o script [`cartpole_env.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_env.py). Para otimizar a discussão, mostraremos apenas algumas partes mais relevantes do *script*. Como de costume, verifique o [repositório de código-fonte](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_env.py) para a sua versão completa.
 
 1. No início, junto com as dependências do ROS 2, importamos os módulos para usar o *gymnasium*. Isto é, o *gymnasium* em geral e o espaço (*space*) do Gymnasium.
 
