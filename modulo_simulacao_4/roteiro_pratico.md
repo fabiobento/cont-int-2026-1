@@ -155,7 +155,7 @@ Os comandos daqui em diante serão executados **dentro do container**.
 > docker exec -it humble_gpu_container bash
 > ```
 
-Dentro do container, para concluir a instalação, crie um arquivo para o script com os seguintes comandos:
+**Dentro do container**, para concluir a instalação, crie um arquivo para o script com os seguintes comandos:
 ```bash
 cd /workspace
 touch install_tb3_humble.sh
@@ -220,15 +220,16 @@ Para realizarmos as práticas de ROS 2, você precisará dos scripts, *packages*
 
 Siga as instruções abaixo de acordo com a sua situação no laboratório de hoje:
 
-**1. Primeira vez usando o repositório (Ainda não baixou)**
+- **Primeira vez usando o repositório (Ainda não baixou)**
+
 Se você ainda não baixou o material no container, entre no container e execute o comando de clonagem para trazer o projeto para o seu workspace:
 
-```bash
+````bash
 cd /workspace
 git clone https://github.com/fabiobento/cont-int-2026-1.git
 ```
 
-**2. Atualizando o repositório existente (Já baixou anteriormente)**
+- **Atualizando o repositório existente (Já baixou anteriormente)**
 Se você já tem a pasta do projeto no seu computador, precisaremos sincronizá-la com as atualizações da semana.
 
 > **Atenção:** Durante as aulas práticas, é esperado e recomendável que vocês editem os códigos para testar hipóteses. No entanto, para iniciar a aula de hoje sem erros de conflito, usaremos uma sequência de comandos que baixa as novidades e **sobrescreve** qualquer alteração local. Isso garante que o seu ambiente fique exatamente igual à versão oficial para o roteiro de hoje.
@@ -246,3 +247,48 @@ git reset --hard origin/main
 * **`cd cont-int-2026-1`**: Garante que você está dentro da pasta correta do projeto.
 * **`git fetch`**: Consulta o GitHub e baixa silenciosamente as informações mais recentes do servidor, mas ainda não altera os seus arquivos visíveis.
 * **`git reset --hard origin/master`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`master`) oficial, descartando testes e modificações residuais das aulas anteriores.
+
+Copiando os pacotes do repositório para o workspace
+
+```bash
+cp -a /workspace/cont-int-2026-1/modulo_simulacao_4/scripts/. /workspace/src/
+```
+
+### 6. Iniciando a simulação
+
+ Iniciar a simulação usando os seguintes comandos:
+
+Compilar os pacotes
+```bash
+cd /workspace
+colcon build --symlink-install
+```
+ Carregar os pacotes compilados
+```bash
+source install/setup.bash
+```
+
+Iniciar a simulação
+```bash
+ros2 launch cartpole_description cartpole.launch.py
+```
+
+### 6. Treinando o robô
+
+Abra um novo terminal (Ctrl + Alt + T, ou clicando no ícone de terminal) e execute o seguinte comando para entrar no container:
+
+```bash
+docker exec -it humble_gpu_container bash
+```
+
+```bash
+ros2 run cartpole_reset cartpole_reset
+```
+O terminal ficará em execução, parecendo que está travado.
+
+Abra um segundo terminal e entre no container:
+
+```bash
+docker exec -it humble_gpu_container bash
+```
+Inicie o treinamento

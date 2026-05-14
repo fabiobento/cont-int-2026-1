@@ -9,16 +9,17 @@ seus controladores e publicar o estado do robô.
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, ExecuteProcess
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
-from launch.substitutions import PathJoinSubstitution
-from ament_index_python.packages import get_package_share_directory
-from launch.substitutions import LaunchConfiguration, Command
+from launch.substitutions import PathJoinSubstitution, LaunchConfiguration, Command
 from launch_ros.substitutions import FindPackageShare
-from launch.actions import ExecuteProcess, IncludeLaunchDescription
+
+# IMPORTAÇÃO ADICIONADA: Necessária para forçar a leitura do XML como String pura
+from launch_ros.parameter_descriptions import ParameterValue 
 
 import time
+
 def generate_launch_description():
     """
     Gera a descrição de inicialização (Launch Description) do sistema.
@@ -41,7 +42,7 @@ def generate_launch_description():
 
     # Monta o caminho completo até o arquivo xacro
     robot_description = PathJoinSubstitution([
-        get_package_share_directory('cartpole_description'),	
+        get_package_share_directory('cartpole_description'),    
         xacro_path
     ])
 
@@ -52,7 +53,8 @@ def generate_launch_description():
         name='robot_state_publisher',
         output='screen',
         parameters=[{
-            'robot_description':Command(['xacro ', robot_description])
+            # CORREÇÃO APLICADA: Envelopando o Command com ParameterValue(..., value_type=str)
+            'robot_description': ParameterValue(Command(['xacro ', robot_description]), value_type=str)
         }]
     )
 
