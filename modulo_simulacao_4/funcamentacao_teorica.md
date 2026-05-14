@@ -1,18 +1,18 @@
 # Aula 7: Fundamentação Teórica - Deep Reinforcement Learning no ROS 2
 
 ## **Introdução**
-Programar robôs para lidar com a natureza imprevisível do mundo real e gerar os sinais de controle corretos para as ações desejadas pode ser complexo. Recentemente, o aprendizado por reforço profundo (DRL - *Deep Reinforcement Learning*) surgiu como uma abordagem poderosa, especialmente para controlar robôs com muitos graus de liberdade, como humanoides ou quadrúpedes. O DRL permite que os robôs aprendam a se mover de forma eficaz para realizar tarefas específicas. Nesta aula, exploraremos duas ferramentas fundamentais para o aprendizado por reforço profundo, ou seja, o `gymnasium` e a `stable_baselines3`. Aplicaremos essas ferramentas para resolver um problema de controle clássico, o pêndulo invertido (*cart-pole*). Uma parte crítica do DRL é a simulação, que é comumente usada para treinar modelos de robôs. Conectaremos essas ferramentas de DRL ao Gazebo para treinar e testar o modelo do *cart-pole* em simulação.
+Programar robôs para lidar com a natureza imprevisível do mundo real e gerar os sinais de controle corretos para as ações desejadas pode ser complexo. Recentemente, o aprendizado por reforço profundo (DRL - *Deep Reinforcement Learning*) surgiu como uma abordagem poderosa, especialmente para controlar robôs com muitos graus de liberdade, como humanoides ou quadrúpedes. O DRL permite que os robôs aprendam a se mover de forma eficaz para realizar tarefas específicas. Nesta aula, exploraremos duas ferramentas fundamentais para o aprendizado por reforço profundo, ou seja, o [Gymnasium](https://gymnasium.farama.org/index.html) e a [Stable-Baselines3](https://stable-baselines3.readthedocs.io/en/master/). Aplicaremos essas ferramentas para resolver um problema de controle clássico, o pêndulo invertido (*cart-pole*). Uma parte crítica do DRL é a simulação, que é comumente usada para treinar modelos de robôs. Conectaremos essas ferramentas de DRL ao Gazebo para treinar e testar o modelo do *cart-pole* em simulação.
 
 ## **Estrutura**
 Nesta aula, os seguintes tópicos serão abordados:
 
-* Introdução ao Aprendizado por Reforço Profundo (DRL)
+* Introdução ao Aprendizado por Reforço Profundo (*Deep Reinforcement Learning* - DRL)
 * DRL e Robótica
 * Controle de um Robô Usando Valores de Torque
-* Introdução ao Framework Gymnasium
-* Configuração do Cenário de Simulação do Cart-Pole
-* Integração do Gymnasium com o ROS 2
-* Treinamento de um Robô usando Gymnasium e stable_baselines3
+* Introdução ao Framework [Gymnasium](https://gymnasium.farama.org/index.html) 
+* Configuração do [Cenário de Simulação do Cart-Pole](https://gymnasium.farama.org/environments/classic_control/cart_pole/)
+* Integração do Gymnasium com o [ROS 2](https://www.ros.org/)
+* Treinamento de um Robô usando Gymnasium e [Stable-Baselines3](https://stable-baselines3.readthedocs.io/en/master/)
 * Controle de um Robô usando Aprendizado por Reforço Profundo
 
 ## **Introdução ao Aprendizado por Reforço Profundo (DRL)**
@@ -469,7 +469,7 @@ Agora temos todos os elementos para integrar o Gymnasium com o ROS 2 e criar nos
 
 ## **Integrando o Gymnasium e o ROS 2**
 
-Para integrar o Gymnasium com o ROS 2, precisamos implementar suas funções principais usando a API do ROS 2 para controlar a simulação. Isso nos permite usar a mesma interface de controle durante o teste do sistema, de modo que, se tivermos um sistema físico idêntico, possamos aplicar perfeitamente o que o agente aprendeu no ambiente simulado ao sistema do mundo real.
+Para integrar o [Gymnasium](https://gymnasium.farama.org/index.html) com o ROS 2, precisamos implementar suas funções principais usando a API do ROS 2 para controlar a simulação. Isso nos permite usar a mesma interface de controle durante o teste do sistema, de modo que, se tivermos um sistema físico idêntico, possamos aplicar perfeitamente o que o agente aprendeu no ambiente simulado ao sistema do mundo real.
 
 Vamos criar o pacote [`cartpole_drl_ppo`](https://github.com/fabiobento/cont-int-2026-1/tree/main/modulo_simulacao_4/scripts/cartpole_drl_ppo) (disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/tree/main/modulo_simulacao_4/scripts/cartpole_drl_ppo)) no ROS 2 contendo
 - o ambiente,
@@ -749,7 +749,7 @@ Concluímos agora nosso primeiro ambiente Gymnasium. Isso significa que podemos 
 
 ### **Treinando um Robô Usando o Gymnasium e stable_baselines3**
 
-Escrever um ambiente Gymnasium adequado é apenas um passo básico para treinar nosso robô. O próximo passo é executar recursivamente o robô no ambiente, selecionando adequadamente as ações a serem executadas, coletando as recompensas e treinando a Rede Neural Profunda que direciona as ações do robô na fase de predição, quando o robô finalmente for capaz de realizar as ações por conta própria. Para simplificar a etapa de treinamento, usaremos outra biblioteca, tipicamente conectada com o Gymnasium, que é a *Stable-Baselines3* (SB3). Trata-se de uma biblioteca Python que fornece implementações de algoritmos de aprendizado por reforço (RL) no estado da arte. Alguns dos algoritmos de DRL mais difundidos implementados na SB3 são a Otimização de Política Proximal (PPO), *Deep Q-Network* (DQN) e *Soft Actor-Critic* (SAC). A SB3 é construída sobre o PyTorch e pode ser usada diretamente em nossos nós Python do ROS 2.
+Escrever um ambiente Gymnasium adequado é apenas um passo básico para treinar nosso robô. O próximo passo é fazer o robô interagir com o ambiente, selecionando adequadamente as ações a serem executadas, coletando as recompensas e treinando a rede neural profunda. Essa rede neural é quem direciona as ações do robô na fase de predição, quando o robô finalmente for capaz de realizar as ações por conta própria. Para simplificar a etapa de treinamento, usaremos outra biblioteca, tipicamente conectada com o Gymnasium, que é a [**Stable-Baselines3**](https://stable-baselines3.readthedocs.io/en/master/) (SB3). Trata-se de uma biblioteca Python que fornece implementações de algoritmos de aprendizado por reforço (RL) no estado da arte. Alguns dos algoritmos de DRL mais difundidos implementados na SB3 são a Otimização de Política Proximal (PPO), *Deep Q-Network* (DQN) e *Soft Actor-Critic* (SAC). A SB3 é construída sobre o PyTorch e pode ser usada diretamente em nossos nós Python do ROS 2.
 
 **Nota:** O PyTorch é um popular *framework* de aprendizado profundo de código aberto conhecido por sua flexibilidade, gráficos de computação dinâmica e forte suporte a GPU. É amplamente utilizado para treinamento e experimentação de redes neurais em tarefas de IA.
 
