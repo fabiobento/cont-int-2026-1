@@ -405,6 +405,36 @@ $$\tau = (k_{stick} \cdot e_{stick}) + (k2_{stick} \cdot \dot{e}_{stick})$$
 
 7. Os erros iniciais no carrinho e no pêndulo são obtidos dos estados das juntas, e o *loop* de controle principal do nó começa. A ação de controle continua até que as condições de reinício sejam atendidas — especificamente, quando o pêndulo estiver na posição de reinício e sua velocidade for quase zero. E quanto à posição do carrinho no trilho? Não definimos isso explicitamente, pois não estamos focados em ter o carrinho exatamente na posição 0.0. No entanto, se o carrinho se mover muito em direção ao centro do trilho, isso fará com que o pêndulo se mova, dificultando sua estabilização e aumentando sua velocidade. Embora o carrinho não precise estar perfeitamente no 0, nosso objetivo é mantê-lo mais perto do centro.
 
+    Neste trecho, o algoritmo define as **condições de tolerância** para considerar o sistema estabilizado e calcula a **derivada numérica** do erro em tempo real.
+
+    - **1. Condição de Estabilização (Loop *While*)**
+    O controle PD de reinício não exige perfeição matemática absoluta (o que seria impossível no mundo físico simulado), mas sim que o sistema entre em uma zona de tolerância aceitável. O laço de controle continua atuando *enquanto* a inclinação do pêndulo ou a velocidade do carrinho forem significativas:
+
+    $$|\theta(t)| > 0.05 \quad \lor \quad |\dot{x}(t)| > 0.01$$
+
+    Onde:
+    * $|\theta(t)|$ corresponde a `math.fabs(stick_js)`, o valor absoluto do ângulo da haste (tolerância de $\approx 2.86^\circ$).
+    * $|\dot{x}(t)|$ corresponde a `math.fabs(self.js.velocity[0])`, o valor absoluto da velocidade do carrinho (tolerância de $1$ cm/s).
+    * O símbolo $\lor$ (OU) indica que se *qualquer uma* das duas condições for violada, o robô ainda não está pronto.
+
+    - **2. Cálculo do Erro de Posição**
+    Como o objetivo é trazer o carrinho de volta para a origem (ponto $0.0$ do trilho), o erro de posição $e_{cart}(t)$ em qualquer instante de tempo é simplesmente a sua posição atual menos o alvo:
+
+    $$e_{cart}(t) = x(t) - 0 \implies e_{cart}(t) = x(t)$$
+    *(No código: `cart_e = self.js.position[0]`)*
+
+    - **3. Derivada Numérica do Erro (Diferença Finita)**
+    Para o termo derivativo do controlador PD ($K_d$), o nó precisa saber a taxa de variação do erro (velocidade). Como estamos operando em um sistema discreto controlado por software, calculamos isso usando a **Aproximação de Euler (Diferença Finita para trás)**:
+
+    $$\dot{e}_{cart}(t) \approx \frac{e_{cart}(t) - e_{cart}(t - \Delta t)}{\Delta t}$$
+
+    Onde:
+    * $e_{cart}(t)$ é o erro no ciclo atual (`cart_e`).
+    * $e_{cart}(t - \Delta t)$ é o erro do ciclo anterior (`prev_cart_e`).
+    * $\Delta t$ é o intervalo de tempo entre as execuções. Como definimos que o controle roda a 100 Hz (`rate2 = self.create_rate(100)`), o $\Delta t$ é de $\frac{1}{100}$ de segundo.
+
+    *(No código, isso é implementado literalmente como: `cart_e_derivative = (cart_e - prev_cart_e) / (1.0/100.0)`)*
+
 ```python
                 # Obtendo posições iniciais
                 cart_e = self.js.position[0]
