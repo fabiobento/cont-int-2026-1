@@ -322,6 +322,52 @@ def bound_angle(angle):
 
 6. Quando uma requisição de reinício é recebida, configuramos as funções necessárias para colocar o sistema no estado de reinício. Por este motivo, implementamos dois controladores Proporcional-Derivativo (PD). Esses PDs obtêm os erros de posição a partir dos ângulos do carrinho e do pêndulo e geram um torque adequado para manter o sistema no estado de reinício.
 
+- A equação geral de controle de um controlador PD é dada por:
+
+$$u(t) = K_p \cdot e(t) + K_d \cdot \frac{de(t)}{dt}$$
+
+- Onde:
+  - $u(t)$ é o sinal de controle (força ou torque) aplicado ao sistema.
+  - $e(t)$ é o erro atual (a diferença entre a posição/ângulo atual e a posição/ângulo desejado, que no caso do reset é zero).
+  - $\frac{de(t)}{dt}$ é a derivada do erro (a taxa de variação do erro ao longo do tempo, ou seja, a velocidade com que o sistema está se afastando ou se aproximando do alvo).
+  - $K_p$ é o ganho proporcional.
+   - $K_d$ é o ganho derivativo.
+
+- Essa equação geral se desdobra em **duas equações específicas** para o sistema Cart-Pole:
+
+    - 1. **Equação do Carrinho (Controle Linear)**
+
+        Esta equação calcula a força necessária para empurrar o carrinho de volta para o centro da pista (posição 0).
+
+        $$F_{cart} = K_p^{cart} \cdot e_{cart} + K_d^{cart} \cdot \dot{e}_{cart}$$
+
+        No código em Python, os termos correspondem a:
+
+        * $K_p^{cart} \rightarrow$ `k = 0.8`
+        * $K_d^{cart} \rightarrow$ `k2 = 0.2`
+        * $e_{cart} \rightarrow$ `cart_e` (Erro de posição)
+        * $\dot{e}_{cart} \rightarrow$ `cart_e_derivative` (Derivada do erro do carrinho)
+
+    - 2. **Equação do Pêndulo (Controle Angular)**
+
+        Esta equação calcula o torque (esforço) rotacional aplicado na junta contínua para levantar e manter a haste equilibrada perfeitamente na vertical (ângulo 0).
+
+        $$\tau_{pole} = K_p^{pole} \cdot e_{pole} + K_d^{pole} \cdot \dot{e}_{pole}$$
+
+        No código em Python, os termos correspondem a:
+
+        * $K_p^{pole} \rightarrow$ `k_stick = 0.1`
+        * $K_d^{pole} \rightarrow$ `k2_stick = 0.05`
+        * $e_{pole} \rightarrow$ `stick_e` (Erro angular da haste)
+        * $\dot{e}_{pole} \rightarrow$ `stick_derivative` (Derivada do erro da haste)
+
+- Para forçar o robô de volta à sua posição inicial de forma estável, o nó de *reset* implementa duas equações de controle Proporcional-Derivativo (PD).A força linear do carrinho ($F$) e o torque angular da haste ($\tau$) são calculados através das seguintes equações:
+
+$$F = (k \cdot e_{cart}) + (k2 \cdot \dot{e}_{cart})$$
+$$\tau = (k_{stick} \cdot e_{stick}) + (k2_{stick} \cdot \dot{e}_{stick})$$
+
+- Onde $e$ representa o erro de posição (o quão longe o robô está do centro absoluto) e $\dot{e}$ representa a derivada desse erro (a velocidade do movimento). Os ganhos do código (`k=0.8`, `k2=0.2`, `k_stick=0.1`, `k2_stick=0.05`) atuam como multiplicadores, calibrando a intensidade com que o simulador vai puxar as juntas do robô de volta para a origem (0.0).
+
 ```python
                 # Publica que o sistema não está pronto durante o procedimento de reset
                 self.system_ready.data = False
