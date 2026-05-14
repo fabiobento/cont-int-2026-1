@@ -112,7 +112,9 @@ Um sistema *cart-pole* (pêndulo invertido) é um exemplo clássico na teoria de
 
 Vamos começar criando um pacote ROS 2 para armazenar o modelo e os arquivos de simulação.
 
-`$ ros2 pkg create cartpole_description`
+```bash
+$ ros2 pkg create cartpole_description
+```
 
 Este pacote conterá o modelo [*xacro*](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_description/urdf/cartpole.urdf.xacro) do robô e um arquivo [*launch*](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_description/launch/cartpole.launch.py) que inicia a simulação e os diferentes controladores. O arquivo do modelo é básico e consiste em duas juntas:
 
@@ -191,9 +193,11 @@ Como de costume, devemos incluir o *plugin* onde os arquivos de configuração Y
 
 Junto com o modelo do robô, devemos criar um arquivo *launch* para iniciar a simulação e os controladores de esforço para a base e para a haste do pêndulo. No pacote do repositório do GitHub, chamamos este arquivo de `cartpole.launch.py`. Após editar o `CMakeLists.txt` para instalar os diretórios `urdf` e `launch`, você pode iniciar a simulação usando os seguintes comandos:
 
-`$ colcon build --symlink-install`
-`$ source install/setup.bash`
-`$ ros2 launch cartpole_description cartpole.launch.py`
+```bash
+$ colcon build --symlink-install
+$ source install/setup.bash
+$ ros2 launch cartpole_description cartpole.launch.py
+```
 
 Da simulação, usaremos os seguintes tópicos:
 
@@ -205,7 +209,9 @@ Outro aspecto chave da simulação é que o modelo do robô deve ser fisicamente
 
 Após obter um modelo de simulação correto, precisamos de uma função para reiniciar o estado do sistema: o carrinho no meio do trilho e o pêndulo perpendicular ao carrinho. Por esse motivo, criaremos um novo pacote que recebe um sinal como entrada para reiniciar o estado da simulação.
 
-`$ ros2 pkg create --build-type ament_python cartpole_reset --dependencies rclpy std_msgs`
+```bash
+$ ros2 pkg create --build-type ament_python cartpole_reset --dependencies rclpy std_msgs
+```
 
 Este pacote contém o nó `cartpole_reset.py`. Seu conteúdo é discutido a seguir:
 
@@ -464,7 +470,9 @@ Agora temos todos os elementos para integrar o Gymnasium com o ROS 2 e criar nos
 Para integrar o Gymnasium com o ROS 2, precisamos implementar suas funções principais usando a API do ROS 2 para controlar a simulação. Isso nos permite usar a mesma interface de controle durante o teste do sistema, de modo que, se tivermos um sistema físico idêntico, possamos aplicar perfeitamente o que o agente aprendeu no ambiente simulado ao sistema do mundo real.
 Vamos criar um pacote ROS 2 contendo o ambiente, o treinamento do modelo e seu uso na fase de execução.
 
-`$ ros2 pkg create cartpole_drl_ppo --build-type ament_python --dependencies rclpy std_msgs sensor_msgs geometry_msgs`
+```bash
+$ ros2 pkg create cartpole_drl_ppo --build-type ament_python --dependencies rclpy std_msgs sensor_msgs geometry_msgs
+```
 
 Neste pacote, implementaremos os seguintes *scripts*:
 
@@ -636,14 +644,18 @@ Escrever um ambiente Gymnasium adequado é apenas um passo básico para treinar 
 
 Vamos instalar a SB3 em nosso sistema usando os seguintes comandos:
 
-`$ pip3 install stable_baselines3`
-`$ pip install 'numpy<2'`
-`$ pip install stable-baselines3[extra]`
+```bash
+$ pip3 install stable_baselines3
+$ pip install 'numpy<2'
+$ pip install stable-baselines3[extra]
+```
 
 Podemos adicionar o nó para realizar a fase de treinamento no mesmo pacote do ambiente.
 
-`$ cd ros2_ws/src/cartpole_drl_ppo`
-`$ touch cartpole_drl_ppo/cartpole_training.py`
+```bash
+$ cd ros2_ws/src/cartpole_drl_ppo
+$ touch cartpole_drl_ppo/cartpole_training.py
+```
 
 O conteúdo deste script é explicado a seguir:
 
@@ -683,9 +695,11 @@ def main(args=None):
 
 Após modificar adequadamente o arquivo `setup.py`, compilar e carregar (*sourcing*) o *workspace*, podemos agora iniciar o processo de treinamento. Obviamente, antes de iniciá-lo, devemos lançar a simulação, o nó de *reset* e, finalmente, o processo de treinamento.
 
-`$ ros2 launch cartpole_description cartpole.launch.py`
-`$ ros2 run cartpole_reset cartpole_reset`
-`$ ros2 run cartpole_drl_ppo cartpole_training`
+```bash
+$ ros2 launch cartpole_description cartpole.launch.py
+$ ros2 run cartpole_reset cartpole_reset
+$ ros2 run cartpole_drl_ppo cartpole_training
+```
 
 Neste ponto, o robô começa a realizar diferentes tentativas para melhorar sua experiência no ambiente Gymnasium. O tempo necessário para concluir o processo depende da velocidade com que o robô aprende e do número de passos de tempo que definimos na função de aprendizado. No entanto, no terminal onde iniciamos o processo de treinamento, você pode acompanhar o processo de aprendizado. Um exemplo dessa saída é mostrado na Figura 3, e é explicado a seguir.
 
