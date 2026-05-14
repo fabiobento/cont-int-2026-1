@@ -122,9 +122,14 @@ Este pacote conterá o modelo *xacro* do robô e um arquivo *launch* que inicia 
 O pêndulo pode se mover livremente sem nenhuma entrada de controle direto e se mantém equilibrado através do movimento do carrinho. Quando o carrinho é empurrado para um lado, o pêndulo naturalmente se inclina na direção oposta. O arquivo [`cartpole.urdf.xacro`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/modulo_simulacao_4/scripts/cartpole_description/urdf/cartpole.urdf.xacro) define as juntas e os elos para este sistema. Neste arquivo habilitamos o controle de esforço, que é refletido na seção `ros2_control` do arquivo *xacro*. A tag `ros2_control` é usada para definir como as juntas são controladas. Incluímos a interface de *hardware* para fazer a interface com as juntas simuladas.
 
 ```xml
-    <!-- Configuração do ros2_control para o simulador Ignition (Gazebo) -->
+    <!-- 
+        Interface do ros2_control para o simulador Ignition (Gazebo Harmonic).
+        Mapeia os comandos de atuação e sensores para que o ROS possa interagir com 
+        os objetos descritos no mundo físico virtual.
+    -->
     <ros2_control name="IgnitionSystem" type="system">
         <hardware>
+            <!-- Carrega o plugin do sistema de controle via ros2 para o Gazebo Ignition -->
             <plugin>ign_ros2_control/IgnitionSystem</plugin>
         </hardware>
 
@@ -133,11 +138,13 @@ O pêndulo pode se mover livremente sem nenhuma entrada de controle direto e se 
 A junta linear é comandada usando uma entrada de controle de esforço. No entanto, estamos interessados em saber sua posição ao longo do trilho para posicioná-la no meio do trilho no início de um novo episódio de treinamento.
 
 ```xml
-        <!-- Interfaces da junta linear do carrinho -->
+        <!-- Mapeamento da junta linear (do carrinho) -->
         <joint name="linear">
             <!--<command_interface name="position" />-->
+            <!-- Habilita a escrita/comando por esforço dinâmico (Força Linear) -->
             <command_interface name="effort" />
 
+            <!-- Interfaces de leitura de estado de sensores -->
             <state_interface name="position">
                 <param name="initial_value">0.0</param>
             </state_interface>
@@ -150,10 +157,12 @@ A junta linear é comandada usando uma entrada de controle de esforço. No entan
 A mesma interface de controle é usada para a junta rotacional conectada ao pêndulo. Embora não precisemos de um controlador para esta junta (já que o objetivo é estabilizar o pêndulo indiretamente movendo o carrinho para a esquerda ou para a direita), o sistema deve iniciar com o pêndulo em uma posição estável, que é um ângulo de 0.0, conforme mostrado na Figura 2. Usando o controlador de esforço, o pêndulo ainda estará livre para se mover ao redor do carrinho durante a simulação.
 
 ```xml
-        <!-- Interfaces da junta do pivô do pêndulo -->
+        <!-- Mapeamento da junta pivot (do pêndulo) -->
         <joint name="pivot">
+            <!-- Habilita a escrita/comando por esforço dinâmico (Torque Angular) -->
             <command_interface name="effort" />
             
+            <!-- Interfaces de leitura de estado de sensores -->
             <state_interface name="position">
                 <param name="initial_value">0.0</param>
             </state_interface>
@@ -167,6 +176,11 @@ A mesma interface de controle é usada para a junta rotacional conectada ao pên
 Como de costume, devemos incluir o *plugin* onde os arquivos de configuração YAML do controlador especificam os tipos de controlador e as juntas envolvidas.
 
 ```xml
+    <!-- 
+        Plugin que atrela as configurações do hardware descrito à simulação do Gazebo.
+        Injeta os parâmetros definidos no arquivo 'cartpole_controller.yaml' para que 
+        o Broadcaster e os Controllers saibam o que ler e publicar.
+    -->
     <gazebo>
         <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
         <parameters>$(find cartpole_description)/config/cartpole_controller.yaml</parameters>
