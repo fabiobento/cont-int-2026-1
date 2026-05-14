@@ -163,7 +163,7 @@ class CartPoleReset(Node):
     def reset_callback(self, msg):
         """
         Callback acionado ao receber uma mensagem no tópico de reset.
-
+        """
     def reset(self, msg):
         self.reset = True
 

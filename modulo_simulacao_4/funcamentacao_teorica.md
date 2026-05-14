@@ -114,7 +114,7 @@ Vamos começar criando um pacote ROS 2 para armazenar o modelo e os arquivos de 
 
 `$ ros2 pkg create cartpole_description`
 
-Este pacote conterá o modelo *xacro* do robô e um arquivo *launch* que inicia a simulação e os diferentes controladores. O arquivo do modelo é básico e consiste em duas juntas:
+Este pacote conterá o modelo [*xacro*](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_description/urdf/cartpole.urdf.xacro) do robô e um arquivo [*launch*](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_description/launch/cartpole.launch.py) que inicia a simulação e os diferentes controladores. O arquivo do modelo é básico e consiste em duas juntas:
 
 * **linear:** Uma junta prismática para mover o carrinho sobre o trilho.
 * **pivot:** Uma junta contínua permitindo a rotação do pêndulo em torno do carrinho.
@@ -403,27 +403,59 @@ def bound_angle(angle):
 9. O restante do código contém as funções para receber como entrada a solicitação de reinício, os estados das juntas e a *thread* para publicar quando a função de reinício for concluída.
 
 ```python
+    def reset_callback(self, msg):
+        """
+        Callback acionado ao receber uma mensagem no tópico de reset.
+        """
     def reset(self, msg):
         self.reset = True
+
+    # Função para publicar periodicamente que o sistema está pronto (ready)
+    def publish_system_ready(self):
+        """
+        Publica repetidamente o status atual do sistema no tópico respectivo.
+        """
+        self.system_ready_pub.publish(self.system_ready)
+
+    # Callback para atualizar os dados mais recentes das juntas
     def js_cb(self, msg):
+        """
+        Callback que atualiza a variável local de estados das juntas.
+
+        Args:
+            msg (sensor_msgs.msg.JointState): Mensagem contendo o estado atual das juntas.
+        """
         self.js = msg
         self.js_ready = True
-    def publish_system_ready(self):
-        self.system_ready_pub.publish(self.system_ready)
+
+    # Inicia a thread separada para o loop de controle e permite que o nó receba mensagens
     def run( self ):
+        """
+        Inicia a execução do nó. 
+        
+        Cria uma thread paralela para executar o 'main_loop', garantindo que
+        o spin do ROS 2 não seja bloqueado e as mensagens continuem sendo processadas.
+        """
         main_loop_thread = Thread(target = self.main_loop, args = ())
         main_loop_thread.start()
         rclpy.spin(self)
+
 def main(args=None):
+    """
+    Função principal de entrada do script. Inicializa a comunicação ROS 2 
+    e coloca o nó em execução.
+    """
     rclpy.init(args=args)
+
     node = CartPoleReset()
     node.run()
+
 if __name__ == '__main__':
     main()
 
 ```
 
-Precisamos adicionar este nó ao arquivo de configuração `setup.py` e compilar o *workspace*. Embora não precisemos usar esse nó imediatamente, já que o Cart-Pole já está na sua posição inicial, vamos executá-lo mais tarde, quando os nós de treinamento e teste exigirem que o modelo simulado seja reiniciado.
+Precisamos adicionar este nó ao arquivo de configuração [`setup.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_reset/setup.py) e compilar o *workspace*.
 
 Agora temos todos os elementos para integrar o Gymnasium com o ROS 2 e criar nosso primeiro ambiente.
 
