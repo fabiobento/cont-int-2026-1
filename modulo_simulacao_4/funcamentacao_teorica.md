@@ -940,7 +940,8 @@ Se o treinamento for concluído com sucesso, ele pode rodar por várias horas se
 entry_points={
     'console_scripts': [
         'cartpole_training = cartpole_drl_ppo.cartpole_training:main',
-        'cartpole_prediction = cartpole_drl_ppo.cartpole_prediction:main'
+        'cartpole_prediction = cartpole_drl_ppo.cartpole_prediction:main',
+        'plot_data = cartpole_drl_ppo.plot_data:main'
     ],
 },
 

@@ -116,9 +116,15 @@ docker build \
 
 ### 3. Executando o Container (Run)
 
-Para iniciar o seu novo container habilitando a Interface Gráfica, o Volume do seu workspace (`~/turtlebot3_ws`) e a **GPU (se presente)**, a estrutura do comando será a seguinte:
+Para iniciar o seu novo container habilitando a Interface Gráfica, o Volume do seu workspace (nesse exemplo é `~/turtlebot3_ws`) :
 
-Primeiro, libere a interface de vídeo na máquina host:
+Primeiro crie o workspace:
+
+```bash
+mkdir -p ~/turtlebot3_ws/src
+```
+
+Depois, libere a interface de vídeo na máquina host:
 
 ```bash
 xhost +local:root
@@ -139,8 +145,17 @@ docker run -it --rm \
   -v ~/turtlebot3_ws:/workspace \
   lab_ros2_humble
 ```
-### 4. Concluindo a Instalação(dentro do container)
-Para concluir a instalação, crie um arquivo para o script com os seguintes comandos:
+### 4. Concluindo a Instalação( **dentro do container** )
+
+Os comandos daqui em diante serão executados **dentro do container**.
+> **Observação:**
+> 
+> Se não estiver mais no mesmo terminal em que executou o `build` acima entre no container com o > comando:
+> ```bash
+> docker exec -it humble_gpu_container bash
+> ```
+
+Dentro do container, para concluir a instalação, crie um arquivo para o script com os seguintes comandos:
 ```bash
 cd /workspace
 touch install_tb3_humble.sh
@@ -152,7 +167,6 @@ Cole o código abaixo dentro desse arquivo que acabou de criar:
 
 # =================================================================
 # Script de Configuração TurtleBot3 - ROS 2 Humble
-# Disciplina: Controle Inteligente - Prof. Fabio
 # =================================================================
 
 set -e # Interrompe o script se algum comando falhar
@@ -200,4 +214,35 @@ chmod +x install_tb3_humble.sh
 ./install_tb3_humble.sh 
 ```
 
-### 5. Treinando a RL   
+### 5. Baixando os pacotes ROS2 do repositório (**Dentro do container**)
+
+Para realizarmos as práticas de ROS 2, você precisará dos scripts, *packages* e arquivos de configuração mais recentes. Todo o material é atualizado constantemente no repositório da disciplina no GitHub.
+
+Siga as instruções abaixo de acordo com a sua situação no laboratório de hoje:
+
+**1. Primeira vez usando o repositório (Ainda não baixou)**
+Se você ainda não baixou o material no container, entre no container e execute o comando de clonagem para trazer o projeto para o seu workspace:
+
+```bash
+cd /workspace
+git clone https://github.com/fabiobento/cont-int-2026-1.git
+```
+
+**2. Atualizando o repositório existente (Já baixou anteriormente)**
+Se você já tem a pasta do projeto no seu computador, precisaremos sincronizá-la com as atualizações da semana.
+
+> **Atenção:** Durante as aulas práticas, é esperado e recomendável que vocês editem os códigos para testar hipóteses. No entanto, para iniciar a aula de hoje sem erros de conflito, usaremos uma sequência de comandos que baixa as novidades e **sobrescreve** qualquer alteração local. Isso garante que o seu ambiente fique exatamente igual à versão oficial para o roteiro de hoje.
+
+Abra o Terminal e execute a seguinte sequência:
+
+```bash
+cd ~/cont-int-2026-1
+git fetch
+git reset --hard origin/main
+```
+
+**O que esses comandos fazem?**
+
+* **`cd cont-int-2026-1`**: Garante que você está dentro da pasta correta do projeto.
+* **`git fetch`**: Consulta o GitHub e baixa silenciosamente as informações mais recentes do servidor, mas ainda não altera os seus arquivos visíveis.
+* **`git reset --hard origin/master`**: Força os seus arquivos locais a ficarem idênticos à ramificação principal (`master`) oficial, descartando testes e modificações residuais das aulas anteriores.
