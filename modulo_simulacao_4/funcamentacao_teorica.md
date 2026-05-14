@@ -315,20 +315,35 @@ def bound_angle(angle):
 6. Quando uma requisição de reinício é recebida, configuramos as funções necessárias para colocar o sistema no estado de reinício. Por este motivo, implementamos dois controladores Proporcional-Derivativo (PD). Esses PDs obtêm os erros de posição a partir dos ângulos do carrinho e do pêndulo e geram um torque adequado para manter o sistema no estado de reinício.
 
 ```python
+                # Publica que o sistema não está pronto durante o procedimento de reset
                 self.system_ready.data = False
                 self.system_ready_pub.publish(self.system_ready)
+              
+                # Taxa de controle interno de 100 Hz
                 rate2 = self.create_rate(100)
+                
+                # Reseta a flag para evitar múltiplos resets simultâneos
                 self.reset = False
-                cmd = Float64MultiArray()
-                stick_tau_cmd = Float64MultiArray()
+         
+                # Mensagens de comando
+                cmd = Float64MultiArray()  
+                stick_tau_cmd = Float64MultiArray()                
+              
+                # Ganhos PD para o controle do carrinho (linear)
                 k = 0.8
                 k2 = 0.2
+                
+                # Ganhos PD para o controle do pêndulo (angular)
                 k_stick = 0.1
                 k2_stick = 0.05
+                
+                # Variáveis de erro do pêndulo
                 stick_e = 0.0
                 prev_stick_e = 0.0
                 stick_derivative = 0.0
-                cart_e = 0
+                
+                # Variáveis de erro do carrinho
+                cart_e = 0 
                 prev_cart_e = 0
                 cart_e_derivative = 0
 
@@ -337,10 +352,16 @@ def bound_angle(angle):
 7. Os erros iniciais no carrinho e no pêndulo são obtidos dos estados das juntas, e o *loop* de controle principal do nó começa. A ação de controle continua até que as condições de reinício sejam atendidas — especificamente, quando o pêndulo estiver na posição de reinício e sua velocidade for quase zero. E quanto à posição do carrinho no trilho? Não definimos isso explicitamente, pois não estamos focados em ter o carrinho exatamente na posição 0.0. No entanto, se o carrinho se mover muito em direção ao centro do trilho, isso fará com que o pêndulo se mova, dificultando sua estabilização e aumentando sua velocidade. Embora o carrinho não precise estar perfeitamente no 0, nosso objetivo é mantê-lo mais perto do centro.
 
 ```python
+                # Obtendo posições iniciais
                 cart_e = self.js.position[0]
                 prev_cart_e = 0
+                
                 stick_js = bound_angle(self.js.position[1])
+                
+                # Enquanto o pêndulo estiver inclinado ou a velocidade do carrinho não for zero
                 while ( (math.fabs( stick_js) > 0.05) or (math.fabs(self.js.velocity[0]) > 0.01) ) :
+                     
+                    # Controle PD do carrinho (aproximando da posição 0)
                     cart_e = (self.js.position[0])
                     cart_e_derivative = (cart_e - prev_cart_e) / (1.0/100.0)
 
@@ -349,22 +370,33 @@ def bound_angle(angle):
 8. O esforço tanto para o carrinho quanto para o pêndulo é calculado usando a fórmula do controlador PD, que combina um ganho aplicado ao erro atual (a diferença entre a posição atual e a desejada) e outro ganho aplicado à derivada do erro (a taxa de variação do erro). Antes de enviar o comando de esforço, também precisamos determinar se um torque positivo ou negativo é necessário para mover o modelo simulado para a posição desejada.
 
 ```python
-                    cart_tau = k*cart_e + k2*cart_e_derivative
-                    cmd.data = [-cart_tau]
+                   cart_c = k*cart_e + k2*cart_e_derivative
+                    cmd.data = [-cart_c]
+
+                    # Controle PD do pêndulo (aproximando do ângulo 0)
                     stick_js = bound_angle(self.js.position[1])
+                    
                     stick_e = math.fabs( stick_js )
                     stick_derivative = (stick_e - prev_stick_e) / (1.0/100.0)
+
                     tau = k_stick*stick_e + k2_stick*stick_derivative
+
+                    # Ajusta a direção do torque dependendo de qual lado o pêndulo caiu
                     if ( stick_js > 0 ):
                         tau = -tau
+                    
                     stick_tau_cmd.data = [tau]
+                    
+                    # Publica os torques / forças calculadas
                     self.cartpole_eff_pub.publish(cmd)
                     self.stick_eff_pub.publish(stick_tau_cmd)
+                    
+                    # Atualiza os estados anteriores
                     prev_stick_e = stick_e
                     prev_cart_e = cart_e
+
+                    # Dorme para manter a frequência de 100 Hz
                     rate2.sleep()
-                self.system_ready.data = True
-            rate.sleep()
 
 ```
 
