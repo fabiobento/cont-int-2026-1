@@ -110,7 +110,7 @@ Um sistema *cart-pole* (pêndulo invertido) é um exemplo clássico na teoria de
 
 **Figura 2 - O pêndulo invertido usado na aplicação de DRL.** 
 
-Vamos começar criando um pacote ROS 2 para armazenar o modelo e os arquivos de simulação.
+Vamos começar criando um pacote ROS 2 para armazenar o modelo e os arquivos de simulação(você pode encontrar uma cópia do pacote [`cartpole_description` nesse link](https://github.com/fabiobento/cont-int-2026-1/tree/main/modulo_simulacao_4/scripts/cartpole_description).
 
 ```bash
 $ ros2 pkg create cartpole_description
@@ -207,13 +207,15 @@ Da simulação, usaremos os seguintes tópicos:
 
 Outro aspecto chave da simulação é que o modelo do robô deve ser fisicamente controlável. Isso depende muito dos parâmetros dinâmicos do modelo. Por exemplo, se o carrinho for muito leve e o pêndulo for muito pesado, será impossível controlar a orientação do pêndulo, mesmo com uma abordagem de DRL. Isso destaca a importância de ter um modelo de simulação preciso para um controle bem-sucedido.
 
-Após obter um modelo de simulação correto, precisamos de uma função para reiniciar o estado do sistema: o carrinho no meio do trilho e o pêndulo perpendicular ao carrinho. Por esse motivo, criaremos um novo pacote que recebe um sinal como entrada para reiniciar o estado da simulação.
+Após obter um modelo de simulação correto, precisamos de uma função para reiniciar o estado do sistema: o carrinho no meio do trilho e o pêndulo perpendicular ao carrinho.
+
+Por esse motivo, criaremos o pacote [`cartpole_reset`](https://github.com/fabiobento/cont-int-2026-1/tree/main/modulo_simulacao_4/scripts/cartpole_reset)(disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/tree/main/modulo_simulacao_4/scripts/cartpole_reset)) que recebe um sinal como entrada para reiniciar o estado da simulação.
 
 ```bash
 $ ros2 pkg create --build-type ament_python cartpole_reset --dependencies rclpy std_msgs
 ```
 
-Este pacote contém o nó `cartpole_reset.py`. Seu conteúdo é discutido a seguir:
+Este pacote contém o nó [`cartpole_reset.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_reset/cartpole_reset/cartpole_reset.py). Seu conteúdo é discutido a seguir:
 
 1. Primeiro, importamos os módulos Python necessários. O tipo de dados `Float64MultiArray` é usado para enviar comandos às juntas do controlador. Embora tenhamos uma junta por controlador, ainda precisamos preencher o *array* com um único elemento para cada junta.
 
@@ -468,7 +470,11 @@ Agora temos todos os elementos para integrar o Gymnasium com o ROS 2 e criar nos
 ## **Integrando o Gymnasium e o ROS 2**
 
 Para integrar o Gymnasium com o ROS 2, precisamos implementar suas funções principais usando a API do ROS 2 para controlar a simulação. Isso nos permite usar a mesma interface de controle durante o teste do sistema, de modo que, se tivermos um sistema físico idêntico, possamos aplicar perfeitamente o que o agente aprendeu no ambiente simulado ao sistema do mundo real.
-Vamos criar um pacote ROS 2 contendo o ambiente, o treinamento do modelo e seu uso na fase de execução.
+
+Vamos criar o pacote [`cartpole_drl_ppo`](https://github.com/fabiobento/cont-int-2026-1/tree/main/modulo_simulacao_4/scripts/cartpole_drl_ppo) (disponível [**nesse link**](https://github.com/fabiobento/cont-int-2026-1/tree/main/modulo_simulacao_4/scripts/cartpole_drl_ppo)) no ROS 2 contendo
+- o ambiente,
+- o treinamento do modelo
+- e o uso na fase de execução.
 
 ```bash
 $ ros2 pkg create cartpole_drl_ppo --build-type ament_python --dependencies rclpy std_msgs sensor_msgs geometry_msgs
@@ -476,11 +482,11 @@ $ ros2 pkg create cartpole_drl_ppo --build-type ament_python --dependencies rclp
 
 Neste pacote, implementaremos os seguintes *scripts*:
 
-* `cartpole_env.py` : Implementa o ambiente Gymnasium usado tanto no treinamento quanto no uso.
-* `cartpole_training.py` : O nó que usa o ambiente para realizar o treinamento do sistema.
-* `cartpole_prediction.py` : O nó que usa o modelo treinado para calcular a próxima ação para realizar a tarefa.
+* [`cartpole_env.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_env.py) : Implementa o ambiente Gymnasium usado tanto no treinamento quanto no uso.
+* [`cartpole_training.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_training.py) : O nó que usa o ambiente para realizar o treinamento do sistema.
+* [`cartpole_prediction.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_prediction.py) : O nó que usa o modelo treinado para calcular a próxima ação para realizar a tarefa.
 
-Vamos começar discutindo o script `cartpole_env.py`. Para otimizar a discussão, mostraremos apenas as partes salientes do *script*. Como de costume, verifique o repositório de código-fonte para a sua versão completa.
+Vamos começar discutindo o script [`cartpole_env.py`](https://github.com/fabiobento/cont-int-2026-1/blob/main/modulo_simulacao_4/scripts/cartpole_drl_ppo/cartpole_drl_ppo/cartpole_env.py). Para otimizar a discussão, mostraremos apenas algumas partes mais relevantes do *script*. Como de costume, verifique o repositório de código-fonte para a sua versão completa.
 
 1. No início, junto com as dependências do ROS 2, importamos os módulos para usar o *gymnasium*. Isto é, o *gymnasium* em geral e o espaço (*space*) do Gymnasium.
 
