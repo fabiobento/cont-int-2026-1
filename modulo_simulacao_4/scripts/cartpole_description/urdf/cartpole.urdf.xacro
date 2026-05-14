@@ -1,35 +1,68 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
+<!-- 
+    Documentação do Robô: Cartpole
+    ==============================
+    Este arquivo define o modelo URDF (Universal Robot Description Format) do robô "Cartpole" 
+    utilizando a sintaxe Xacro (XML Macros) para o ROS 2.
+    
+    O Cartpole é um sistema clássico de controle subatuado composto por um carrinho (cart) 
+    que se move linearmente sobre um trilho (rail) e um pêndulo (pole) invertido, conectado 
+    ao carrinho através de uma junta de revolução livre (pivot).
+    
+    Este modelo também inclui as configurações necessárias para simulação no Gazebo (Ignition)
+    utilizando a interface ros2_control.
+-->
 <robot name="cartpole" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!-- ========================================================== -->
+    <!-- VARIÁVEIS DE PROPRIEDADE (PROPERTIES)                      -->
+    <!-- ========================================================== -->
+
     <!-- Propriedades do trilho (rail) -->
+    <!-- O trilho é a base fixa sobre a qual o carrinho deslizará. -->
     <xacro:property name="rail_height" value="1.2"/>
     <xacro:property name="rail_length" value="50"/>
     <xacro:property name="rail_radius" value="0.005"/>
     <xacro:property name="rail_mass" value="15"/>
 
     <!-- Propriedades do carrinho (cart) -->
+    <!-- O carrinho atua como a base móvel que sustentará e controlará o pêndulo. -->
     <xacro:property name="cart_size_x" value="0.1"/>
     <xacro:property name="cart_size_y" value="0.2"/>
     <xacro:property name="cart_size_z" value="0.05"/>
     <xacro:property name="cart_mass" value="2.0"/>
 
     <!-- Propriedades do pêndulo (pole) -->
+    <!-- O pêndulo é a haste longa que deve ser mantida equilibrada pelo controle de esforço. -->
     <xacro:property name="pole_length" value="0.35"/>
     <xacro:property name="pole_radius" value="0.005"/>
     <xacro:property name="pole_mass" value="0.1"/>
     <xacro:property name="theta_0" value="0.0"/>
 
-    <!-- Constante para evitar divisões por zero -->
+    <!-- Constante para evitar divisões por zero em cálculos matemáticos (Inércia) -->
     <xacro:property name="epsilon" value="1e-09"/>
 
-    <!-- Definição de cores RGBA -->
+    <!-- Definição de cores no padrão RGBA (Red, Green, Blue, Alpha) -->
     <xacro:property name="rgba_black" value="0 0 0 1"/>
     <xacro:property name="rgba_white" value="1 1 1 1"/>
     <xacro:property name="rgba_grey" value="0.2 0.2 0.2 1"/>
     <xacro:property name="rgba_red" value="1 0 0 1"/>
 
-    <!-- Macro para calcular a matriz de inércia de uma caixa (box) -->
+    <!-- ========================================================== -->
+    <!-- MACROS (MACROS XACRO)                                      -->
+    <!-- ========================================================== -->
+
+    <!-- 
+        Macro: box_inertia
+        Calcula e gera a matriz de inércia para um objeto em formato de caixa (paralelepípedo).
+        
+        Parâmetros:
+        - mass: Massa total da caixa.
+        - dimx, dimy, dimz: Dimensões físicas da caixa nos eixos X, Y e Z.
+        - xyz: Deslocamento do centro de massa (posição de origem).
+        - rpy: Rotação do centro de massa em Roll, Pitch, Yaw.
+    -->
     <xacro:macro name="box_inertia" params="mass dimx dimy dimz xyz rpy">
         <inertial>
             <origin xyz="${xyz}" rpy="${rpy}"/>
@@ -41,7 +74,17 @@
         </inertial>
     </xacro:macro>
 
-    <!-- Macro para calcular a matriz de inércia de um cilindro (cylinder) -->
+    <!-- 
+        Macro: cylinder_inertial_element
+        Calcula e gera a matriz de inércia para um objeto cilíndrico.
+        
+        Parâmetros:
+        - mass: Massa total do cilindro.
+        - length: Comprimento/Altura do cilindro.
+        - radius: Raio da face circular do cilindro.
+        - xyz: Deslocamento do centro de massa (posição de origem).
+        - rpy: Rotação do centro de massa em Roll, Pitch, Yaw.
+    -->
     <xacro:macro name="cylinder_inertial_element"
                  params="mass length radius xyz rpy">
         <inertial>
@@ -56,14 +99,20 @@
         </inertial>
     </xacro:macro>
 
-    <!-- Macro para criar um material visual básico -->
+    <!-- 
+        Macro: mymaterial
+        Atribui uma cor (material visual genérico) de forma simplificada no URDF.
+    -->
     <xacro:macro name="mymaterial" params="name rgba">
         <material name="${name}">
             <color rgba="${rgba}"/>
         </material>
     </xacro:macro>
 
-    <!-- Macro para definir cor do material no Gazebo -->
+    <!-- 
+        Macro: gzmaterial
+        Atribui material/cor de forma dedicada para o renderizador visual do Gazebo.
+    -->
     <xacro:macro name="gzmaterial" params="reference rgba">
         <gazebo reference="${reference}">
             <visual>
@@ -74,11 +123,11 @@
         </gazebo>
     </xacro:macro>
 
-    <!-- ====== -->
-    <!-- CORES (COLORS) -->
-    <!-- ====== -->
+    <!-- ========================================================== -->
+    <!-- CORES (COLORS)                                             -->
+    <!-- ========================================================== -->
 
-    <!-- Materiais padrão -->
+    <!-- Materiais padrão do URDF base -->
     <material name="black">
         <color rgba="${rgba_black}"/>
     </material>
@@ -89,19 +138,23 @@
         <color rgba="${rgba_grey}"/>
     </material>
 
-    <!-- Atribuição de cores para exibição no Gazebo -->
+    <!-- Atribuição de cores específicas para exibição na engine física do Gazebo -->
     <xacro:gzmaterial reference="rail" rgba="${rgba_black}"/>
     <xacro:gzmaterial reference="cart" rgba="${rgba_grey}"/>
     <xacro:gzmaterial reference="pole" rgba="${rgba_red}"/>
 
-    <!-- ===== -->
-    <!-- ELOS (LINKS) -->
-    <!-- ===== -->
+    <!-- ========================================================== -->
+    <!-- ELOS (LINKS)                                               -->
+    <!-- ========================================================== -->
 
-    <!-- Elo base do ambiente (Mundo) -->
+    <!-- Elo base referencial fixo (Mundo) -->
     <link name="world"/>
 
-    <!-- Elo do trilho (rail) -->
+    <!-- 
+        Elo: trilho (rail)
+        Consiste em um cilindro estático de 50 metros onde o carrinho irá operar. 
+        Este objeto recebe propriedades de massa e geometria visual para aparecer na simulação.
+    -->
     <link name="rail">
         <xacro:cylinder_inertial_element mass="${rail_mass}"
                                          length="${rail_length}"
@@ -117,7 +170,11 @@
         </visual>
     </link>
 
-    <!-- Elo do carrinho (cart) -->
+    <!-- 
+        Elo: carrinho (cart)
+        Corpo em formato de caixa que desliza horizontalmente no trilho. Possui 
+        inércia calculada como um bloco retangular, propriedades visuais (cinza) e de colisão.
+    -->
     <link name="cart">
         <xacro:box_inertia mass="${cart_mass}"
                            dimx="${cart_size_x}"
@@ -140,7 +197,11 @@
         </collision>
     </link>
 
-    <!-- Elo do pêndulo (pole) -->
+    <!-- 
+        Elo: pêndulo (pole)
+        Cilindro longo e leve posicionado sobre o carrinho. Deslocado levemente em Z 
+        para coincidir seu centro de massa corretamente durante o giro.
+    -->
     <link name="pole">
         <xacro:cylinder_inertial_element mass="${pole_mass}"
                                          length="${pole_length}"
@@ -163,19 +224,26 @@
         </collision>
     </link>
 
-    <!-- ====== -->
-    <!-- JUNTAS (JOINTS) -->
-    <!-- ====== -->
+    <!-- ========================================================== -->
+    <!-- JUNTAS (JOINTS)                                            -->
+    <!-- ========================================================== -->
 
-    <!-- Fixando o trilho rigidamente ao mundo -->
-    <!-- http://gazebosim.org/tutorials/?tut=ros_urdf#RigidlyFixingAModeltotheWorld -->
+    <!-- 
+        Junta Fixa: world_to_rail
+        Fixa o trilho em uma posição elevada (z = rail_height) em relação ao ambiente.
+        Referência: http://gazebosim.org/tutorials/?tut=ros_urdf#RigidlyFixingAModeltotheWorld 
+    -->
     <joint name="world_to_rail" type="fixed">
         <parent link="world"/>
         <child link="rail"/>
         <origin xyz="0 0 ${rail_height}" rpy="0 0 0"/>
     </joint>
 
-    <!-- Junta prismática para o movimento linear do carrinho sobre o trilho -->
+    <!-- 
+        Junta Prismática: linear
+        Permite a translação do carrinho no eixo Y. Possui restrições de limite para que o 
+        carrinho não "caia" do trilho (calculado pela metade do comprimento do trilho).
+    -->
     <joint name="linear" type="prismatic">
         <parent link="rail"/>
         <child link="cart"/>
@@ -185,7 +253,11 @@
                upper="${rail_length/2-cart_size_y/2}" effort="2" velocity="1"/>
     </joint>
 
-    <!-- Junta contínua (revolução sem limites) para a rotação do pêndulo no carrinho -->
+    <!-- 
+        Junta Contínua: pivot
+        Permite a rotação livre (sem restrições angulares) do pêndulo acoplado ao carrinho.
+        O pêndulo gira infinitamente em torno do eixo X.
+    -->
     <joint name="pivot" type="continuous">
     <!--<joint name="pivot" type="revolute">-->
         <parent link="cart"/>
@@ -196,17 +268,28 @@
         <limit effort="50" velocity="15"/>
     </joint>
   
-    <!-- Configuração do ros2_control para o simulador Ignition (Gazebo) -->
+    <!-- ========================================================== -->
+    <!-- CONFIGURAÇÃO DO ROS 2 CONTROL E GAZEBO                     -->
+    <!-- ========================================================== -->
+
+    <!-- 
+        Interface do ros2_control para o simulador Ignition (Gazebo Harmonic).
+        Mapeia os comandos de atuação e sensores para que o ROS possa interagir com 
+        os objetos descritos no mundo físico virtual.
+    -->
     <ros2_control name="IgnitionSystem" type="system">
         <hardware>
+            <!-- Carrega o plugin do sistema de controle via ros2 para o Gazebo Ignition -->
             <plugin>ign_ros2_control/IgnitionSystem</plugin>
         </hardware>
         
-        <!-- Interfaces da junta linear do carrinho -->
+        <!-- Mapeamento da junta linear (do carrinho) -->
         <joint name="linear">
             <!--<command_interface name="position" />-->
+            <!-- Habilita a escrita/comando por esforço dinâmico (Força Linear) -->
             <command_interface name="effort" />
 
+            <!-- Interfaces de leitura de estado de sensores -->
             <state_interface name="position">
                 <param name="initial_value">0.0</param>
             </state_interface>
@@ -214,10 +297,12 @@
             <state_interface name="effort"/>
         </joint>
         
-        <!-- Interfaces da junta do pivô do pêndulo -->
+        <!-- Mapeamento da junta pivot (do pêndulo) -->
         <joint name="pivot">
+            <!-- Habilita a escrita/comando por esforço dinâmico (Torque Angular) -->
             <command_interface name="effort" />
             
+            <!-- Interfaces de leitura de estado de sensores -->
             <state_interface name="position">
                 <param name="initial_value">0.0</param>
             </state_interface>
@@ -226,7 +311,11 @@
         </joint>
     </ros2_control>
 
-    <!-- Plugin do Gazebo para conectar o ros2_control à simulação -->
+    <!-- 
+        Plugin que atrela as configurações do hardware descrito à simulação do Gazebo.
+        Injeta os parâmetros definidos no arquivo 'cartpole_controller.yaml' para que 
+        o Broadcaster e os Controllers saibam o que ler e publicar.
+    -->
     <gazebo>
         <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
         <parameters>$(find cartpole_description)/config/cartpole_controller.yaml</parameters>

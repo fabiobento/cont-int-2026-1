@@ -198,42 +198,72 @@ Este pacote contém o nó `cartpole_reset.py`. Seu conteúdo é discutido a segu
 1. Primeiro, importamos os módulos Python necessários. O tipo de dados `Float64MultiArray` é usado para enviar comandos às juntas do controlador. Embora tenhamos uma junta por controlador, ainda precisamos preencher o *array* com um único elemento para cada junta.
 
 ```python
+"""
+Módulo ROS 2 responsável por redefinir e estabilizar o sistema do Cartpole.
+
+Este script implementa um nó que monitora o estado das juntas e, ao receber um comando 
+de reset, utiliza controladores Proporcionais-Derivativos (PD) independentes para retornar o carrinho à posição inicial e estabilizar o pêndulo na posição vertical.
+"""
+
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float64MultiArray, Bool
 from sensor_msgs.msg import JointState
 from threading import Thread
 import math
-
 ```
 
 2. Precisamos de uma função adequada para reportar o ângulo do estado da junta dentro de um limite adequado. Conforme definido no modelo do robô, esse elo (*link*) é um elo contínuo; isso significa que, ao realizar múltiplas rotações, seu valor tende a um valor infinito. Diferentemente, precisamos que o ângulo seja delimitado no intervalo `-pi` a `pi`.
 
 ```python
+# Função para garantir que o ângulo do pêndulo fique restrito entre -pi e pi
 def bound_angle(angle):
+    """
+    Mantém o valor do ângulo delimitado no intervalo de -pi a pi radianos.
+
+    Args:
+        angle (float): Ângulo contínuo em radianos.
+
+    Returns:
+        float: O ângulo equivalente ajustado para o intervalo [-pi, pi].
+    """
     bounded_angle = (angle + math.pi) % (2 * math.pi) - math.pi
     return bounded_angle
-
 ```
 
 3. No construtor da classe, definiremos a entrada e a saída usando os dados do ROS 2.
 
 ```python
-class CartPoleReset(Node):
-    def __init__(self):
+   def __init__(self):
+        """
+        Inicializa o nó, configurando as inscrições (subscriptions), publicadores
+        (publishers) e o timer necessários para o controle das juntas do robô.
+        """
+        # Inicializa o nó (nomeado como 'yolo_node', embora controle o reset do cartpole)
         super().__init__('yolo_node')
+        
+        # Inscreve-se no tópico de estados das juntas para receber posições e velocidades
         self.js_sub = self.create_subscription(JointState, "/joint_states", self.js_cb, 10)
+        
+        # Publicadores de comandos de esforço (effort/torque) para o carrinho e para o pêndulo
         self.cartpole_eff_pub = self.create_publisher(Float64MultiArray, "/effort_control/commands", 10)
         self.system_ready_pub = self.create_publisher(Bool, "/cartpole/ready", 10)
         self.cartpole__reset_sub = self.create_subscription(Bool, "/cartpole/reset", self.reset, 10)
         self.stick_eff_pub = self.create_publisher(Float64MultiArray, "/stick_effort_control/commands", 10)
+        
+        # Publicador que indica se o sistema está pronto e inscrição para iniciar o reset
+        self.system_ready_pub = self.create_publisher(Bool, "/cartpole/ready", 10)
+        self.cartpole__reset_sub = self.create_subscription(Bool, "/cartpole/reset", self.reset_callback, 10)
 
 ```
 
 4. Quando o carrinho está na posição de reinício, publicamos uma *flag* (bandeira) booleana para informar ao *software* de terceiros (o ambiente de treinamento neste caso) sobre o status do sistema. Se essa *flag* for verdadeira, o sistema está pronto; caso contrário, está no estado de *reset*.
 
 ```python
+        # Timer para publicar repetidamente que o sistema está pronto
         self.timer = self.create_timer(0.1, self.publish_system_ready)
+        
+        # Flags e variáveis de controle interno
         self.reset = False
         self.js_ready = False
         self.js = None
@@ -245,11 +275,25 @@ class CartPoleReset(Node):
 5. No *loop* principal, aguardamos uma nova solicitação de reinício do sistema. Naturalmente, devemos esperar até que o status do sistema esteja pronto, recebendo os estados das juntas. Essa verificação é executada em uma taxa baixa (2 Hz).
 
 ```python
-    def main_loop(self):
+    def main_loop(self): 
+        """
+        Loop de execução principal executado em uma thread separada.
+        
+        Este método aguarda um comando de reset e, em seguida, executa um 
+        loop de controle a 100 Hz utilizando controladores PD para estabilizar 
+        tanto a posição linear do carrinho quanto a posição angular do pêndulo.
+        """
+       
         rate = self.create_rate(2)
+        
+        # Aguarda até receber o primeiro dado de estado das juntas
         while not self.js_ready:
-            rate.sleep()
+            rate.sleep()   
+            
+        # Loop principal enquanto o ROS estiver rodando
         while rclpy.ok():
+
+            # Verifica se uma solicitação de reset foi recebida
             if( self.reset == True):
 
 ```
