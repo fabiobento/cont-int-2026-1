@@ -700,20 +700,45 @@ class CartPoleROS2Env(gym.Env):
 
 ```python
     def reset(self, seed=None, options=None):
+        """
+        Reinicia fisicamente o ambiente para iniciar um novo episódio de treinamento.
+
+        Esta função se comunica com o nó auxiliar `cartpole_reset` para aplicar
+        os PIDs virtuais que levantam o pêndulo de volta à posição inicial no simulador.
+
+        Argumentos:
+            seed (int, opcional): Semente de aleatoriedade para reprodutibilidade.
+            options (dict, opcional): Opções extras de reset.
+
+        Retorna:
+            tuple: Contendo a observação inicial após o reset e o dicionário de informações.
+        """
+        if seed is not None:
+             np.random.seed(seed)
+            
+        # Dispara o comando de reset pela rede do laboratório
         reset_data = Bool()
         reset_data.data = True
         self.cartpole_reset_pub.publish( reset_data )
-        time.sleep(0.5)
+        time.sleep(0.5) # Tempo de tolerância para o nó de reset assumir o controle
+
+        # Bloqueia o avanço da Inteligência Artificial até que o braço invisível 
+        # (nó de reset) confirme que posicionou o pêndulo no centro e parou de tremer.
         while( not self.system_ready ):
             time.sleep(0.001)
-        return self.current_observation.copy(), {}
+
+        info = {}
+        return self.current_observation.copy(), info
 
 ```
 
 14. Finalmente, na função `close`, devemos apenas sair de forma limpa do nó ROS 2.
 
 ```python
-    def close(self):
+        """
+        Desliga ordenadamente o ambiente, encerrando as threads em background e
+        fechando o nó do ROS 2 para liberar os recursos do sistema operacional.
+        """
         self.executor.shutdown()
         self.node.destroy_node()
         rclpy.shutdown()
