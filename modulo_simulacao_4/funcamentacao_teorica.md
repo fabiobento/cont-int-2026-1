@@ -366,7 +366,10 @@ $$u(t) = K_p \cdot e(t) + K_d \cdot \frac{de(t)}{dt}$$
 $$F = (k \cdot e_{cart}) + (k2 \cdot \dot{e}_{cart})$$
 $$\tau = (k_{stick} \cdot e_{stick}) + (k2_{stick} \cdot \dot{e}_{stick})$$
 
-- Onde $e$ representa o erro de posição (o quão longe o robô está do centro absoluto) e $\dot{e}$ representa a derivada desse erro (a velocidade do movimento). Os ganhos do código (`k=0.8`, `k2=0.2`, `k_stick=0.1`, `k2_stick=0.05`) atuam como multiplicadores, calibrando a intensidade com que o simulador vai puxar as juntas do robô de volta para a origem (0.0).
+- Onde:
+    - $e$ representa o erro de posição (o quão longe o robô está do centro absoluto) e
+    - $\dot{e}$ representa a derivada desse erro (a velocidade do movimento).
+    - Os ganhos do código (`k=0.8`, `k2=0.2`, `k_stick=0.1`, `k2_stick=0.05`) atuam como multiplicadores, calibrando a intensidade com que o simulador vai puxar as juntas do robô de volta para a origem (0.0).
 
 ```python
                 # Publica que o sistema não está pronto durante o procedimento de reset
@@ -412,10 +415,10 @@ $$\tau = (k_{stick} \cdot e_{stick}) + (k2_{stick} \cdot \dot{e}_{stick})$$
 
     $$|\theta(t)| > 0.05 \quad \lor \quad |\dot{x}(t)| > 0.01$$
 
-    Onde:
-    * $|\theta(t)|$ corresponde a `math.fabs(stick_js)`, o valor absoluto do ângulo da haste (tolerância de $\approx 2.86^\circ$).
-    * $|\dot{x}(t)|$ corresponde a `math.fabs(self.js.velocity[0])`, o valor absoluto da velocidade do carrinho (tolerância de $1$ cm/s).
-    * O símbolo $\lor$ (OU) indica que se *qualquer uma* das duas condições for violada, o robô ainda não está pronto.
+    - Onde:
+        - $|\theta(t)|$ corresponde a `math.fabs(stick_js)`, o valor absoluto do ângulo da haste (tolerância de $\approx 2.86^\circ$).
+        - $|\dot{x}(t)|$ corresponde a `math.fabs(self.js.velocity[0])`, o valor absoluto da velocidade do carrinho (tolerância de $1$ cm/s).
+        - O símbolo $\lor$ (OU) indica que se *qualquer uma* das duas condições for violada, o robô ainda não está pronto.
 
     - **2. Cálculo do Erro de Posição**
     Como o objetivo é trazer o carrinho de volta para a origem (ponto $0.0$ do trilho), o erro de posição $e_{cart}(t)$ em qualquer instante de tempo é simplesmente a sua posição atual menos o alvo:
@@ -428,12 +431,13 @@ $$\tau = (k_{stick} \cdot e_{stick}) + (k2_{stick} \cdot \dot{e}_{stick})$$
 
     $$\dot{e}_{cart}(t) \approx \frac{e_{cart}(t) - e_{cart}(t - \Delta t)}{\Delta t}$$
 
-    Onde:
-    * $e_{cart}(t)$ é o erro no ciclo atual (`cart_e`).
-    * $e_{cart}(t - \Delta t)$ é o erro do ciclo anterior (`prev_cart_e`).
-    * $\Delta t$ é o intervalo de tempo entre as execuções. Como definimos que o controle roda a 100 Hz (`rate2 = self.create_rate(100)`), o $\Delta t$ é de $\frac{1}{100}$ de segundo.
+    - Onde:
 
-    *(No código, isso é implementado literalmente como: `cart_e_derivative = (cart_e - prev_cart_e) / (1.0/100.0)`)*
+        - $e_{cart}(t)$ é o erro no ciclo atual (`cart_e`).
+        - $e_{cart}(t - \Delta t)$ é o erro do ciclo anterior (`prev_cart_e`).
+        - $\Delta t$ é o intervalo de tempo entre as execuções. Como definimos que o controle roda a 100 Hz (`rate2 = self.create_rate(100)`), o $\Delta t$ é de $\frac{1}{100}$ de segundo.
+
+    - No código, isso é implementado literalmente como: `cart_e_derivative = (cart_e - prev_cart_e) / (1.0/100.0)`
 
 ```python
                 # Obtendo posições iniciais
@@ -452,6 +456,32 @@ $$\tau = (k_{stick} \cdot e_{stick}) + (k2_{stick} \cdot \dot{e}_{stick})$$
 ```
 
 8. O esforço tanto para o carrinho quanto para o pêndulo é calculado usando a fórmula do controlador PD, que combina um ganho aplicado ao erro atual (a diferença entre a posição atual e a desejada) e outro ganho aplicado à derivada do erro (a taxa de variação do erro). Antes de enviar o comando de esforço, também precisamos determinar se um torque positivo ou negativo é necessário para mover o modelo simulado para a posição desejada.
+
+- Neste trecho, nós pegamos as variáveis calculadas anteriormente e finalmente aplicamos as equações de controle Proporcional-Derivativo (PD). Além disso, realizamos um ajuste de direção antes de enviar a força para o simulador.
+
+- **1. Cálculo do Comando de Esforço**
+O código executa a matemática do PD que definimos antes. Para o carrinho, a força linear $F_{cart}$ (chamada de `cart_c` no código) e para o pêndulo, o torque angular $\tau_{pole}$ (chamado de `tau` no código) são calculados da seguinte forma:
+
+$$F_{cart} = (K_{p}^{cart} \cdot e_{cart}) + (K_{d}^{cart} \cdot \dot{e}_{cart})$$
+$$\tau_{pole} = (K_{p}^{pole} \cdot |e_{pole}|) + (K_{d}^{pole} \cdot \dot{e}_{pole})$$
+
+>*(No código: `cart_c = k*cart_e + k2*cart_e_derivative` e `tau = k_stick*stick_e + k2_stick*stick_derivative`)*
+
+>Note que, para o pêndulo, o erro $e_{pole}$ usado no cálculo é o valor absoluto (`stick_e = math.fabs(stick_js)`). Isso significa que o controlador PD sempre calcula a *magnitude* do esforço (a "força bruta" necessária) para corrigir o erro, ignorando inicialmente para qual lado o pêndulo caiu.
+
+- **2. A Correção de Direção (Sinal)**
+A parte mais crítica deste trecho é o ajuste de sinal para garantir que a força seja aplicada na direção correta.
+
+    - **Para o carrinho:** O sinal é invertido ao empacotar o comando (`cmd.data = [-cart_c]`). Se o erro é positivo (carrinho está "à frente"), a força deve puxá-lo para trás (negativo).
+    - **Para o pêndulo:** Como calculamos o torque usando o erro absoluto, o valor `tau` resultante é sempre positivo. Portanto, o código precisa olhar para o ângulo original com sinal (`stick_js`) para decidir a direção do empurrão:
+        - Se `stick_js > 0` (pêndulo caiu para a direita), o torque deve ser negativo (`tau = -tau`) para empurrá-lo de volta para a esquerda.
+        - Se `stick_js < 0` (pêndulo caiu para a esquerda), o torque permanece positivo para empurrá-lo para a direita.
+
+- **3. Publicação e Ciclo**
+
+    - Finalmente, os comandos processados e com os sinais corretos são publicados nos tópicos do `ros2_control` (`self.cartpole_eff_pub.publish(cmd)` e `self.stick_eff_pub.publish(stick_tau_cmd)`).
+
+    - Os erros atuais são então armazenados como erros "anteriores" (`prev_stick_e` e `prev_cart_e`) para preparar o cálculo da derivada no próximo ciclo. O comando `rate2.sleep()` garante que este loop rode estritamente a 100 Hz, o que é essencial para que o valor de $\Delta t$ ($\frac{1}{100}$ s) usado no cálculo da derivada continue correto.
 
 ```python
                    cart_c = k*cart_e + k2*cart_e_derivative
