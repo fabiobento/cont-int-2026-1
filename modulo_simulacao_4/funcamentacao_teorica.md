@@ -119,53 +119,59 @@ Este pacote conterá o modelo *xacro* do robô e um arquivo *launch* que inicia 
 * **linear:** Uma junta prismática para mover o carrinho sobre o trilho.
 * **pivot:** Uma junta contínua permitindo a rotação do pêndulo em torno do carrinho.
 
-O pêndulo pode se mover livremente sem nenhuma entrada de controle direto e se mantém equilibrado através do movimento do carrinho. Quando o carrinho é empurrado para um lado, o pêndulo naturalmente se inclina na direção oposta. O arquivo [`cartpole.urdf.xacro`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/modulo_simulacao_4/scripts/cartpole_description/urdf/cartpole.urdf.xacro) define as juntas e os elos para este sistema. Como ele é longo e já cobrimos como criar tais arquivos, a principal diferença aqui é a interface de controle para as juntas. Neste caso, habilitamos o controle de esforço, que é refletido na seção `ros2_control` do arquivo *xacro*, conforme mostrado no código a seguir. Como de costume, a *tag* `ros2_control` é usada para definir como as juntas são controladas. Incluímos a interface de *hardware* para fazer a interface com as juntas simuladas.
+O pêndulo pode se mover livremente sem nenhuma entrada de controle direto e se mantém equilibrado através do movimento do carrinho. Quando o carrinho é empurrado para um lado, o pêndulo naturalmente se inclina na direção oposta. O arquivo [`cartpole.urdf.xacro`](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/refs/heads/main/modulo_simulacao_4/scripts/cartpole_description/urdf/cartpole.urdf.xacro) define as juntas e os elos para este sistema. Neste arquivo habilitamos o controle de esforço, que é refletido na seção `ros2_control` do arquivo *xacro*. A tag `ros2_control` é usada para definir como as juntas são controladas. Incluímos a interface de *hardware* para fazer a interface com as juntas simuladas.
 
 ```xml
-<ros2_control name="IgnitionSystem" type="system">
-<hardware>
-<plugin>ign_ros2_control/IgnitionSystem</plugin>
-</hardware>
+    <!-- Configuração do ros2_control para o simulador Ignition (Gazebo) -->
+    <ros2_control name="IgnitionSystem" type="system">
+        <hardware>
+            <plugin>ign_ros2_control/IgnitionSystem</plugin>
+        </hardware>
 
 ```
 
 A junta linear é comandada usando uma entrada de controle de esforço. No entanto, estamos interessados em saber sua posição ao longo do trilho para posicioná-la no meio do trilho no início de um novo episódio de treinamento.
 
 ```xml
-<joint name="linear">
-<command_interface name="effort" />
-<state_interface name="position"><param name="initial_value">0.0</param>
-</state_interface>
-<state_interface name="velocity"/>
-<state_interface name="effort"/>
-</joint>
+        <!-- Interfaces da junta linear do carrinho -->
+        <joint name="linear">
+            <!--<command_interface name="position" />-->
+            <command_interface name="effort" />
+
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
 
 ```
 
 A mesma interface de controle é usada para a junta rotacional conectada ao pêndulo. Embora não precisemos de um controlador para esta junta (já que o objetivo é estabilizar o pêndulo indiretamente movendo o carrinho para a esquerda ou para a direita), o sistema deve iniciar com o pêndulo em uma posição estável, que é um ângulo de 0.0, conforme mostrado na Figura 2. Usando o controlador de esforço, o pêndulo ainda estará livre para se mover ao redor do carrinho durante a simulação.
 
 ```xml
-<joint name="pivot">
-<command_interface name="effort" />
-<state_interface name="position">
-<param name="initial_value">0.0</param>
-</state_interface>
-<state_interface name="velocity"/>
-<state_interface name="effort"/>
-</joint>
-</ros2_control>
+        <!-- Interfaces da junta do pivô do pêndulo -->
+        <joint name="pivot">
+            <command_interface name="effort" />
+            
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+        </joint>
+    </ros2_control>
 
 ```
 
 Como de costume, devemos incluir o *plugin* onde os arquivos de configuração YAML do controlador especificam os tipos de controlador e as juntas envolvidas.
 
 ```xml
-<gazebo>
-<plugin filename="ign_ros2_control-system"
-name="ign_ros2_control::IgnitionROS2ControlPlugin">
-<parameters>$(find cartpole_description)/config/cartpole_controller.yaml</parameters>
-</plugin>
-</gazebo>
+    <gazebo>
+        <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+        <parameters>$(find cartpole_description)/config/cartpole_controller.yaml</parameters>
+        </plugin>
+    </gazebo>
 
 ```
 
