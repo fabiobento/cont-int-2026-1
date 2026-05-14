@@ -107,6 +107,7 @@ Um sistema *cart-pole* (pêndulo invertido) é um exemplo clássico na teoria de
 
 <a id="figure-2"></a>
 ![](https://raw.githubusercontent.com/fabiobento/cont-int-2026-1/main/modulo_simulacao_4/imagens/cart-pole.png)
+
 **Figura 2 - O pêndulo invertido usado na aplicação de DRL.** 
 
 Vamos começar criando um pacote ROS 2 para armazenar o modelo e os arquivos de simulação.
