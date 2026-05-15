@@ -44,7 +44,11 @@ class CartPoleROS2Env(gym.Env):
 
     Atributos:
         action_space (gymnasium.spaces.Box): Espaço contínuo de ações definindo a força a ser aplicada no carro.
-        observation_space (gymnasium.spaces.Box): Espaço contínuo do estado do robô.
+        observation_space (gymnasium.spaces.Box): Espaço contínuo do estado do robô, composto por:
+            - Posição do carro (m)
+            - Velocidade do carro (m/s)
+            - Ângulo da haste (rad)
+            - Velocidade angular da haste (rad/s)
         node (rclpy.node.Node): Nó embutido do ROS 2 para comunicação.
     """
     
