@@ -289,9 +289,34 @@ ros2 run cartpole_reset cartpole_reset
 ```
 O terminal ficará em execução, parecendo que está travado.
 
+### 7. Inicie o treinamento
+
 Abra um segundo terminal e entre no container:
 
 ```bash
 docker exec -it humble_gpu_container bash
 ```
-Inicie o treinamento
+
+Execute o treinamento
+```bash
+ros2 run cartpole_drl_ppo cartpole_training
+```
+
+### 8. Teste o modelo treinado
+
+Abra um terceiro terminal e entre no container:
+
+```bash
+docker exec -it humble_gpu_container bash
+```
+
+Verifique se o arquivo resultante do modelo foi criado
+
+```bash
+ls -l /workspace/install/cartpole_drl_ppo/share/cartpole_drl_ppo/ppo_cartpole_ros2.zip
+``` 
+
+Se o arquivo foi criado, execute o teste do modelo
+```bash
+ros2 run cartpole_drl_ppo cartpole_prediction
+```
