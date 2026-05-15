@@ -24,7 +24,7 @@ def main(args=None):
     # Carrega a rede neural pré-treinada a partir do arquivo .zip.
     # Utilizamos device='cpu' para carregar o modelo sem gerar gargalos ou avisos
     # caso estejamos em uma máquina sem GPU ou com configurações PyTorch simples.
-    model = PPO.load(model_pkg_path + "ppo_cartpole_ros2.zip", device='cpu')
+    model = PPO.load(model_pkg_path + "ppo_cartpole_ros2.zip", device='auto')
     
     # Instancia o ambiente customizado integrado com ROS 2
     env = CartPoleROS2Env()
