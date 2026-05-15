@@ -26,7 +26,7 @@ def main(args=None):
     # Inicializa o modelo PPO utilizando uma política Multi-Layer Perceptron (MlpPolicy).
     # O device='cpu' é utilizado para remover o aviso do PyTorch e frequentemente melhora a 
     # velocidade para redes pequenas em comparação à transferência de dados para a GPU.
-    model = PPO('MlpPolicy', env, verbose=1, device='cpu')
+    model = PPO('MlpPolicy', env, verbose=1, device='auto')
 
     # Inicia o processo de aprendizado (treinamento) do agente interagindo com o ambiente.
     # O total_timesteps define quantos passos (interações) o agente fará no total.
