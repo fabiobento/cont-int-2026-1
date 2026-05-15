@@ -147,7 +147,6 @@ docker run -it --rm \
 ```
 ### 4. Concluindo a Instalação( **dentro do container** )
 
-Os comandos daqui em diante serão executados **dentro do container**.
 > **Observação:**
 > 
 > Se não estiver mais no mesmo terminal em que executou o `build` acima entre no container com o > comando:
@@ -214,7 +213,7 @@ chmod +x install_tb3_humble.sh
 ./install_tb3_humble.sh 
 ```
 
-### 5. Baixando os pacotes ROS2 do repositório (**Dentro do container**)
+### 5. Baixando os pacotes ROS2 do repositório (**no computador host**)
 
 Para realizarmos as práticas de ROS 2, você precisará dos scripts, *packages* e arquivos de configuração mais recentes. Todo o material é atualizado constantemente no repositório da disciplina no GitHub.
 
@@ -225,7 +224,7 @@ Siga as instruções abaixo de acordo com a sua situação no laboratório de ho
 Se você ainda não baixou o material no container, entre no container e execute o comando de clonagem para trazer o projeto para o seu workspace:
 
 ```bash
-cd /workspace
+cd ~/
 git clone https://github.com/fabiobento/cont-int-2026-1.git
 ```
 
@@ -251,10 +250,14 @@ git reset --hard origin/main
 Copiando os pacotes do repositório para o workspace
 
 ```bash
-cp -a /workspace/cont-int-2026-1/modulo_simulacao_4/scripts/. /workspace/src/
+cp -a ~/cont-int-2026-1/modulo_simulacao_4/scripts/. ~/lab_ros_ws/src/
 ```
 
 ### 6. Iniciando a simulação
+
+> **Observação**
+>
+> Os comandos daqui em diante serão executados **dentro do container**.
 
  Iniciar a simulação usando os seguintes comandos:
 
