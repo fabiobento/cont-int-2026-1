@@ -1,4 +1,4 @@
-# Aula 7: Fundamentação Teórica - Deep Reinforcement Learning no ROS 2
+# Aula 7: *Deep Reinforcement Learning* no ROS 2
 
 ## **Introdução**
 Programar robôs para lidar com a natureza imprevisível do mundo real e gerar os sinais de controle corretos para as ações desejadas pode ser complexo. Recentemente, o aprendizado por reforço profundo (DRL - *Deep Reinforcement Learning*) surgiu como uma abordagem poderosa, especialmente para controlar robôs com muitos graus de liberdade, como humanoides ou quadrúpedes. O DRL permite que os robôs aprendam a se mover de forma eficaz para realizar tarefas específicas. Nesta aula, exploraremos duas ferramentas fundamentais para o aprendizado por reforço profundo, ou seja, o [Gymnasium](https://gymnasium.farama.org/index.html) e a [Stable-Baselines3](https://stable-baselines3.readthedocs.io/en/master/). Aplicaremos essas ferramentas para resolver um problema de controle clássico, o pêndulo invertido (*cart-pole*). Uma parte crítica do DRL é a simulação, que é comumente usada para treinar modelos de robôs. Conectaremos essas ferramentas de DRL ao Gazebo para treinar e testar o modelo do *cart-pole* em simulação.
