@@ -43,7 +43,7 @@ class CartPoleROS2Env(gym.Env):
     no padrão síncrono de passos (steps) esperado pelos algoritmos de DRL.
 
     Atributos:
-        action_space (gymnasium.spaces.Box): Espaço contínuo de ações definindo a força.
+        action_space (gymnasium.spaces.Box): Espaço contínuo de ações definindo a força a ser aplicada no carro.
         observation_space (gymnasium.spaces.Box): Espaço contínuo do estado do robô.
         node (rclpy.node.Node): Nó embutido do ROS 2 para comunicação.
     """
