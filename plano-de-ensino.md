@@ -77,7 +77,7 @@ A turma será dividida em equipes para resolver o problema de navegação autôn
 *   **Rviz2:** Para visualização dos sensores e do estado do agente.
 
 **Bibliografia Específica:**
-1.  **RENARD, Edouard.** *Mastering ROS 2 for Robotics Programming*. 4ª Ed. Packt, 2025. (Crucial para a integração ROS 2 + AI, Capítulos 14 e 15).
+1.  **RENARD, Edouard.** *Mastering ROS 2 for Robotics Programming*. 4ª Ed. Packt, 2025. (Importante para a integração ROS 2 + AI, Capítulos 14 e 15).
 2.  **LAPAN, Maxim.** *Deep Reinforcement Learning Hands-On*. 3ª Ed. Packt, 2024. (Base para PPO/DQN e PyTorch).
 3.  **GÉRON, Aurélien.** *Hands-On Machine Learning with Scikit-Learn and PyTorch*. O'Reilly, 2025. (Referência para CNNs e treinamento).
 4.  **RENARD, Edouard.** *ROS 2 from Scratch*. Packt, 2024. (Para os conceitos fundamentais de nós e tópicos).

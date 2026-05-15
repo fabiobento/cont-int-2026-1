@@ -91,7 +91,7 @@ Em termos simples, criar um ambiente no Gymnasium envolve definir todas as funç
 
 * **step:** Atualiza o ambiente com base em uma ação, retornando a próxima observação (ou estado) para o agente, a recompensa associada à ação e se o ambiente terminou (seja por terminação ou truncamento). Quando a terminação acontece, um episódio de treinamento termina.
 * **reset:** Reinicia o ambiente para o seu estado inicial e é obrigatório antes de invocar `step()`. Ele fornece a primeira observação do agente para o episódio e informações complementares, como métricas ou dados de depuração. A função de *reset* é invocada quando um episódio termina.
-* **close:** Este método encerra o ambiente, o que é crucial quando *softwares* externos estão envolvidos e devem ser encerrados de forma limpa.
+* **close:** Este método encerra o ambiente, o que é importante quando *softwares* externos estão envolvidos e devem ser encerrados de forma limpa.
 
 Note que essas funções não estão diretamente ligadas a nenhum recurso que forneça informações sobre o status do robô ou onde as ações selecionadas são aplicadas. Ao usar o ambiente fornecido no pacote, você pode conectá-lo a um sistema de renderização ou ao simulador MuJoCo. Adicionalmente, definir um ambiente envolve vincular as entradas e saídas com as quais o agente interage. No nosso exemplo, conectaremos o ambiente ao Gazebo. Antes de integrá-lo ao ROS 2 através do Gazebo, 
 

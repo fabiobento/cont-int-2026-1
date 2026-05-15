@@ -22,7 +22,7 @@ def bound_angle(angle):
     """
     Normaliza o ângulo fornecido para mantê-lo estritamente no intervalo [-π, π].
 
-    Isso é crucial para a Rede Neural, pois evita que a observação do ângulo 
+    Isso é imporatnte para a Rede Neural, pois evita que a observação do ângulo 
     cresça infinitamente caso o pêndulo dê voltas completas no próprio eixo.
 
     Argumentos:
