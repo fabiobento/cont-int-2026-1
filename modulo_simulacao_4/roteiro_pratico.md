@@ -116,12 +116,12 @@ docker build \
 
 ### 3. Executando o Container (Run)
 
-Para iniciar o seu novo container habilitando a Interface Gráfica, o Volume do seu workspace (nesse exemplo é `~/turtlebot3_ws`) :
+Para iniciar o seu novo container habilitando a Interface Gráfica, o Volume do seu workspace (nesse exemplo é `~/lab_ros_ws`) :
 
 Primeiro crie o workspace:
 
 ```bash
-mkdir -p ~/turtlebot3_ws/src
+mkdir -p ~/lab_ros_ws/src
 ```
 
 Depois, libere a interface de vídeo na máquina host:
@@ -142,7 +142,7 @@ docker run -it --rm \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -e ROS_DOMAIN_ID=30 \
-  -v ~/turtlebot3_ws:/workspace \
+  -v ~/lab_ros_ws:/workspace \
   lab_ros2_humble
 ```
 ### 4. Concluindo a Instalação( **dentro do container** )
