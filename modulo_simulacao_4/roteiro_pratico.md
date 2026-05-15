@@ -224,7 +224,7 @@ Siga as instruções abaixo de acordo com a sua situação no laboratório de ho
 
 Se você ainda não baixou o material no container, entre no container e execute o comando de clonagem para trazer o projeto para o seu workspace:
 
-````bash
+```bash
 cd /workspace
 git clone https://github.com/fabiobento/cont-int-2026-1.git
 ```
