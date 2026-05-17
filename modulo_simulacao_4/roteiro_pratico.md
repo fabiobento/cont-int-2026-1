@@ -257,7 +257,7 @@ cp -a ~/cont-int-2026-1/modulo_simulacao_4/scripts/. ~/lab_ros_ws/src/
 
 > **Observação**
 >
-> Os comandos daqui em diante serão executados **dentro do container**.
+> Os comandos daqui em diante serão executados **DENTRO DO CONTAINER**.
 
  Iniciar a simulação usando os seguintes comandos:
 
