@@ -253,7 +253,7 @@ Copiando os pacotes do repositório para o workspace
 cp -a ~/cont-int-2026-1/modulo_simulacao_4/scripts/. ~/lab_ros_ws/src/
 ```
 
-### 6. Iniciando a simulação
+### 6. Iniciando a simulação (**DENTRO DO CONTAINER**)
 
 > **Observação**
 >
