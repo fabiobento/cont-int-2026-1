@@ -282,6 +282,7 @@ Abra um novo terminal (Ctrl + Alt + T, ou clicando no ícone de terminal) e exec
 
 ```bash
 docker exec -it humble_gpu_container bash
+source install/setup.bash
 ```
 
 ```bash
@@ -295,6 +296,7 @@ Abra um segundo terminal e entre no container:
 
 ```bash
 docker exec -it humble_gpu_container bash
+source install/setup.bash
 ```
 
 Execute o treinamento
@@ -308,6 +310,7 @@ Abra um terceiro terminal e entre no container:
 
 ```bash
 docker exec -it humble_gpu_container bash
+source install/setup.bash
 ```
 
 Verifique se o arquivo resultante do modelo foi criado
