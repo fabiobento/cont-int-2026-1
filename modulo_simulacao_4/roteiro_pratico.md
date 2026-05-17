@@ -304,9 +304,23 @@ Execute o treinamento
 ros2 run cartpole_drl_ppo cartpole_training
 ```
 
-### 8. Teste o modelo treinado
+### 8. Registre os dados do treinamento
 
 Abra um terceiro terminal e entre no container:
+
+```bash
+docker exec -it humble_gpu_container bash
+source install/setup.bash
+```
+
+Execute o registro de dados de treinamento
+```bash
+ros2 run cartpole_drl_ppo plot_data
+```
+
+### 9. Teste o modelo treinado
+
+Abra um quarto terminal e entre no container:
 
 ```bash
 docker exec -it humble_gpu_container bash
