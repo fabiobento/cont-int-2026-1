@@ -145,7 +145,7 @@ docker run -it --rm \
   -v ~/lab_ros_ws:/workspace \
   lab_ros2_humble
 ```
-### 4. Concluindo a Instalação( **dentro do container** )
+### 4. Concluindo a Instalação( **DENTRO DO CONTAINER** )
 
 > **Observação:**
 > 
