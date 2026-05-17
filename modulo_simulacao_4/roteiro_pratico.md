@@ -213,7 +213,7 @@ chmod +x install_tb3_humble.sh
 ./install_tb3_humble.sh 
 ```
 
-### 5. Baixando os pacotes ROS2 do repositório (**no computador host**)
+### 5. Baixando os pacotes ROS2 do repositório (**NO COMPUTADOR HOST**)
 
 Para realizarmos as práticas de ROS 2, você precisará dos scripts, *packages* e arquivos de configuração mais recentes. Todo o material é atualizado constantemente no repositório da disciplina no GitHub.
 
