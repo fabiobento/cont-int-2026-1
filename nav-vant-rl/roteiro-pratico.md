@@ -1,5 +1,3 @@
-Aqui estão o roteiro e o script atualizados, incorporando as correções das dependências (`apt-get update`) e a clonagem do pacote `aws-robomaker-hospital-world` para resolver o erro do `hospital_robot_spawner`, além do comando de inicialização correto para a simulação.
-
 ### Roteiro Atualizado
 
 # Aula 8: Roteiro Prático - Deep Reinforcement Learning para VANTs no ROS 2
