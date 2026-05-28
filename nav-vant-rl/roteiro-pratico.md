@@ -1,6 +1,4 @@
-### Roteiro Atualizado
-
-# Aula 8: Roteiro Prático - Deep Reinforcement Learning para VANTs no ROS 2
+# Projeto Final - Navegação Autônoma e Desvio de Obstáculos para VANTs com Aprendizado por Reforço
 
 ### 1. Crie o arquivo Dockerfile
 
