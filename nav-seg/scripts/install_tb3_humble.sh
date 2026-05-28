@@ -20,6 +20,8 @@ git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git || tru
 git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git || true
 git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git || true
 git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git || true
+git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_applications.git || true
+
 
 echo "[3/4] Compilando o Workspace com Colcon..."
 cd /workspace
