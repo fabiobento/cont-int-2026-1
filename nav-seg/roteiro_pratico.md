@@ -1,6 +1,8 @@
 # Projeto Final - Navegação Reativa e Coordenação de Frotas de Robôs Terrestres (Líder-Seguidor)
 
-### 1. Crie o arquivo Dockerfile
+## 1. Construção da Imagem Docker 
+
+### 1.1. Crie o arquivo Dockerfile
 
 No seu terminal físico, crie uma pasta para guardar as configurações do Docker e crie o arquivo:
 
@@ -98,7 +100,7 @@ CMD ["bash"]
 
 ---
 
-### 2. Construindo a Imagem (Build)
+### 1.2. Construindo a Imagem (Build)
 
 Agora, vamos transformar esse `Dockerfile` em uma imagem real na sua máquina. Execute o comando abaixo na mesma pasta onde você salvou o arquivo `Dockerfile`. Vamos usar comandos do próprio Ubuntu `(id -u e id -g)` para ler qual é a sua numeração exata no sistema e passar isso para dentro do Docker: 
 
@@ -106,7 +108,7 @@ Agora, vamos transformar esse `Dockerfile` em uma imagem real na sua máquina. E
 docker build \
   --build-arg USER_UID=$(id -u) \
   --build-arg USER_GID=$(id -g) \
-  -t lab_ros2_humble .
+  -t ros2_humble .
 
 ```
 
@@ -114,7 +116,7 @@ docker build \
 
 ---
 
-### 3. Executando o Container (Run)
+### 1.3. Executando o Container (Run)
 
 Para iniciar o seu novo container habilitando a Interface Gráfica, o Volume do seu workspace (nesse exemplo é `~/lab_ros_ws`) :
 
@@ -143,13 +145,18 @@ docker run -it --rm \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -e ROS_DOMAIN_ID=30 \
   -v ~/lab_ros_ws:/workspace \
-  lab_ros2_humble
+  ros2_humble
 ```
-### 4. Concluindo a Instalação( **DENTRO DO CONTAINER** )
+### 1.4. Concluindo a Instalação( **DENTRO DO CONTAINER** )
+> **IMPORTANTE!**
+> ----------------
+> * A partir deste ponto, todas as operações serão executadas **dentro** do container.
+> * O `workspace` é o volume compartilhado entre o seu sistema físico (`~/lab_ros_ws`) e o container.
+> ----------------
 
 > **Observação:**
 > 
-> Se não estiver mais no mesmo terminal em que executou o `build` acima entre no container com o > comando:
+> Se não estiver mais no mesmo terminal em que executou o `build` acima entre no container com o  comando:
 > ```bash
 > docker exec -it humble_gpu_container bash
 > ```
@@ -166,29 +173,39 @@ Cole o código abaixo dentro desse arquivo que acabou de criar:
 
 # =================================================================
 # Script de Configuração TurtleBot3 - ROS 2 Humble
+# Disciplina: Controle Inteligente - Prof. Fabio
 # =================================================================
 
 set -e # Interrompe o script se algum comando falhar
 
-echo "[1/4] Preparando o Workspace..."
+echo "[1/5] Preparando o Workspace..."
 # Garante que o ambiente base do ROS Humble está carregado para a compilação
 source /opt/ros/humble/setup.bash
 
 mkdir -p /workspace/src
 cd /workspace/src/
 
-echo "[2/4] Clonando repositórios do TurtleBot3 (Branch: humble-devel)..."
-# Utiliza a branch oficial da Robotis para a versão Humble
-git clone -b humble-devel https://github.com/ROBOTIS-GIT/DynamixelSDK.git || true
-git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git || true
-git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3.git || true
-git clone -b humble-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git || true
+echo "[2/5] Clonando repositórios do TurtleBot3 (Branch: humble)..."
+# Utiliza a branch oficial da Robotis para a versão Humble (sem o sufixo -devel)
+git clone -b humble https://github.com/ROBOTIS-GIT/DynamixelSDK.git || true
+git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git || true
+git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3.git || true
+git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git || true
+git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_applications.git || true
+git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_applications_msgs.git || true
 
-echo "[3/4] Compilando o Workspace com Colcon..."
+
+echo "[3/5] Instalando dependências do ROS (rosdep)..."
 cd /workspace
+sudo apt-get update
+sudo rosdep init || true
+rosdep update
+rosdep install --from-paths src --ignore-src -r -y
+
+echo "[4/5] Compilando o Workspace com Colcon..."
 colcon build --symlink-install
 
-echo "[4/4] Configurando variáveis de ambiente adicionais no .bashrc..."
+echo "[5/5] Configurando variáveis de ambiente adicionais no .bashrc..."
 # Adiciona as variáveis do utilizador ao bashrc se ainda não existirem
 if ! grep -q "/workspace/install/setup.bash" ~/.bashrc; then
     echo "" >> ~/.bashrc
@@ -196,8 +213,8 @@ if ! grep -q "/workspace/install/setup.bash" ~/.bashrc; then
     echo "# Configurações TurtleBot3 - ROS 2 Humble" >> ~/.bashrc
     echo "# ===================================================" >> ~/.bashrc
     echo 'source /workspace/install/setup.bash' >> ~/.bashrc
-    echo 'export TURTLEBOT3_MODEL=waffle' >> ~/.bashrc
-    echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc
+    echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
+    echo 'export ROS_DOMAIN_ID=0 #TURTLEBOT3' >> ~/.bashrc
 fi
 
 echo "========================================================="
@@ -206,9 +223,35 @@ echo " Para aplicar as mudanças no terminal atual, execute:"
 echo " source ~/.bashrc"
 echo "========================================================="
 ```
+### 1.5. Carregando o Ambiente do ROS 2 Humble 
+Carregue o ambiente do ROS 2 Humble com o comando:
 
-Configure a permissão de execução do script e execute-o:
 ```bash
-chmod +x install_tb3_humble.sh
-./install_tb3_humble.sh 
+source ~/.bashrc
 ```
+### 1.6. Executando o Comando para Abrir 
+
+Desse passo em diante, sempre que mencionar que você deve abrir mais um terminal no container, você precisará executar o seguinte comando para entrar no container:
+
+```bash
+docker exec -it humble_gpu_container bash
+```
+e, dentro do container, carregar o ambiente do ROS 2 Humble com o comando:
+
+```bash
+source ~/.bashrc
+```
+
+
+## 2. Simulação do Seguidor(*Follower*)
+- **O que é o exemplo *Follower*?**
+
+- Este exemplo demonstra um robô seguindo aquele que está à sua frente.
+- Quando o robô líder é controlado via teleoperação, os demais robôs seguem o que está à sua frente em sequência.
+- Este exemplo utiliza odometria e o planejador local do `Nav2`.
+
+> **OBSERVAÇÃO:**
+> O desvio da odometria pode se acumular ao longo do tempo, tornando-a menos precisa.
+
+- Você pode encontrar um exemplo de execução do seguidor nesse link:
+[Vídeo de execução do seguidor](https://www.youtube.com/watch?v=YXF3FeRNSeE)

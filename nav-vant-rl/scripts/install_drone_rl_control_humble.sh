@@ -39,7 +39,7 @@ if ! grep -q "/workspace/install/setup.bash" ~/.bashrc; then
     echo "# Configurações Drone-RL-Control - ROS 2 Humble" >> ~/.bashrc
     echo "# ===================================================" >> ~/.bashrc
     echo 'source /workspace/install/setup.bash' >> ~/.bashrc
-    echo 'export ROS_DOMAIN_ID=30 #DRONE_RL' >> ~/.bashrc
+    echo 'export ROS_DOMAIN_ID=0 #DRONE_RL' >> ~/.bashrc
 fi
 
 echo "========================================================="

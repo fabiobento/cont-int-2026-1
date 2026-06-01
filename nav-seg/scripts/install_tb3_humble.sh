@@ -21,6 +21,8 @@ git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git || true
 git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3.git || true
 git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git || true
 git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_applications.git || true
+git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_applications_msgs.git || true
+
 
 echo "[3/5] Instalando dependências do ROS (rosdep)..."
 cd /workspace
@@ -40,8 +42,8 @@ if ! grep -q "/workspace/install/setup.bash" ~/.bashrc; then
     echo "# Configurações TurtleBot3 - ROS 2 Humble" >> ~/.bashrc
     echo "# ===================================================" >> ~/.bashrc
     echo 'source /workspace/install/setup.bash' >> ~/.bashrc
-    echo 'export TURTLEBOT3_MODEL=waffle' >> ~/.bashrc
-    echo 'export ROS_DOMAIN_ID=30 #TURTLEBOT3' >> ~/.bashrc
+    echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
+    echo 'export ROS_DOMAIN_ID=0 #TURTLEBOT3' >> ~/.bashrc
 fi
 
 echo "========================================================="
