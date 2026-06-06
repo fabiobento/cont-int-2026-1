@@ -38,12 +38,11 @@ RUN apt-get update && apt-get install -y \
     ros-humble-cartographer-ros \
     ros-humble-navigation2 \
     ros-humble-nav2-bringup \
-    ros-humble-turtlebot3-teleop \
-    ros-humble-turtlebot3-description \
-    ros-humble-turtlebot3-gazebo \
     ros-humble-ros-gz \
     ros-humble-ign-ros2-control \
     && rm -rf /var/lib/apt/lists/*
+
+
 
 # ====================================================================
 # INSTALAÇÃO DE BIBLIOTECAS DE INTELIGÊNCIA ARTIFICIAL (DRL)
@@ -223,13 +222,28 @@ echo " Para aplicar as mudanças no terminal atual, execute:"
 echo " source ~/.bashrc"
 echo "========================================================="
 ```
-### 1.5. Carregando o Ambiente do ROS 2 Humble 
-Carregue o ambiente do ROS 2 Humble com o comando:
+
+Agora habilite o script acima apra ser executado:
+
+```bash
+chmod +x install_tb3_humble.sh
+
+```
+
+E execute o mesmo dentro do container com o comando
+```
+./install_tb3_humble.sh
+```
+
+Agora carregue o ambiente do ROS 2 Humble com o comando:
 
 ```bash
 source ~/.bashrc
 ```
-### 1.6. Executando o Comando para Abrir 
+
+Pronto, seu container está pronto para ser utilizado.
+
+### 1.5. Executando o Comando para Abrir 
 
 Desse passo em diante, sempre que mencionar que você deve abrir mais um terminal no container, você precisará executar o seguinte comando para entrar no container:
 
@@ -244,6 +258,8 @@ source ~/.bashrc
 
 
 ## 2. Simulação do Seguidor(*Follower*)
+
+### 2.1. Descrição
 - **O que é o exemplo *Follower*?**
 
 - Este exemplo demonstra um robô seguindo aquele que está à sua frente.
@@ -253,5 +269,8 @@ source ~/.bashrc
 > **OBSERVAÇÃO:**
 > O desvio da odometria pode se acumular ao longo do tempo, tornando-a menos precisa.
 
-- Você pode encontrar um exemplo de execução do seguidor nesse link:
-[Vídeo de execução do seguidor](https://www.youtube.com/watch?v=YXF3FeRNSeE)
+- Você pode encontrar um exemplo de execução do seguidor nesse link: 
+[**Vídeo de execução do seguidor**](https://www.youtube.com/watch?v=YXF3FeRNSeE)
+
+### 2.2. Executando o seguidor no Gazebo
+

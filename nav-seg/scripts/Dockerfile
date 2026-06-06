@@ -21,12 +21,11 @@ RUN apt-get update && apt-get install -y \
     ros-humble-cartographer-ros \
     ros-humble-navigation2 \
     ros-humble-nav2-bringup \
-    ros-humble-turtlebot3-teleop \
-    ros-humble-turtlebot3-description \
-    ros-humble-turtlebot3-gazebo \
     ros-humble-ros-gz \
     ros-humble-ign-ros2-control \
     && rm -rf /var/lib/apt/lists/*
+
+
 
 # ====================================================================
 # INSTALAÇÃO DE BIBLIOTECAS DE INTELIGÊNCIA ARTIFICIAL (DRL)
