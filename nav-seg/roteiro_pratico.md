@@ -141,7 +141,7 @@ docker run -it --rm \
   --ipc=host \
   --gpus all \
   -e DISPLAY=$DISPLAY \
-  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+  -v ~/tmp/.X11-unix:/tmp/.X11-unix:rw \
   -e ROS_DOMAIN_ID=30 \
   -v ~/lab_ros_ws:/workspace \
   ros2_humble

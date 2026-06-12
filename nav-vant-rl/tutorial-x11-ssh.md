@@ -46,10 +46,10 @@ Identifique o cookie cujo número bate com o do seu `$DISPLAY` (ex: `unix:12` �
 
 ```bash
 # Extrair o cookie do display correto para um arquivo temporário
-xauth extract /tmp/xauth_docker localhost:12
+xauth extract ~/tmp/xauth_docker localhost:12
 
 # Garantir que o container consiga ler o arquivo
-chmod 644 /tmp/xauth_docker
+chmod 644 ~/tmp/xauth_docker
 ```
 
 > Ajuste o número `:12` conforme o seu `$DISPLAY`.
@@ -64,8 +64,8 @@ docker run -it --rm \
   --net=host \
   --ipc=host \
   -e DISPLAY=$DISPLAY \
-  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-  -v /tmp/xauth_docker:/tmp/.xauth_docker:ro \
+  -v ~/tmp/.X11-unix:/tmp/.X11-unix:rw \
+  -v ~/tmp/xauth_docker:/tmp/.xauth_docker:ro \
   -e XAUTHORITY=/tmp/.xauth_docker \
   minha_imagem
 ```
@@ -76,8 +76,8 @@ O que cada flag faz:
 |------|--------|
 | `--net=host` | Usa a rede do host — necessário para `localhost:N` funcionar dentro do container |
 | `-e DISPLAY` | Passa o display SSH para dentro do container |
-| `-v /tmp/.X11-unix` | Monta o socket X11 no container |
-| `-v /tmp/xauth_docker` | Monta o arquivo de cookie de autenticação |
+| `-v ~/tmp/.X11-unix` | Monta o socket X11 no container |
+| `-v ~/tmp/xauth_docker` | Monta o arquivo de cookie de autenticação |
 | `-e XAUTHORITY` | Aponta para o cookie dentro do container |
 
 ---
@@ -90,7 +90,7 @@ echo $DISPLAY
 # deve ser localhost:12.0
 
 # Confirmar que o cookie está acessível
-cat /tmp/.xauth_docker | od -An -tx1 | head
+cat ~/tmp/.xauth_docker | od -An -tx1 | head
 # deve mostrar bytes, não um erro de permissão
 
 # Teste rápido — deve abrir uma janelinha de relógio
@@ -136,8 +136,8 @@ chmod 644 /tmp/xauth_docker                            # liberar leitura
 docker run -it --rm \
   --net=host --ipc=host \
   -e DISPLAY=$DISPLAY \
-  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-  -v /tmp/xauth_docker:/tmp/.xauth_docker:ro \
+  -v ~/tmp/.X11-unix:/tmp/.X11-unix:rw \
+  -v ~/tmp/xauth_docker:/tmp/.xauth_docker:ro \
   -e XAUTHORITY=/tmp/.xauth_docker \
   minha_imagem
 
