@@ -1,15 +1,22 @@
+
+
 # Projeto Final - Navegação Reativa e Coordenação de Frotas de Robôs Terrestres (Líder-Seguidor)
 
-## 1. Construção da Imagem Docker 
+Este guia orienta a construção da imagem Docker, configuração do ecossistema ROS 2 Humble / Gazebo e a correta exportação de telas em ambientes locais ou remotos (via SSH).
+
+---
+
+## 1. Construção da Imagem Docker
 
 ### 1.1. Crie o arquivo Dockerfile
 
-No seu terminal físico, crie uma pasta para guardar as configurações do Docker e crie o arquivo:
+No seu terminal, crie uma pasta para organizar as configurações do Docker e crie o arquivo:
 
 ```bash
 mkdir -p ~/docker_ros2
 cd ~/docker_ros2
 nano Dockerfile
+
 ```
 
 Cole o conteúdo abaixo dentro do arquivo:
@@ -42,34 +49,33 @@ RUN apt-get update && apt-get install -y \
     ros-humble-ign-ros2-control \
     && rm -rf /var/lib/apt/lists/*
 
-
-
 # ====================================================================
 # INSTALAÇÃO DE BIBLIOTECAS DE INTELIGÊNCIA ARTIFICIAL (DRL)
 # ====================================================================
-# Instalado globalmente na imagem. O numpy<2 garante estabilidade com ROS/Gym.
 RUN pip3 install 'numpy<2' gymnasium stable-baselines3[extra]
 
 # ====================================================================
 # CONFIGURAÇÃO DE USUÁRIO NÃO-ROOT
 # ====================================================================
-# Argumentos que receberão os IDs da sua máquina host durante o build
 ARG USERNAME=robot
 ARG USER_UID=1000
 ARG USER_GID=1000
 
-# Cria o grupo e o utilizador com os IDs exatos da máquina física
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME -s /bin/bash \
-    # Adiciona o utilizador ao grupo sudo e permite o uso sem palavra-passe
     && usermod -aG sudo $USERNAME \
     && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # ====================================================================
 # SUPORTE A GPU (NVIDIA) E INTERFACE GRÁFICA
 # ====================================================================
+<<<<<<< HEAD
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=graphics,display,video,utility
+=======
+ENV NVIDIA_VISIBLE_DEVICES ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,display,video,utility
+>>>>>>> 3f2d653c4a71517265c7b3d4f90243378b0cc6d5
 ENV QT_X11_NO_MITSHM=1
 
 # Variável de domínio da rede do laboratório
@@ -82,27 +88,22 @@ ENV TURTLEBOT3_MODEL=burger
 # CONFIGURAÇÃO DO WORKSPACE
 # ====================================================================
 WORKDIR /workspace
-
-# Muda o dono da pasta inicial para o novo utilizador
 RUN chown -R $USER_UID:$USER_GID /workspace
 
-# Muda efetivamente do 'root' para o utilizador definido
 USER $USERNAME
 
-# Adiciona os 'sources' base no terminal do novo utilizador
 RUN echo "source /opt/ros/humble/setup.bash" >> /home/$USERNAME/.bashrc \
     && echo "source /usr/share/gazebo/setup.sh" >> /home/$USERNAME/.bashrc
 
 CMD ["bash"]
+
 ```
 
 *(Salve apertando `Ctrl+O`, `Enter`, e saia com `Ctrl+X`).*
 
----
-
 ### 1.2. Construindo a Imagem (Build)
 
-Agora, vamos transformar esse `Dockerfile` em uma imagem real na sua máquina. Execute o comando abaixo na mesma pasta onde você salvou o arquivo `Dockerfile`. Vamos usar comandos do próprio Ubuntu `(id -u e id -g)` para ler qual é a sua numeração exata no sistema e passar isso para dentro do Docker: 
+Execute o comando de build mapeando o UID e GID do seu usuário para evitar conflitos de permissões em volumes compartilhados:
 
 ```bash
 docker build \
@@ -112,28 +113,51 @@ docker build \
 
 ```
 
-*O ponto (`.`) no final é obrigatório, ele indica que o Dockerfile está na pasta atual.*
-
 ---
 
-### 1.3. Executando o Container (Run)
+## 2. Preparação do Servidor Gráfico (X11)
 
-Para iniciar o seu novo container habilitando a Interface Gráfica, o Volume do seu workspace (nesse exemplo é `~/lab_ros_ws`) :
+Antes de iniciar o container, você deve preparar a autorização visual dependendo de onde está acessando a máquina do laboratório:
 
-Primeiro crie o workspace:
+### Opção A: Acesso Direto (Máquina Física/Local)
 
-```bash
-mkdir -p ~/lab_ros_ws/src
-```
-
-Depois, libere a interface de vídeo na máquina host:
+Se você está sentado em frente ao computador do laboratório, basta rodar:
 
 ```bash
 xhost +local:root
 
 ```
 
-Agora, inicie o container:
+### Opção B: Acesso Remoto (Via SSH com X11 Forwarding)
+
+Se você acessou a máquina via `ssh -X usuario@servidor`, o comando `xhost` falhará. Use o método de cookies de autenticação do `xauth`:
+
+```bash
+# 1. Verifique o ID do display criado pelo SSH
+echo $DISPLAY
+# Exemplo de saída: localhost:12.0
+
+# 2. Extraia o cookie do display correspondente (troque o '12' pelo número retornado acima)
+mkdir -p ~/tmp
+xauth extract ~/tmp/xauth_docker localhost:12
+
+# 3. Permita que o container leia o arquivo de cookie
+chmod 644 ~/tmp/xauth_docker
+
+```
+
+---
+
+## 3. Executando o Container (Run)
+
+Prepare a pasta do seu Workspace na máquina host:
+
+```bash
+mkdir -p ~/lab_ros_ws/src
+
+```
+
+Inicie o container injetando os parâmetros de rede, aceleração de hardware e as configurações visuais apropriadas:
 
 ```bash
 docker run -it --rm \
@@ -143,58 +167,63 @@ docker run -it --rm \
   --gpus all \
   -e DISPLAY=$DISPLAY \
   -v ~/tmp/.X11-unix:/tmp/.X11-unix:rw \
+<<<<<<< HEAD
   -e ROS_DOMAIN_ID=0 \
   -e TURTLEBOT3_MODEL=burger \
+=======
+  -v ~/tmp/xauth_docker:/tmp/.xauth_docker:ro \
+  -e XAUTHORITY=/tmp/.xauth_docker \
+  -e ROS_DOMAIN_ID=30 \
+>>>>>>> 3f2d653c4a71517265c7b3d4f90243378b0cc6d5
   -v ~/lab_ros_ws:/workspace \
   ros2_humble
+
 ```
-### 1.4. Concluindo a Instalação( **DENTRO DO CONTAINER** )
-> **IMPORTANTE!**
-> ----------------
-> * A partir deste ponto, todas as operações serão executadas **dentro** do container.
-> * O `workspace` é o volume compartilhado entre o seu sistema físico (`~/lab_ros_ws`) e o container.
-> ----------------
 
-> **Observação:**
-> 
-> Se não estiver mais no mesmo terminal em que executou o `build` acima entre no container com o  comando:
-> ```bash
-> docker exec -it humble_gpu_container bash
-> ```
+> *Nota: Se estiver usando o acesso local (Opção A), as flags `-v ~/tmp/xauth_docker` e `-e XAUTHORITY` podem ser omitidas sem problemas.*
 
-**Dentro do container**, para concluir a instalação, crie um arquivo para o script com os seguintes comandos:
+---
+
+## 4. Concluindo a Instalação (Dentro do Container)
+
+> ⚠️ **IMPORTANTE:** A partir deste ponto, todas as operações são executadas **DENTRO** do container.
+
+Para validar se o X11 Forwarding funcionou, faça um teste rápido:
+
+```bash
+xclock
+
+```
+
+*Se uma janela de relógio analógico abrir na sua tela, a interface gráfica está funcionando.*
+
+Agora, configure o ecossistema do TurtleBot3:
+
 ```bash
 cd /workspace
 touch install_tb3_humble.sh
 nano install_tb3_humble.sh
+
 ```
-Cole o código abaixo dentro desse arquivo que acabou de criar:
+
+Cole o script de automação abaixo:
+
 ```bash
 #!/bin/bash
-
-# =================================================================
-# Script de Configuração TurtleBot3 - ROS 2 Humble
-# Disciplina: Controle Inteligente - Prof. Fabio
-# =================================================================
-
-set -e # Interrompe o script se algum comando falhar
+set -e 
 
 echo "[1/5] Preparando o Workspace..."
-# Garante que o ambiente base do ROS Humble está carregado para a compilação
 source /opt/ros/humble/setup.bash
-
 mkdir -p /workspace/src
 cd /workspace/src/
 
-echo "[2/5] Clonando repositórios do TurtleBot3 (Branch: humble)..."
-# Utiliza a branch oficial da Robotis para a versão Humble (sem o sufixo -devel)
+echo "[2/5] Clonando repositórios do TurtleBot3..."
 git clone -b humble https://github.com/ROBOTIS-GIT/DynamixelSDK.git || true
 git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git || true
 git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3.git || true
 git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git || true
 git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_applications.git || true
 git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_applications_msgs.git || true
-
 
 echo "[3/5] Instalando dependências do ROS (rosdep)..."
 cd /workspace
@@ -207,7 +236,6 @@ echo "[4/5] Compilando o Workspace com Colcon..."
 colcon build --symlink-install
 
 echo "[5/5] Configurando variáveis de ambiente adicionais no .bashrc..."
-# Adiciona as variáveis do utilizador ao bashrc se ainda não existirem
 if ! grep -q "/workspace/install/setup.bash" ~/.bashrc; then
     echo "" >> ~/.bashrc
     echo "# ===================================================" >> ~/.bashrc
@@ -219,59 +247,48 @@ fi
 
 echo "========================================================="
 echo " WORKSPACE CONFIGURADO E COMPILADO COM SUCESSO!"
-echo " Para aplicar as mudanças no terminal atual, execute:"
-echo " source ~/.bashrc"
+echo " Execute: source ~/.bashrc"
 echo "========================================================="
+
 ```
 
-Agora habilite o script acima apra ser executado:
+Dê permissão e execute o script:
 
 ```bash
 chmod +x install_tb3_humble.sh
-
-```
-
-E execute o mesmo dentro do container com o comando
-```
 ./install_tb3_humble.sh
-```
-
-Agora carregue o ambiente do ROS 2 Humble com o comando:
-
-```bash
 source ~/.bashrc
+
 ```
 
-Pronto, seu container está pronto para ser utilizado.
+---
 
-### 1.5. Executando o Comando para Abrir 
+## 5. Simulação do Seguidor (*Follower*)
 
-Desse passo em diante, sempre que mencionar que você deve abrir mais um terminal no container, você precisará executar o seguinte comando para entrar no container:
+### 5.1. Descrição do Exemplo
+
+Este pacote demonstra uma técnica de navegação em frota estilo líder-seguidor. O robô da frente (líder) é controlado manualmente e os subsequentes utilizam dados de odometria combinados com o planejador local do `Nav2` para segui-lo em fila.
+
+> ℹ️ **Observação:** O desvio acumulado na odometria (*drift*) pode reduzir a precisão do alinhamento ao longo do tempo.
+
+Você pode conferir o comportamento dinâmico esperado neste link: **[Vídeo de execução do seguidor](https://www.youtube.com/watch?v=YXF3FeRNSeE)**.
+
+### 5.2. Abertura de Múltiplos Terminais (**Modo Operacional**)
+
+Sempre que o roteiro exigir novos terminais durante os testes de simulação, abra uma nova aba na sua máquina host e acesse o container com:
 
 ```bash
 docker exec -it humble_gpu_container bash
-```
-e, dentro do container, carregar o ambiente do ROS 2 Humble com o comando:
-
-```bash
 source ~/.bashrc
+
 ```
 
+### 5.3 Carregando Múltiplos TurtleBot3s
 
-## 2. Simulação do Seguidor(*Follower*)
+#### 5.3.1 Descrição
 
-### 2.1. Descrição
-- **O que é o exemplo *Follower*?**
+> Esse vídeo ilustra o controle de multiplos TurtleBot3 simultanemante: [TurtleBot3 Example: Multi-Robot Control](https://www.youtube.com/watch?v=IVut8qZOrEk&t=40s).
 
-- Este exemplo demonstra um robô seguindo aquele que está à sua frente.
-- Quando o robô líder é controlado via teleoperação, os demais robôs seguem o que está à sua frente em sequência.
-- Este exemplo utiliza odometria e o planejador local do `Nav2`.
-
-> **OBSERVAÇÃO:**
-> O desvio da odometria pode se acumular ao longo do tempo, tornando-a menos precisa.
-
-- Você pode encontrar um exemplo de execução do seguidor nesse link: 
-[**Vídeo de execução do seguidor**](https://www.youtube.com/watch?v=YXF3FeRNSeE)
-
-### 2.2. Executando o seguidor no Gazebo
-
+Nessa ubseção vamos aprender como operar múltiplos TurtleBot3s a partir de um único PC Remoto.
+Se você operar vários TurtleBots como se estivesse operando apenas um, não conseguirá distinguir qual tópico pertence a qual robô.
+![]()
