@@ -75,7 +75,10 @@ ENV NVIDIA_DRIVER_CAPABILITIES \
 ENV QT_X11_NO_MITSHM=1
 
 # Variável de domínio da rede do laboratório
-ENV ROS_DOMAIN_ID=30
+ENV ROS_DOMAIN_ID=0
+
+# Define o modelo padrão do TurtleBot3 (burger, waffle ou waffle_pi)
+ENV TURTLEBOT3_MODEL=burger
 
 # ====================================================================
 # CONFIGURAÇÃO DO WORKSPACE
@@ -142,7 +145,8 @@ docker run -it --rm \
   --gpus all \
   -e DISPLAY=$DISPLAY \
   -v ~/tmp/.X11-unix:/tmp/.X11-unix:rw \
-  -e ROS_DOMAIN_ID=30 \
+  -e ROS_DOMAIN_ID=0 \
+  -e TURTLEBOT3_MODEL=burger \
   -v ~/lab_ros_ws:/workspace \
   ros2_humble
 ```
@@ -211,9 +215,8 @@ if ! grep -q "/workspace/install/setup.bash" ~/.bashrc; then
     echo "# ===================================================" >> ~/.bashrc
     echo "# Configurações TurtleBot3 - ROS 2 Humble" >> ~/.bashrc
     echo "# ===================================================" >> ~/.bashrc
-    echo 'source /workspace/install/setup.bash' >> ~/.bashrc
-    echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
-    echo 'export ROS_DOMAIN_ID=0 #TURTLEBOT3' >> ~/.bashrc
+echo 'source /workspace/install/setup.bash' >> ~/.bashrc
+    # A variável TURTLEBOT3_MODEL e ROS_DOMAIN_ID agora são gerenciadas nativamente pelo Docker
 fi
 
 echo "========================================================="
