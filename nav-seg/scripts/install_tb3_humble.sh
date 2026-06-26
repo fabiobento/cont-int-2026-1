@@ -41,9 +41,8 @@ if ! grep -q "/workspace/install/setup.bash" ~/.bashrc; then
     echo "# ===================================================" >> ~/.bashrc
     echo "# Configurações TurtleBot3 - ROS 2 Humble" >> ~/.bashrc
     echo "# ===================================================" >> ~/.bashrc
-    echo 'source /workspace/install/setup.bash' >> ~/.bashrc
-    echo 'export TURTLEBOT3_MODEL=burger' >> ~/.bashrc
-    echo 'export ROS_DOMAIN_ID=0 #TURTLEBOT3' >> ~/.bashrc
+echo 'source /workspace/install/setup.bash' >> ~/.bashrc
+    # A variável TURTLEBOT3_MODEL e ROS_DOMAIN_ID agora são gerenciadas nativamente pelo Docker
 fi
 
 echo "========================================================="

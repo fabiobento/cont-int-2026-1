@@ -51,14 +51,15 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # ====================================================================
 # SUPORTE A GPU (NVIDIA) E INTERFACE GRÁFICA
 # ====================================================================
-ENV NVIDIA_VISIBLE_DEVICES \
-    ${NVIDIA_VISIBLE_DEVICES:-all}
-ENV NVIDIA_DRIVER_CAPABILITIES \
-    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,display,video,utility
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=graphics,display,video,utility
 ENV QT_X11_NO_MITSHM=1
 
 # Variável de domínio da rede do laboratório
-ENV ROS_DOMAIN_ID=30
+ENV ROS_DOMAIN_ID=0
+
+# Define o modelo padrão do TurtleBot3 (burger, waffle ou waffle_pi)
+ENV TURTLEBOT3_MODEL=burger
 
 # ====================================================================
 # CONFIGURAÇÃO DO WORKSPACE
