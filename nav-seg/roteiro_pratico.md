@@ -317,3 +317,44 @@ Agora abra para modificação o arquivo `turtlebot3_follower.launch.py` no pacot
 
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nav-seg/imagens/multi-robot-folowers-config.png)
 
+4. Lance o modo seguidor
+```bash
+ros2 launch turtlebot3_follower turtlebot3_follower.launch.py use_sim_time:=true
+```
+
+5. Abra o RViz2 e clique em **File** → **Open Config** → **/workspace/src/turtlebot3_applications/turtlebot3_follower/rviz/simulation_robot.rviz**
+
+Em um novo terminal (`CTRL+ALT+T`) inicie mais uma conexão com o container.
+```bash
+docker exec -it humble_gpu_container bash
+```
+
+Dentro do container carregue o ambiente do ROS 2 Humble:
+```bash
+source ~/.bashrc
+```
+
+```bash
+rviz2
+```
+
+6. Controle os robôs com o teclado:
+
+Em um novo terminal (`CTRL+ALT+T`) inicie mais uma conexão com o container.
+```bash
+docker exec -it humble_gpu_container bash
+```
+
+Dentro do container carregue o ambiente do ROS 2 Humble:
+```bash
+source ~/.bashrc
+```
+
+Inicie o controle do robô líder:
+
+```bash
+ ros2 run turtlebot3_teleop teleop_keyboard --ros-args -r __ns:=/TB3_1
+```
+
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nav-seg/imagens/multi-robot-seg.png)
