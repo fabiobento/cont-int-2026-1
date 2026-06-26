@@ -274,7 +274,9 @@ source ~/.bashrc
 [**Vídeo de execução do seguidor**](https://www.youtube.com/watch?v=YXF3FeRNSeE)
 
 ### 2.2. Executando o seguidor no Gazebo
-1. Abra o arquivo `/workspace/src/turtlebot3_simulations/turtlebot3_gazebo/launch/multi_robot.launch.py` com o seguinte comando:
+1. Configure a quantidade de robôs e suas posições.
+
+Abra o arquivo `/workspace/src/turtlebot3_simulations/turtlebot3_gazebo/launch/multi_robot.launch.py` com o seguinte comando:
 ```bash
  nano /workspace/src/turtlebot3_simulations/turtlebot3_gazebo/launch/multi_robot.launch.py
 ```
@@ -284,7 +286,34 @@ e modifique os valores de acordo com o apresentado abaixo:
 - `pose = [[-0.8,-0.5], [-1.0,-0.5], [-1.2,-0.5], [-1.4,-0.5], [-1.6,-0.5]]`
 - `world = ‘turtlebot3_world.world’`
 
-
 ![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nav-seg/imagens/multi-robot-launch-config.png)
 
+
+2. Lance o Gazebo com 5 robôs
+
+```bash
+export TURTLEBOT3_MODEL=burger
+ros2 launch turtlebot3_gazebo multi_robot.launch.py
+```
+
+3. Modifique o arquivo `turtlebot3_follower.launch.py` no pacote `turtlebot3_follower`.
+Configure a variável `number_of_follower`. Na demonstração, utilizamos 5 robôs no total, então a definimos como 4.
+
+Em um novo terminal (`CTRL+ALT+T`) inicie mais uma conexão com o container.
+```bash
+docker exec -it humble_gpu_container bash
+```
+
+Dentro do container carregue o ambiente do ROS 2 Humble:
+```bash
+source ~/.bashrc
+```
+
+Agora abra para modificação o arquivo `turtlebot3_follower.launch.py` no pacote `turtlebot3_follower`. Configure a variável `number_of_follower`. Na demonstração, utilizamos 5 robôs no total, então a definimos como 4.
+```bash
+ nano /workspace/src/turtlebot3_applications/turtlebot3_follower/launch/turtlebot3_follower.launch.py
+```
+
+
+![](https://github.com/fabiobento/cont-int-2026-1/raw/main/nav-seg/imagens/multi-robot-folowers-config.png)
 
